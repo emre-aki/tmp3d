@@ -1,0 +1,12 @@
+# directories
+node_modules/*
+screenshots/*
+
+# dotfiles
+.DS_Store
+.Python
+*.sublime-workspace
+
+# misc.
+*.zip
+Procfile
