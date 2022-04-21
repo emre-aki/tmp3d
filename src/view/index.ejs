@@ -20,6 +20,9 @@
                 height: 100vh;
             }
         </style>
+        <%_ if (env.debugMode) { _%>
+        <script>window.__DEBUG_MODE__ = 1;</script>
+        <%_ } _%>
     </head>
     <body>
         <canvas id="canvas" height="480px" width="640px"></canvas>
@@ -30,11 +33,12 @@
         <script type="text/javascript" src="/engine/m_vec3.js"></script>
         <script type="text/javascript" src="/engine/m_mat4.js"></script>
         <script type="text/javascript" src="/engine/m_tri3.js"></script>
-        <script type="text/javascript" src="/engine/r_geometry.js"></script>
         <script type="text/javascript" src="/engine/i_input.js"></script>
         <script type="text/javascript" src="/engine/r_screen.js"></script>
         <script type="text/javascript" src="/engine/r_draw.js"></script>
         <script type="text/javascript" src="/engine/r_camera.js"></script>
+        <script type="text/javascript" src="/engine/r_geometry.js"></script>
         <script type="text/javascript" src="/game/g_setup.js"></script>
+        <script type="text/javascript" src="/game/g_run.js"></script>
     </body>
 </html>

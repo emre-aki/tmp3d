@@ -21,12 +21,13 @@
 
     const R_Screen = __import__R_Screen();
     const R_Ctx = R_Screen.R_Ctx;
+    const R_ClearBuffer = R_Screen.R_ClearBuffer;
 
     let frameBuffer;
 
-    function R_SetFrameBuffer (buffer)
+    function R_ClearFrameBuffer ()
     {
-        frameBuffer = buffer;
+        frameBuffer = R_ClearBuffer();
     }
 
     function R_FillRect (x, y, w, h, r, g, b, a)
@@ -122,7 +123,7 @@
     window.__import__R_Draw = function ()
     {
         return {
-            R_SetFrameBuffer: R_SetFrameBuffer,
+            R_ClearFrameBuffer: R_ClearFrameBuffer,
             R_DrawLine: R_DrawLine,
             R_DrawTriangleWireframe: R_DrawTriangleWireframe,
             R_FillTriangle: R_FillTriangle,

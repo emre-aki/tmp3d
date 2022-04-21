@@ -4,7 +4,8 @@
     "description": "An attempt at writing 3-D software rasterizer from scratch in JavaScript",
     "main": "server.js",
     "scripts": {
-        "start": "node ./src/server.js"
+        "start": "node ./src/server.js",
+        "start:debug": "DEBUG=1 node ./src/server.js"
     },
     "repository": {
         "type": "git"
