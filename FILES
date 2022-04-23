@@ -1,0 +1,34 @@
+--------------------------------------------------------------------------------
+G        Game loops and top-level stuff
+--------------------------------------------------------------------------------
+g_const.js    - constants
+g_main.js     - the main program
+g_run.js      - game loops
+g_setup.js    - setup routines
+
+--------------------------------------------------------------------------------
+I        Interfaces, I/O controllers
+--------------------------------------------------------------------------------
+i_input.js    - mouse & keyboard controller
+
+--------------------------------------------------------------------------------
+M        Math
+--------------------------------------------------------------------------------
+m_math.js     - math utilities
+m_mat4.js     - 4x4 matrix
+m_tri3.js     - 3-D triangle
+m_vec3.js     - 3-D vector
+
+--------------------------------------------------------------------------------
+R        Rendering
+--------------------------------------------------------------------------------
+r_camera.js   - camera controller, and view & perspective transformations
+r_draw.js     - rendering back-end--drawing routines
+r_geometry.js - load, update & read 3-D geometry data
+r_screen.js   - rendering front-end--access to framebuffer APIs
+
+--------------------------------------------------------------------------------
+D        Data
+--------------------------------------------------------------------------------
+d_mesh.js     - initial level data
+d_player.js   - initial player data
