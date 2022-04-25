@@ -262,15 +262,15 @@
         if (originViewSpace4[2] > 0 || axesViewSpace3[0][0][2] > 0)
             R_DrawLine(originScreen2[0], originScreen2[1],
                        rightScreen2[0], rightScreen2[1],
-                       255, 0, 0, 255);
+                       255, 0, 0, 255, 2);
         if (originViewSpace4[2] > 0 || axesViewSpace3[0][1][2] > 0)
             R_DrawLine(originScreen2[0], originScreen2[1],
                        upScreen2[0], upScreen2[1],
-                       0, 255, 0, 255);
+                       0, 255, 0, 255, 2);
         if (originViewSpace4[2] > 0 || axesViewSpace3[0][2][2] > 0)
             R_DrawLine(originScreen2[0], originScreen2[1],
                        fwdScreen2[0], fwdScreen2[1],
-                       0, 0, 255, 255);
+                       0, 0, 255, 255, 2);
     }
 
     window.__import__R_Camera = function ()

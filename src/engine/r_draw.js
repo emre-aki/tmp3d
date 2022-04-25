@@ -13,9 +13,6 @@
 
 (function ()
 {
-    const G_Const = __import__G_Const();
-    const BRUSH_W = G_Const.BRUSH_W, BRUSH_H = G_Const.BRUSH_H;
-
     const M_Math = __import__M_Math();
     const M_Clamp = M_Math.M_Clamp;
 
@@ -61,33 +58,35 @@
 
     function R_DrawLine (sx, sy, dx, dy, r, g, b, a, stroke)
     {
-        const strokeX = stroke || BRUSH_W, strokeY = stroke || BRUSH_H;
+        const stroke_ = stroke || 1;
         const sX = Math.floor(sx), sY = Math.floor(sy);
         const dX = Math.floor(dx), dY = Math.floor(dy);
         const deltaX = dX - sX, deltaY = dY - sY;
         const dirX = Math.sign(deltaX), dirY = Math.sign(deltaY);
         const slope = deltaY / deltaX, slopeInverse = deltaX / deltaY;
-        const stepInXHorizontal = strokeX * dirX;
-        const stepInYHorizontal = strokeX * dirX * slope;
-        const stepInXVertical = strokeX * dirY * slopeInverse;
-        const stepInYVertical = strokeWithDirY = strokeY * dirY;
-        if (stepInXHorizontal)
+        const strokeInXHorizontal = stroke_ * dirX;
+        const stepInYHorizontal = slope * dirX;
+        const strokeInYVertical = stroke_ * dirY;
+        const stepInXVertical = slopeInverse * dirY;
+        if (strokeInXHorizontal)
         {
             for (let x = sX, y = sY;
-                 (dX - x) * dirX >= 0;
-                  x += stepInXHorizontal)
+                 (dX - x) * dirX > 0;
+                 x += strokeInXHorizontal)
             {
-                const Y = Math.floor(y);
-                R_FillRect(x, Y, strokeX, strokeY, r, g, b, a);
+                const Y = sY + Math.floor(y - sY) * stroke_;
+                R_FillRect(x, Y, stroke_, stroke_, r, g, b, a);
                 y += stepInYHorizontal;
             }
         }
-        if (stepInYVertical)
+        if (strokeInYVertical)
         {
-            for (let x = sX, y = sY; (dY - y) * dirY >= 0; y += stepInYVertical)
+            for (let x = sX, y = sY;
+                 (dY - y) * dirY > 0;
+                 y += strokeInYVertical)
             {
-                const X = Math.floor(x);
-                R_FillRect(X, y, strokeX, strokeY, r, g, b, a);
+                const X = sX + Math.floor(x - sX) * stroke_;
+                R_FillRect(X, y, stroke_, stroke_, r, g, b, a);
                 x += stepInXVertical;
             }
         }

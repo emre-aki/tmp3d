@@ -77,7 +77,7 @@
                 R_DrawTriangleWireframe(triScreen[0][0], triScreen[0][1],
                                         triScreen[1][0], triScreen[1][1],
                                         triScreen[2][0], triScreen[2][1],
-                                        255, 255, 255, 255);
+                                        255, 255, 255, 255, 2);
         }
     }
 
