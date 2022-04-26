@@ -56,7 +56,7 @@
         }
     }
 
-    function R_DrawLine (sx, sy, dx, dy, r, g, b, a, stroke)
+    function R_DrawLine_DDA (sx, sy, dx, dy, r, g, b, a, stroke)
     {
         const stroke_ = stroke || 1;
         const sX = Math.floor(sx), sY = Math.floor(sy);
@@ -92,6 +92,75 @@
         }
     }
 
+    function R_Bresenham_HorizontalSweep (sx, sy, dx, dy, r, g, b, a, stroke)
+    {
+        const stroke_ = stroke || 1;
+        const deltaX = dx - sx, deltaY = dy - sy;
+        const dirX = Math.sign(deltaX), dirY = Math.sign(deltaY);
+        const strokeX = dirX * stroke_, strokeY = dirY * stroke_;
+        // need to fix the signs in the formulae
+        const deltaYAbs = deltaY * dirY;
+        // the increment for Pk+1, if Pk < 0
+        const pIncrementForSameRow = deltaYAbs + deltaYAbs;
+        // the increment for Pk+1, if Pk >= 0
+        const pIncrementForNextRow = pIncrementForSameRow - deltaX - deltaX;
+        // the initial value for the decision parameter, P0
+        const p0 = pIncrementForNextRow + deltaX;
+        for (let x = sx, y = sy, pK = p0; (dx - x) * dirX >= 0; x += strokeX)
+        {
+            R_FillRect(x, y, stroke_, stroke_, r, g, b, a);
+            if (pK < 0) pK += pIncrementForSameRow;
+            else
+            {
+                pK += pIncrementForNextRow;
+                y += strokeY;
+            }
+        }
+    }
+
+    function R_Bresenham_VerticalSweep (sx, sy, dx, dy, r, g, b, a, stroke)
+    {
+        const stroke_ = stroke || 1;
+        const deltaX = dx - sx, deltaY = dy - sy;
+        const dirX = Math.sign(deltaX), dirY = Math.sign(deltaY);
+        const strokeX = dirX * stroke_, strokeY = dirY * stroke_;
+        // need to fix the signs in the formulae
+        const deltaXAbs = deltaX * dirX;
+        // the increment for Pk+1, if Pk < 0
+        const pIncrementForSameCol = deltaXAbs + deltaXAbs;
+        // the increment for Pk+1, if Pk >= 0
+        const pIncrementForNextCol = pIncrementForSameCol - deltaY - deltaY;
+        // the initial value for the decision parameter, P0
+        const p0 = pIncrementForNextCol + deltaY;
+        for (let x = sx, y = sy, pK = p0; (dy - y) * dirY >= 0; y += strokeY)
+        {
+            R_FillRect(x, y, stroke_, stroke_, r, g, b, a);
+            if (pK < 0) pK += pIncrementForSameCol;
+            else
+            {
+                pK += pIncrementForNextCol;
+                x += strokeX;
+            }
+        }
+    }
+
+    function R_DrawLine_Bresenham (sx, sy, dx, dy, r, g, b, a, stroke)
+    {
+        const sX = Math.floor(sx), sY = Math.floor(sy);
+        const dX = Math.floor(dx), dY = Math.floor(dy);
+        if (sX === dX && sY === dY) return; // early return if nothing to draw
+        const isVerticalSweep = Math.abs(dX - sX) < Math.abs(dY - sY);
+        /* the x-direction of the line should always be >= 0 */
+        if (isVerticalSweep && dY > sY)
+            R_Bresenham_VerticalSweep(sX, sY, dX, dY, r, g, b, a, stroke);
+        else if (isVerticalSweep)
+            R_Bresenham_VerticalSweep(dX, dY, sX, sY, r, g, b, a, stroke);
+        else if (dX > sX)
+            R_Bresenham_HorizontalSweep(sX, sY, dX, dY, r, g, b, a, stroke);
+        else
+            R_Bresenham_HorizontalSweep(dX, dY, sX, sY, r, g, b, a, stroke);
+    }
+
     function
     R_DrawTriangleWireframe
     ( ax, ay,
@@ -100,9 +169,9 @@
       r, g, b, a,
       stroke )
     {
-        R_DrawLine(ax, ay, bx, by, r, g, b, a, stroke);
-        R_DrawLine(ax, ay, cx, cy, r, g, b, a, stroke);
-        R_DrawLine(bx, by, cx, cy, r, g, b, a, stroke);
+        R_DrawLine_Bresenham(ax, ay, bx, by, r, g, b, a, stroke);
+        R_DrawLine_Bresenham(ax, ay, cx, cy, r, g, b, a, stroke);
+        R_DrawLine_Bresenham(bx, by, cx, cy, r, g, b, a, stroke);
     }
 
     function R_Print (chars, x, y, color, size, fontFamily, style)
@@ -123,7 +192,8 @@
     {
         return {
             R_ClearFrameBuffer: R_ClearFrameBuffer,
-            R_DrawLine: R_DrawLine,
+            R_DrawLine_DDA: R_DrawLine_DDA,
+            R_DrawLine_Bresenham: R_DrawLine_Bresenham,
             R_DrawTriangleWireframe: R_DrawTriangleWireframe,
             R_FillTriangle: R_FillTriangle,
             R_Print: R_Print,
