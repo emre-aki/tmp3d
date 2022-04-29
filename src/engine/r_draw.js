@@ -161,6 +161,60 @@
             R_Bresenham_HorizontalSweep(dX, dY, sX, sY, r, g, b, a, stroke);
     }
 
+    function R_DrawLine_RayCast (sx, sy, dx, dy, r, g, b, a, stroke)
+    {
+        const stroke_ = stroke || 1;
+        const sX = Math.floor(sx), sY = Math.floor(sy);
+        const dX = Math.floor(dx), dY = Math.floor(dy);
+        if (sX === dX && sY === dY) return; // early return if nothing to draw
+        const deltaX = dX - sX, deltaY = dY - sY;
+        const dirX = Math.sign(deltaX), dirY = Math.sign(deltaY);
+        const slope = deltaY / deltaX, slopeInverse = deltaX / deltaY;
+        const stepVerticalY = dirX * slope;
+        const stepHorizontalX = dirY * slopeInverse;
+        const strokeXVertical = dirX * stroke_;
+        const strokeYVertical = stepVerticalY * stroke_;
+        const strokeXHorizontal = stepHorizontalX * stroke_;
+        const strokeYHorizontal = dirY * stroke_;
+        const lineLength = (dx - sx) * (dx - sx) + (dy - sy) * (dy - sy);
+        let currentLength = 0;
+        let x = sX, y = sY;
+        let traceVerticalX = dirX > 0 ? Math.floor(sx + 1) : sX;
+        let traceVerticalY = sy + (traceVerticalX - sx) * slope;
+        let traceHorizontalY = dirY > 0 ? Math.floor(sy + 1) : sY;
+        let traceHorizontalX = sx + (traceHorizontalY - sy) * slopeInverse;
+        let advanceVertically;
+        while (currentLength < lineLength)
+        {
+            R_FillRect(x, y, stroke_, stroke_, r, g, b, a);
+            const verticalDistInX = traceVerticalX - sx;
+            const verticalDistInY = traceVerticalY - sy;
+            const horizontalDistInX = traceHorizontalX - sx;
+            const horizontalDistInY = traceHorizontalY - sy;
+            const distVertical = verticalDistInX * verticalDistInX +
+                                 verticalDistInY * verticalDistInY;
+            const distHorizontal = horizontalDistInX * horizontalDistInX +
+                                   horizontalDistInY * horizontalDistInY;
+            advanceVertically = Number.isNaN(distVertical) ||
+                                distVertical > distHorizontal
+                                    ? 0 : distVertical === distHorizontal
+                                        ? advanceVertically : 1;
+            currentLength = advanceVertically ? distVertical : distHorizontal;
+            if (advanceVertically)
+            {
+                x += strokeXVertical;
+                traceVerticalX += strokeXVertical;
+                traceVerticalY += strokeYVertical;
+            }
+            else
+            {
+                y += strokeYHorizontal;
+                traceHorizontalX += strokeXHorizontal;
+                traceHorizontalY += strokeYHorizontal;
+            }
+        }
+    }
+
     function
     R_DrawTriangleWireframe
     ( ax, ay,
@@ -194,6 +248,7 @@
             R_ClearFrameBuffer: R_ClearFrameBuffer,
             R_DrawLine_DDA: R_DrawLine_DDA,
             R_DrawLine_Bresenham: R_DrawLine_Bresenham,
+            R_DrawLine_RayCast: R_DrawLine_RayCast,
             R_DrawTriangleWireframe: R_DrawTriangleWireframe,
             R_FillTriangle: R_FillTriangle,
             R_Print: R_Print,
