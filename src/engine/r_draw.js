@@ -228,6 +228,11 @@
         R_DrawLine_Bresenham(bx, by, cx, cy, r, g, b, a, stroke);
     }
 
+    function R_FillTriangle (ax, ay, bx, by, cx, cy, r, g, b, a)
+    {
+        // TODO: implement
+    }
+
     function R_Print (chars, x, y, color, size, fontFamily, style)
     {
         R_Ctx.font = (style ? style + " " : "") +
@@ -235,11 +240,6 @@
                      (fontFamily ? fontFamily : "Courier");
         R_Ctx.fillStyle = color || "#000000";
         R_Ctx.fillText(chars, x, y);
-    }
-
-    function R_FillTriangle (ax, ay, bx, by, cx, cy, r, g, b, a)
-    {
-        // TODO: implement
     }
 
     window.__import__R_Draw = function ()
