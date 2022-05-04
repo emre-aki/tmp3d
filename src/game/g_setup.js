@@ -37,12 +37,12 @@
     const R_Camera = __import__R_Camera();
     const R_InitCamera = R_Camera.R_InitCamera;
 
+    const R_Geometry = __import__R_Geometry();
+    const R_LoadGeometry = R_Geometry.R_LoadGeometry;
+
     const R_Screen = __import__R_Screen();
     const R_InitBuffer = R_Screen.R_InitBuffer;
     const R_ScreenElement = R_Screen.R_ScreenElement;
-
-    const R_Geometry = __import__R_Geometry();
-    const R_LoadGeometry = R_Geometry.R_LoadGeometry;
 
     const Z_NEAR = SCREEN_H * 0.5 / Math.tan(FOV_Y * 0.5);
     const Z_FAR = 4 * Z_NEAR;

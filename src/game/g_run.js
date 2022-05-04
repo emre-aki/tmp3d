@@ -17,20 +17,20 @@
     const G_Const = __import__G_Const();
     const FPS = G_Const.FPS;
 
-    const R_Screen = __import__R_Screen();
-    const R_FlushBuffer = R_Screen.R_FlushBuffer;
-
-    const R_Draw = __import__R_Draw();
-    const R_ClearFrameBuffer = R_Draw.R_ClearFrameBuffer;
-
     const R_Camera = __import__R_Camera();
     const R_UpdateCamera = R_Camera.R_UpdateCamera;
     const R_DebugAxes = R_Camera.R_DebugAxes;
     const R_DebugStats = R_Camera.R_DebugStats;
 
+    const R_Draw = __import__R_Draw();
+    const R_ClearFrameBuffer = R_Draw.R_ClearFrameBuffer;
+
     const R_Geometry = __import__R_Geometry();
     const R_RenderGeometry = R_Geometry.R_RenderGeometry;
     const R_TriPool = R_Geometry.R_TriPool;
+
+    const R_Screen = __import__R_Screen();
+    const R_FlushBuffer = R_Screen.R_FlushBuffer;
 
     const TICK_DELAY = 1000 / FPS;
     let tickInterval;
