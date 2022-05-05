@@ -315,6 +315,7 @@
     {
         return {
             R_ClearFrameBuffer: R_ClearFrameBuffer,
+            R_FillRect: R_FillRect,
             R_DrawLine_DDA: R_DrawLine_DDA,
             R_DrawLine_Bresenham: R_DrawLine_Bresenham,
             R_DrawLine_RayCast: R_DrawLine_RayCast,

@@ -34,6 +34,7 @@ R        Rendering
 --------------------------------------------------------------------------------
 r_camera.js     - camera controller, and view & perspective transformations
 r_draw.js       - rendering back-end--drawing routines
+r_drawers.js    - render various menus, screens, etc.
 r_geometry.js   - load, update & read 3-D geometry data
 r_screen.js     - rendering front-end--access to framebuffer APIs
 
