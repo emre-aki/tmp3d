@@ -21,10 +21,13 @@
     const R_ClearBuffer = R_Screen.R_ClearBuffer;
 
     let frameBuffer;
+    let screenW, screenH;
 
     function R_ClearFrameBuffer ()
     {
         frameBuffer = R_ClearBuffer();
+        screenW = frameBuffer.width;
+        screenH = frameBuffer.height;
     }
 
     function R_FillRect (x, y, w, h, r, g, b, a)
@@ -228,6 +231,72 @@
         R_DrawLine_Bresenham(bx, by, cx, cy, r, g, b, a, stroke);
     }
 
+    function R_DrawImage (img, sx, sy, sw, sh, dx, dy, dw, dh, options)
+    {
+        const imgWidth = img.width, imgHeight = img.height, bitmap = img.bitmap;
+        /* early return if either the source or the destination is out of bounds
+         */
+        if (sx + sw <= 0 || sy + sh <= 0 || sx >= imgWidth || sy >= imgHeight ||
+            dx + dw <= 0 || dy + dh <= 0 || dx >= screenW || dy >= screenH)
+            return;
+        /* determine how bright & translucent the image is going to be drawn */
+        const shadowLevel = options && options.shade ? options.shade : 0;
+        const lightLevel = 1 - shadowLevel;
+        const opacity = options && Number.isFinite(options.alpha)
+            ? options.alpha : 1;
+        /* calculate the screen coordinates and dimensions */
+        const dX = Math.floor(dx), dW = Math.ceil(dw);
+        const dY = Math.floor(dy), dH = Math.ceil(dh);
+        const scaleX = sw / dw, scaleY = sh / dh;
+        /* clip the screen coordinates against the bounds of the buffer */
+        const clipLeft = Math.max(-dX, 0), clipTop = Math.max(-dY, 0);
+        const clipRight = Math.max(dX + dW - screenW, 0);
+        const clipBottom = Math.max(dY + dH - screenH, 0);
+        const clippedW = dW - clipLeft - clipRight;
+        const clippedH = dH - clipTop - clipBottom;
+        /* calculate draw endpoints */
+        const dStartX = dX + clipLeft, dEndX = dStartX + clippedW;
+        const dStartY = dY + clipTop, dEndY = dStartY + clippedH;
+        for (let y = dStartY; y < dEndY; ++y)
+        {
+            const sampleY = Math.round(sy + (y - dY) * scaleY);
+            for (let x = dStartX; x < dEndX; ++x)
+            {
+                const sampleX = Math.round(sx + (x - dX) * scaleX);
+                /* only draw the pixel if the sampling point is within the
+                 * bounds of the source image
+                 */
+                if (sampleX >= 0 && sampleX < imgWidth &&
+                    sampleY >= 0 && sampleY < imgHeight)
+                {
+                    const sampleIndex = 4 * (sampleY * imgWidth + sampleX);
+                    const sampleRed = bitmap[sampleIndex];
+                    const sampleGreen = bitmap[sampleIndex + 1];
+                    const sampleBlue = bitmap[sampleIndex + 2];
+                    const sampleAlpha = bitmap[sampleIndex + 3] * opacity;
+                    const paintIndex = 4 * (y * screenW + x);
+                    const bufferRed = frameBuffer.data[paintIndex];
+                    const bufferGreen = frameBuffer.data[paintIndex + 1];
+                    const bufferBlue = frameBuffer.data[paintIndex + 2];
+                    const bufferAlpha = frameBuffer.data[paintIndex + 3] || 255;
+                    const blendRatio = sampleAlpha / bufferAlpha;
+                    const blendRatio_ = 1 - blendRatio;
+                    const blendWithLightLevel = lightLevel * blendRatio;
+                    const newRed = blendWithLightLevel * sampleRed +
+                                   blendRatio_ * bufferRed;
+                    const newGreen = blendWithLightLevel * sampleGreen +
+                                     blendRatio_ * bufferGreen;
+                    const newBlue = blendWithLightLevel * sampleBlue +
+                                    blendRatio_ * bufferBlue;
+                    frameBuffer.data[paintIndex] = newRed;
+                    frameBuffer.data[paintIndex + 1] = newGreen;
+                    frameBuffer.data[paintIndex + 2] = newBlue;
+                    frameBuffer.data[paintIndex + 3] = 255;
+                }
+            }
+        }
+    }
+
     function R_FillTriangle (ax, ay, bx, by, cx, cy, r, g, b, a)
     {
         // TODO: implement
@@ -250,6 +319,7 @@
             R_DrawLine_Bresenham: R_DrawLine_Bresenham,
             R_DrawLine_RayCast: R_DrawLine_RayCast,
             R_DrawTriangleWireframe: R_DrawTriangleWireframe,
+            R_DrawImage: R_DrawImage,
             R_FillTriangle: R_FillTriangle,
             R_Print: R_Print,
         };
