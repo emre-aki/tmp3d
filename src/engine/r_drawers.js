@@ -64,7 +64,7 @@
         R_FlushBuffer();
         R_Print("Tmp3D Engine", SCREEN_W_2 - 117, SCREEN_H_2 + 20,
                 TITLE_FONT_COLOR, TITLE_PRIMARY_FONT_SIZE);
-        R_Print("v0.0.0", SCREEN_W_2 - 30, SCREEN_H_2 + 44,
+        R_Print("v" + __VERSION__, SCREEN_W_2 - 30, SCREEN_H_2 + 44,
                 TITLE_FONT_COLOR, TITLE_SECONDARY_FONT_SIZE);
         R_Print("by Emre Akı, 2022.", SCREEN_W_2 - 86, SCREEN_H_2 + 87,
                 TITLE_FONT_COLOR, TITLE_SECONDARY_FONT_SIZE);

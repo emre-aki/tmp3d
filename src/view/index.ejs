@@ -6,7 +6,7 @@
         <link rel="icon" type="ico" sizes="32x30" href="favicon_32x30.ico">
         <link rel="icon" type="ico" sizes="96x91" href="favicon_96x91.ico">
         <link rel="shortcut icon" href="favicon.ico" />
-        <title>Tmp3D | By Emre Akı</title>
+        <title>Tmp3D</title>
         <style type="text/css">
             body {
                 background-color: #101010;
@@ -26,6 +26,7 @@
         <%_ if (env.debugMode) { _%>
         <script>window.__DEBUG_MODE__ = 1;</script>
         <%_ } _%>
+        <script>window.__VERSION__ = "<%= env.version _%>";</script>
     </head>
     <body>
         <canvas id="canvas" height="480px" width="640px"></canvas>

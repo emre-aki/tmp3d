@@ -14,6 +14,9 @@
     const A_Assets = __import__A_Assets();
     const A_LoadTextures = A_Assets.A_LoadTextures;
 
+    const AN_Animation = __import__AN_Animation();
+    const AN_CancelAnimation = AN_Animation.AN_CancelAnimation;
+
     const D_Mesh = __import__D_Mesh();
     const D_Vertices = D_Mesh.D_Vertices()
     const D_Triangles = D_Mesh.D_Triangles();
@@ -37,6 +40,10 @@
     const R_Camera = __import__R_Camera();
     const R_InitCamera = R_Camera.R_InitCamera;
 
+    const R_Drawers = __import__R_Drawers();
+    const R_LoadingDrawer = R_Drawers.R_LoadingDrawer;
+    const R_ErrorDrawer = R_Drawers.R_ErrorDrawer;
+
     const R_Geometry = __import__R_Geometry();
     const R_LoadGeometry = R_Geometry.R_LoadGeometry;
 
@@ -56,21 +63,33 @@
         return A_LoadTextures(textureFilenames, textureIds, numTextures);
     }
 
-    function G_SetupPromise (resolve, reject)
+    function G_SetupPromise ()
     {
-        return G_LoadTextures().then(resolve).catch(reject);
+        return G_LoadTextures();
+        // TODO: other async operations will go here, chained by `.then`s
     }
 
     function G_Setup ()
     {
+        // play a loading animation during the setup procedure
+        const resolution = { loadingId: R_LoadingDrawer() };
         /* sync operations */
         I_InitKeyboard(document);
         I_InitMouse(R_ScreenElement);
         R_InitBuffer(SCREEN_W, SCREEN_H);
         R_InitCamera(FOV_Y, ASPECT, Z_NEAR, Z_FAR, D_Eye, D_Velocity);
         R_LoadGeometry(D_Vertices, D_Triangles, D_Triangles.length);
-        // async operations
-        return new Promise(G_SetupPromise);
+        /* async operations */
+        return G_SetupPromise()
+            .then(function G_SetupResolver ()
+            {
+                return resolution;
+            })
+            .catch(function G_SetupRejector ()
+            {
+                AN_CancelAnimation(resolution.loadingId);
+                R_ErrorDrawer("setup error");
+            });
     }
 
     window.__import__G_Setup = function ()

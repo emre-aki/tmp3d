@@ -14,6 +14,15 @@
 {
     const DEBUG_MODE = window.__DEBUG_MODE__;
 
+    const A_Assets = __import__A_Assets();
+    const A_Texture = A_Assets.A_Texture;
+
+    const AN_Animation = __import__AN_Animation();
+    const AN_CancelAnimation = AN_Animation.AN_CancelAnimation;
+
+    const D_Textures = __import__D_Textures();
+    const D_TextureIdTable = D_Textures.D_TextureIdTable;
+
     const G_Const = __import__G_Const();
     const FPS = G_Const.FPS;
 
@@ -24,6 +33,9 @@
 
     const R_Draw = __import__R_Draw();
     const R_ClearFrameBuffer = R_Draw.R_ClearFrameBuffer;
+
+    const R_Drawers = __import__R_Drawers();
+    const R_TitleDrawer = R_Drawers.R_TitleDrawer;
 
     const R_Geometry = __import__R_Geometry();
     const R_RenderGeometry = R_Geometry.R_RenderGeometry;
@@ -66,15 +78,26 @@
         lastTick = currentTick;
     }
 
-    function G_StartGame ()
+    function G_StartGame (titleId)
     {
-        // kickstart the game ticks
+        // first, clear the title screen animation that is running
+        AN_CancelAnimation(titleId);
+        // then, kickstart the game ticks
         tickInterval = setInterval(G_AdvanceTick, TICK_DELAY);
     }
 
-    function G_Run ()
+    function G_Run (setupResolution)
     {
-        document.addEventListener("keydown", G_StartGame, { once: 1 });
+        if (!setupResolution) return; // exit with error
+        // first, clear the frame buffer for any further drawing to take place
+        R_ClearFrameBuffer();
+        // then, clear the loading animation that is currently running
+        AN_CancelAnimation(setupResolution.loadingId);
+        // finally, start the animation for the title screen
+        const titleId = R_TitleDrawer(A_Texture(D_TextureIdTable.TITLE_TMP3D));
+        document.addEventListener("keydown",
+                                  G_StartGame.bind(this, titleId),
+                                  { once: 1 });
     }
 
     window.__import__G_Run = function ()
