@@ -6,6 +6,12 @@
     <br>
     <img src="https://media1.giphy.com/media/0ArnMvRIUGDD9qOIfX/giphy.gif">
     </img>
+    <br>
+    <a href="https://undefbehav.itch.io/tmp3d" target="_blank">itch.io</a>
+    •
+    <a href="https://tmp3d.herokuapp.com" target="_blank">
+        Play in the browser
+    </a>
 </p>
 
 Tmp3D is a 3-D software rasterizer written from scratch in nothing but plain-old
