@@ -18,16 +18,22 @@
 
     const R_Screen = __import__R_Screen();
     const R_Ctx = R_Screen.R_Ctx;
-    const R_ClearBuffer = R_Screen.R_ClearBuffer;
+    const R_SetBuffer = R_Screen.R_SetBuffer;
 
     let frameBuffer;
     let screenW, screenH;
 
-    function R_ClearFrameBuffer ()
+    function R_ClearBuffer ()
     {
-        frameBuffer = R_ClearBuffer();
-        screenW = frameBuffer.width;
-        screenH = frameBuffer.height;
+        /* initialize the frame buffer if it has not been already */
+        if (screenW === undefined || screenH === undefined)
+        {
+            frameBuffer = R_SetBuffer();
+            screenW = frameBuffer.width;
+            screenH = frameBuffer.height;
+        }
+        R_Ctx.clearRect(0, 0, screenW, screenH);
+        frameBuffer = R_SetBuffer();
     }
 
     function R_FillRect (x, y, w, h, r, g, b, a)
@@ -314,7 +320,7 @@
     window.__import__R_Draw = function ()
     {
         return {
-            R_ClearFrameBuffer: R_ClearFrameBuffer,
+            R_ClearBuffer: R_ClearBuffer,
             R_FillRect: R_FillRect,
             R_DrawLine_DDA: R_DrawLine_DDA,
             R_DrawLine_Bresenham: R_DrawLine_Bresenham,

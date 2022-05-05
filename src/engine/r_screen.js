@@ -31,16 +31,12 @@
         return screenBuffer;
     }
 
+    // TODO: just initialize the screen dimensions, rather than initializing the
+    // frame buffer with it, maybe??
     function R_InitBuffer (w, h)
     {
         screenW = w; screenH = h;
         screen.width = screenW; screen.height = screenH;
-        return R_SetBuffer();
-    }
-
-    function R_ClearBuffer ()
-    {
-        ctx.clearRect(0, 0, screenW, screenH);
         return R_SetBuffer();
     }
 
@@ -50,8 +46,8 @@
             R_ScreenElement: screen,
             R_Ctx: ctx,
             R_FlushBuffer: R_FlushBuffer,
+            R_SetBuffer: R_SetBuffer,
             R_InitBuffer: R_InitBuffer,
-            R_ClearBuffer: R_ClearBuffer,
         };
     };
 })();
