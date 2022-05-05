@@ -94,12 +94,12 @@
 
     function M_Transform4 (mat, vec)
     {
-        const matX = M_Vec4(mat[0], mat[4], mat[8], mat[12]);
-        const matY = M_Vec4(mat[1], mat[5], mat[9], mat[13]);
-        const matZ = M_Vec4(mat[2], mat[6], mat[10], mat[14]);
-        const matW = M_Vec4(mat[3], mat[7], mat[11], mat[15]);
-        return M_Vec4(M_Dot4(matX, vec), M_Dot4(matY, vec), M_Dot4(matZ, vec),
-                      M_Dot4(matW, vec));
+        const matRow0 = M_Vec4(mat[0], mat[4], mat[8], mat[12]);
+        const matRow1 = M_Vec4(mat[1], mat[5], mat[9], mat[13]);
+        const matRow2 = M_Vec4(mat[2], mat[6], mat[10], mat[14]);
+        const matRow3 = M_Vec4(mat[3], mat[7], mat[11], mat[15]);
+        return M_Vec4(M_Dot4(matRow0, vec), M_Dot4(matRow1, vec),
+                      M_Dot4(matRow2, vec), M_Dot4(matRow3, vec));
     }
 
     window.__import__M_Mat4 = function ()
