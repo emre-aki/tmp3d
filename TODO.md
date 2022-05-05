@@ -20,6 +20,6 @@
 
 ## Project-wise
 
-- [ ] `README.md`
+- [x] `README.md`
 - [x] File descriptions
 - [x] `CONVENTIONS`
