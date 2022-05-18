@@ -22,6 +22,7 @@
 
     const M_Vec3 = __import__M_Vec3();
     const M_IsInFrontOfPlane3 = M_Vec3.M_IsInFrontOfPlane3;
+    const M_Dot3 = M_Vec3.M_Dot3;
     const Vec3 = M_Vec3.M_Vec3;
 
     const R_Camera = __import__R_Camera();
@@ -31,6 +32,7 @@
 
     const R_Draw = __import__R_Draw();
     const R_DrawTriangleWireframe = R_Draw.R_DrawTriangleWireframe;
+    const R_FillTriangle_Flat = R_Draw.R_FillTriangle_Flat;
 
     let triPool3;
 
@@ -62,25 +64,37 @@
         const trisNormalized = R_ToClipSpace(trisTransformed, nTris);
         for (let i = 0; i < nTris; ++i)
         {
+            /* TODO: make into a separate function call, maybe?? */
             const triClip = trisNormalized[i];
-            /* TODO: make into a separate function call */
-            const triScreen = [[triClip[0][0] * SCREEN_W_2 + SCREEN_W_2,
-                                triClip[0][1] * SCREEN_H_2 + SCREEN_H_2],
-                               [triClip[1][0] * SCREEN_W_2 + SCREEN_W_2,
-                                triClip[1][1] * SCREEN_H_2 + SCREEN_H_2],
-                               [triClip[2][0] * SCREEN_W_2 + SCREEN_W_2,
-                                triClip[2][1] * SCREEN_H_2 + SCREEN_H_2]];
+            const aClip3 = triClip[0], bClip3 = triClip[1], cClip3 = triClip[2];
+            const ax = aClip3[0] * SCREEN_W_2 + SCREEN_W_2;
+            const ay = aClip3[1] * SCREEN_H_2 + SCREEN_H_2;
+            const bx = bClip3[0] * SCREEN_W_2 + SCREEN_W_2;
+            const by = bClip3[1] * SCREEN_H_2 + SCREEN_H_2;
+            const cx = cClip3[0] * SCREEN_W_2 + SCREEN_W_2;
+            const cy = cClip3[1] * SCREEN_H_2 + SCREEN_H_2;
             const triView = trisTransformed[i];
-            /* if the triangle is not behind the camera */
-            if ((triView[0][2] > 0 || triView[1][2] > 0 || triView[2][2] > 0) &&
-                /* if the triangle is facing the camera */
-                M_IsInFrontOfPlane3(Vec3(0, 0, 0),
-                                    triView[0],
-                                    M_TriNormal3(triView)))
-                R_DrawTriangleWireframe(triScreen[0][0], triScreen[0][1],
-                                        triScreen[1][0], triScreen[1][1],
-                                        triScreen[2][0], triScreen[2][1],
-                                        255, 255, 255, 255, 2);
+            const aView = triView[0], bView = triView[1], cView = triView[2];
+            const aViewZ = aView[2], bViewZ = bView[2], cViewZ = cView[2];
+            const triNormal = M_TriNormal3(triView);
+            if (
+                // if the triangle is not behind the camera
+                (aViewZ > 0 || bViewZ > 0 || cViewZ > 0) &&
+                // if the triangle is facing the camera
+                M_IsInFrontOfPlane3(Vec3(0, 0, 0), aView, triNormal)
+            )
+            {
+                // directional light, emitted from the surface of the triangle:
+                // calculate the dot product of the directional light and the
+                // unit normal of the triangle to determine the level of
+                // illumination on the surface
+                const faceLuminance = M_Dot3(Vec3(0, 0, -1), triNormal);
+                R_FillTriangle_Flat(ax, ay, bx, by, cx, cy,
+                                    255, 255, 255, 255 * faceLuminance);
+                if (DEBUG_MODE)
+                    R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
+                                            0, 0, 0, 255, 2);
+            }
         }
         if (DEBUG_MODE) R_DebugAxes();
     }

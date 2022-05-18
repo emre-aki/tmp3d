@@ -235,6 +235,104 @@
         R_DrawLine_Bresenham(bx, by, cx, cy, r, g, b, a, stroke);
     }
 
+    function R_FillTriangle_Flat (ax, ay, bx, by, cx, cy, r, g, b, a)
+    {
+        /* coordinates of the triangle in screen-space */
+        let topX = ax, topY = ay;
+        let midX = bx, midY = by;
+        let bottomX = cx, bottomY = cy;
+        /* sort vertices of the triangle so that their y-coordinates are in
+         * ascending order
+         */
+        if (topY > midY)
+        {
+            const auxX = topX, auxY = topY;
+            topX = midX, topY = midY;
+            midX = auxX, midY = auxY;
+        }
+        if (midY > bottomY)
+        {
+            const auxX = midX, auxY = midY;
+            midX = bottomX, midY = bottomY;
+            bottomX = auxX, bottomY = auxY;
+        }
+        if (topY > midY)
+        {
+            const auxX = topX, auxY = topY;
+            topX = midX, topY = midY;
+            midX = auxX, midY = auxY;
+        }
+        const deltaUpper = midY - topY, _deltaUpper = 1 / deltaUpper;
+        const deltaLower = bottomY - midY, _deltaLower = 1 / deltaLower;
+        const deltaMajor = bottomY - topY, _deltaMajor = 1 / deltaMajor;
+        /* 1 step in `+y` equals how many steps in `x` */
+        const stepXAlongUpper = (midX - topX) * _deltaUpper;
+        const stepXAlongLower = (bottomX - midX) * _deltaLower;
+        const stepXAlongMajor = (bottomX - topX) * _deltaMajor;
+        /* vertical endpoints of the rasterization in screen-space, biased by
+         * -0.5 as per the coverage rules
+         */
+        const startY = Math.ceil(topY - 0.5);
+        const midStopY = Math.ceil(midY - 0.5);
+        const endY = Math.ceil(bottomY - 0.5);
+        // bias the top and mid endpoints in screen-space by -0.5 horizontally
+        // as per the coverage rules
+        const topXBiased = topX - 0.5, midXBiased = midX - 0.5;
+        /* pre-step from top and mid endpoints as pixel centers are the actual
+         * sampling points
+         */
+        const preStepFromTop = startY + 0.5 - topY;
+        const preStepFromMid = midStopY + 0.5 - midY;
+        /* current `x` coordinates in screen-space */
+        let xUpper = preStepFromTop * stepXAlongUpper + topXBiased;
+        let xLower = preStepFromMid * stepXAlongLower + midXBiased;
+        let xMajor = preStepFromTop * stepXAlongMajor + topXBiased;
+        // whether the lefmost edge of the raster triangle is the longest
+        const isLeftMajor = stepXAlongMajor < stepXAlongUpper;
+        /* lerp based on `y` in screen-space for the upper half of the triangle
+         */
+        for (let y = startY; y < midStopY; ++y)
+        {
+            let startX, endX;
+            if (isLeftMajor)
+            {
+                startX = Math.ceil(xMajor);
+                endX = Math.ceil(xUpper);
+            }
+            else
+            {
+                startX = Math.ceil(xUpper);
+                endX = Math.ceil(xMajor);
+            }
+            R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
+            xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
+        }
+        /* lerp based on `y` in screen-space for the lower half of the triangle
+         */
+        for (let y = midStopY; y < endY; ++y)
+        {
+            let startX, endX;
+            if (isLeftMajor)
+            {
+                startX = Math.ceil(xMajor);
+                endX = Math.ceil(xLower);
+            }
+            else
+            {
+                startX = Math.ceil(xLower);
+                endX = Math.ceil(xMajor);
+            }
+            R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
+            xLower += stepXAlongLower; xMajor += stepXAlongMajor;
+        }
+    }
+
+    function R_FillTriangle_Flat_Bresenham (ax, ay, bx, by, cx, cy, r, g, b, a)
+    {
+        // TODO: implement, inspired by:
+        // https://mcejp.github.io/2020/11/06/bresenham.html
+    }
+
     function R_DrawImage (img, sx, sy, sw, sh, dx, dy, dw, dh, options)
     {
         const imgWidth = img.width, imgHeight = img.height, bitmap = img.bitmap;
@@ -301,11 +399,6 @@
         }
     }
 
-    function R_FillTriangle (ax, ay, bx, by, cx, cy, r, g, b, a)
-    {
-        // TODO: implement
-    }
-
     function R_Print (chars, x, y, color, size, fontFamily, style)
     {
         R_Ctx.font = (style ? style + " " : "") +
@@ -324,8 +417,9 @@
             R_DrawLine_Bresenham: R_DrawLine_Bresenham,
             R_DrawLine_RayCast: R_DrawLine_RayCast,
             R_DrawTriangleWireframe: R_DrawTriangleWireframe,
+            R_FillTriangle_Flat: R_FillTriangle_Flat,
+            R_FillTriangle_Flat_Bresenham: R_FillTriangle_Flat_Bresenham,
             R_DrawImage: R_DrawImage,
-            R_FillTriangle: R_FillTriangle,
             R_Print: R_Print,
         };
     };

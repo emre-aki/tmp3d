@@ -69,3 +69,20 @@ Renderer
 
 The renderer has no sub-pixel accuracy, the screen coordinates are strictly
 integers.
+
+The triangle rasterization routines follow the "top-left" coverage rule (as seen
+in OpenGL and D3D):
+
+Every pixel that falls inside the triangle is drawn--A pixel is assumed to be
+inside the triangle if it satisfies the the top-left rule:
+
+- A pixel is considered to lie inside the triangle if its center lies completely
+  inside the triangle, without touching any of the edges except for the "top"
+  and "left" edges.
+- A top edge is above all of the other edges and is perfectly horizontal.
+- A left edge is any edge that is not perfectly horizontal and is on the left of
+  the triangle. At most two edges in a triangle can be identified as a left
+  edge.
+
+The top-left rule guarantees that pixels that are shared by two adjacent
+triangles are drawn exactly once.
