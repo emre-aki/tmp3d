@@ -5,7 +5,7 @@
  *  Created by Emre Akı on 2022-05-03.
  *
  *  SYNOPSIS:
- *     Module that houses some static drawer routines that renders various
+ *     Module that houses some static drawer routines that render various
  *     menus, screens, etc.
  */
 
