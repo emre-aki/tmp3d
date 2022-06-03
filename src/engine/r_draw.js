@@ -312,7 +312,7 @@
     {
         R_Ctx.font = (style ? style + " " : "") +
                      (Number.isFinite(size) ? size : 10).toString() + "px " +
-                     (fontFamily ? fontFamily : "Courier");
+                     (fontFamily ? fontFamily : "monospace");
         R_Ctx.fillStyle = color || "#000000";
         R_Ctx.fillText(chars, x, y);
     }
