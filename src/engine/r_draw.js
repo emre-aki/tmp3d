@@ -38,17 +38,15 @@
 
     function R_FillRect (x, y, w, h, r, g, b, a)
     {
-        const frameBufferWidth = frameBuffer.width;
-        const frameBufferHeight = frameBuffer.height
-        const sX = M_Clamp(Math.floor(x), 0, frameBufferWidth);
-        const sY = M_Clamp(Math.floor(y), 0, frameBufferHeight);
-        const dX = M_Clamp(Math.floor(x + w), 0, frameBufferWidth);
-        const dY = M_Clamp(Math.floor(y + h), 0, frameBufferHeight);
+        const sX = M_Clamp(Math.floor(x), 0, screenW);
+        const sY = M_Clamp(Math.floor(y), 0, screenH);
+        const dX = M_Clamp(Math.floor(x + w), 0, screenW);
+        const dY = M_Clamp(Math.floor(y + h), 0, screenH);
         for (let brushY = sY; brushY < dY; ++brushY)
         {
             for (let brushX = sX; brushX < dX; ++brushX)
             {
-                const pixIndex = 4 * (frameBufferWidth * brushY + brushX);
+                const pixIndex = 4 * (screenW * brushY + brushX);
                 const bufferRed = frameBuffer.data[pixIndex];
                 const bufferGreen = frameBuffer.data[pixIndex + 1];
                 const bufferBlue = frameBuffer.data[pixIndex + 2];
