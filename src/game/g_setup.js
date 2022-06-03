@@ -18,7 +18,7 @@
     const AN_CancelAnimation = AN_Animation.AN_CancelAnimation;
 
     const D_Mesh = __import__D_Mesh();
-    const D_Vertices = D_Mesh.D_Vertices()
+    const D_Vertices = D_Mesh.D_Vertices();
     const D_Triangles = D_Mesh.D_Triangles();
 
     const D_Player = __import__D_Player();
