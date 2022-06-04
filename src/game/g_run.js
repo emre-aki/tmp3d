@@ -28,7 +28,6 @@
 
     const R_Camera = __import__R_Camera();
     const R_UpdateCamera = R_Camera.R_UpdateCamera;
-    const R_DebugAxes = R_Camera.R_DebugAxes;
     const R_DebugStats = R_Camera.R_DebugStats;
 
     const R_Draw = __import__R_Draw();
@@ -52,7 +51,6 @@
     {
         R_ClearBuffer();
         R_RenderGeometry();
-        if (DEBUG_MODE) R_DebugAxes(deltaT);
         R_FlushBuffer();
         if (DEBUG_MODE) R_DebugStats(deltaT);
     }
