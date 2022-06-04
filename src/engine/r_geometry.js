@@ -16,21 +16,21 @@
     const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
     const SCREEN_W_2 = SCREEN_W * 0.5, SCREEN_H_2 = SCREEN_H * 0.5;
 
-    const M_Vec3 = __import__M_Vec3();
-    const M_IsInFrontOfPlane3 = M_Vec3.M_IsInFrontOfPlane3;
-    const Vec3 = M_Vec3.M_Vec3;
-
     const M_Tri3 = __import__M_Tri3();
     const M_TriNormal3 = M_Tri3.M_TriNormal3;
     const Tri3 = M_Tri3.M_Tri3;
 
-    const R_Draw = __import__R_Draw();
-    const R_DrawTriangleWireframe = R_Draw.R_DrawTriangleWireframe;
+    const M_Vec3 = __import__M_Vec3();
+    const M_IsInFrontOfPlane3 = M_Vec3.M_IsInFrontOfPlane3;
+    const Vec3 = M_Vec3.M_Vec3;
 
     const R_Camera = __import__R_Camera();
     const R_DebugAxes = R_Camera.R_DebugAxes;
     const R_ToViewSpace = R_Camera.R_ToViewSpace;
     const R_ToClipSpace = R_Camera.R_ToClipSpace;
+
+    const R_Draw = __import__R_Draw();
+    const R_DrawTriangleWireframe = R_Draw.R_DrawTriangleWireframe;
 
     let triPool3;
 
