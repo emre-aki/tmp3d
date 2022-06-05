@@ -287,7 +287,7 @@
         let xUpper = preStepFromTop * stepXAlongUpper + topXBiased;
         let xLower = preStepFromMid * stepXAlongLower + midXBiased;
         let xMajor = preStepFromTop * stepXAlongMajor + topXBiased;
-        // whether the lefmost edge of the raster triangle is the longest
+        // whether the lefmost edge of the triangle is the longest
         const isLeftMajor = stepXAlongMajor < stepXAlongUpper;
         /* lerp based on `y` in screen-space for the upper half of the triangle
          */
