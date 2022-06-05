@@ -34,6 +34,8 @@
     const R_DrawTriangleWireframe = R_Draw.R_DrawTriangleWireframe;
     const R_FillTriangle_Flat = R_Draw.R_FillTriangle_Flat;
 
+    const ORIGIN = R_Camera.R_ORIGIN, BWD = R_Camera.R_BWD;
+
     let triPool3;
 
     function R_LoadGeometry (vertices, triangles, nTriangles)
@@ -81,14 +83,14 @@
                 // if the triangle is not behind the camera
                 (aViewZ > 0 || bViewZ > 0 || cViewZ > 0) &&
                 // if the triangle is facing the camera
-                M_IsInFrontOfPlane3(Vec3(0, 0, 0), aView, triNormal)
+                M_IsInFrontOfPlane3(ORIGIN, aView, triNormal)
             )
             {
                 // directional light, emitted from the surface of the triangle:
                 // calculate the dot product of the directional light and the
                 // unit normal of the triangle to determine the level of
                 // illumination on the surface
-                const faceLuminance = M_Dot3(Vec3(0, 0, -1), triNormal);
+                const faceLuminance = M_Dot3(BWD, triNormal);
                 R_FillTriangle_Flat(ax, ay, bx, by, cx, cy,
                                     255, 255, 255, 255 * faceLuminance);
                 if (DEBUG_MODE)

@@ -62,6 +62,7 @@
     const ORIGIN = Vec3(0, 0, 0);
     // the axes
     const RIGHT = Vec3(1, 0 ,0), UP = Vec3(0, 1, 0), FWD = Vec3(0, 0, 1);
+    const BWD = Vec3(0, 0, -1);
 
     let veloc; // camera velocity
     let camPitch, camYaw; // the elementary rotations for the camera
@@ -276,6 +277,8 @@
     window.__import__R_Camera = function ()
     {
         return {
+            R_ORIGIN: ORIGIN,
+            R_BWD: BWD,
             R_InitCamera: R_InitCamera,
             R_UpdateCamera: R_UpdateCamera,
             R_GetCameraState: R_GetCameraState,
