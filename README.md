@@ -1,7 +1,6 @@
 <p align="center">
     <img
-        src="https://raw.githubusercontent.com/emre-aki/tmp3d/master/.images/tmp3d_2x.png"
-    >
+        src="https://raw.githubusercontent.com/emre-aki/tmp3d/master/.images/tmp3d_2x.png">
     </img>
     <br>
     <img src="https://media1.giphy.com/media/0ArnMvRIUGDD9qOIfX/giphy.gif">
@@ -95,6 +94,23 @@ first-ever public release of the project, by which time I had already grown
 accustomed to the placeholder name and it's too late to come up with a new name,
 so I decide to go with it thinking I can pretend it is a deliberate choice of a
 name so I can make some silly _backronyms_ with it.
+
+<p align="center">
+    <a href="https://github.com/emre-aki/tmp3d/blob/master/CONVENTIONS"
+       target="_blank">
+        Conventions
+    </a>
+    •
+    <a href="https://github.com/emre-aki/tmp3d/blob/master/FILES"
+       target="_blank">
+        File descriptions
+    </a>
+    •
+    <a href="https://github.com/emre-aki/tmp3d/blob/master/TODO.md"
+       target="_blank">
+        To-do
+    </a>
+</p>
 
 [LMB]: https://raw.githubusercontent.com/emre-aki/tmp3d/master/.images/lmb.png (left mouse button)
 [MSW]: https://raw.githubusercontent.com/emre-aki/tmp3d/master/.images/msw.png (mouse scroll whell)

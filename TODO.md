@@ -22,3 +22,4 @@
 
 - [ ] `README.md`
 - [x] File descriptions
+- [x] `CONVENTIONS`

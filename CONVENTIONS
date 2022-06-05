@@ -1,0 +1,71 @@
+--------------------------------------------------------------------------------
+Coordinate systems
+--------------------------------------------------------------------------------
+
+Tmp3D uses column-vectors conceptually, but they are transposed to row-vectors
+before getting written in the memory to leverage CPU cache.
+
+A right-handed coordinate system is used, and the untransformed camera is
+situated at the origin <0, 0, 0>, looking towards +z.
+
+         _ +z
+         /|
+        /
+       /
+  <0, 0, 0> -----> +x
+      |
+      |
+      |
+     \|/
+      +y
+
+The projection plane has its center at <0, 0, zNear>, where `zNear' is
+determined by the vertical FOV (`fovy'), where:
+
+           screenHeight
+zNear = -------------------
+         2 * tan(fovy / 2)
+
+           +z
+      _______
+     |       |
+     |__/____|
+       /
+  <0, 0, 0> ----> +x
+      |
+      |
+      |
+     \|/
+      +y
+
+The camera has two degrees of freedom and its rotations use Rodrigues'
+Axis-angle representation. The yaw is always followed by the pitch. The positive
+rotations follow the right-hand rule as well: they are clockwise when looking
+towards the positive direction of that particular axis.
+
+The screen-space origin is at <0, 0> and the +y points downwards.
+
+<0, 0>-------------> +x
+   |           |
+   |           |
+   |___________|
+   |
+  \|/
+   +y
+
+The triangles facing the camera have counter-clockwise winding.
+
+      /\
+     /  \
+    /    \
+   /      \
+  /   ↺    \
+ /          \
+/____________\
+
+--------------------------------------------------------------------------------
+Renderer
+--------------------------------------------------------------------------------
+
+The renderer has no sub-pixel accuracy, the screen coordinates are strictly
+integers.
