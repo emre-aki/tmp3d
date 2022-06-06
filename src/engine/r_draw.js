@@ -403,7 +403,7 @@
     {
         R_Ctx.font = (style ? style + " " : "") +
                      (Number.isFinite(size) ? size : 10).toString() + "px " +
-                     (fontFamily ? fontFamily : "monospace");
+                     (fontFamily ? fontFamily : "Courier, monospace");
         R_Ctx.fillStyle = color || "#000000";
         R_Ctx.fillText(chars, x, y);
     }
