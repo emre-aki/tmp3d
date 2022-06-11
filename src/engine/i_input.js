@@ -13,18 +13,22 @@
     function I_Key ()
     {
         return {
-            W: "W",
+            /* standard keys */
             A: "A",
-            S: "S",
             D: "D",
-            Q: "Q",
             E: "E",
-            SPC: "SPC",
-            RTN: "RTN",
-            ARW_UP: "ARW_UP",
+            Q: "Q",
+            R: "R",
+            S: "S",
+            W: "W",
+            /* arrow keys */
             ARW_DOWN: "ARW_DOWN",
             ARW_LEFT: "ARW_LEFT",
             ARW_RIGHT: "ARW_RIGHT",
+            ARW_UP: "ARW_UP",
+            /* special keys */
+            RTN: "RTN",
+            SPC: "SPC",
         };
     }
 
@@ -49,18 +53,19 @@
     const MOUSE = I_Mouse();
 
     const keyState = {
-        [KEY.W]: 0,
         [KEY.A]: 0,
-        [KEY.S]: 0,
         [KEY.D]: 0,
-        [KEY.Q]: 0,
         [KEY.E]: 0,
-        [KEY.SPC]: 0,
-        [KEY.RTN]: 0,
-        [KEY.ARW_UP]: 0,
+        [KEY.Q]: 0,
+        [KEY.R]: 0,
+        [KEY.S]: 0,
+        [KEY.W]: 0,
         [KEY.ARW_DOWN]: 0,
         [KEY.ARW_LEFT]: 0,
         [KEY.ARW_RIGHT]: 0,
+        [KEY.ARW_UP]: 0,
+        [KEY.RTN]: 0,
+        [KEY.SPC]: 0,
     };
 
     const mouseState = {
@@ -84,18 +89,19 @@
     {
         switch (key)
         {
-            case 87: keyState.W = state ? 1 : 0; break;
-            case 65: keyState.A = state ? 1 : 0; break;
-            case 83: keyState.S = state ? 1 : 0; break;
-            case 68: keyState.D = state ? 1 : 0; break;
-            case 81: keyState.Q = state ? 1 : 0; break;
-            case 69: keyState.E = state ? 1 : 0; break;
-            case 32: keyState.SPC = state ? 1 : 0; break;
             case 13: keyState.RTN = state ? 1 : 0; break;
+            case 32: keyState.SPC = state ? 1 : 0; break;
             case 37: keyState.ARW_LEFT = state ? 1 : 0; break;
             case 38: keyState.ARW_UP = state ? 1 : 0; break;
             case 39: keyState.ARW_RIGHT = state ? 1 : 0; break;
             case 40: keyState.ARW_DOWN = state ? 1 : 0; break;
+            case 65: keyState.A = state ? 1 : 0; break;
+            case 68: keyState.D = state ? 1 : 0; break;
+            case 69: keyState.E = state ? 1 : 0; break;
+            case 87: keyState.W = state ? 1 : 0; break;
+            case 81: keyState.Q = state ? 1 : 0; break;
+            case 82: keyState.R = state ? 1 : 0; break;
+            case 83: keyState.S = state ? 1 : 0; break;
             default: break;
         }
     }

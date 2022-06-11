@@ -73,11 +73,12 @@ $ npm run start:debug
 
 ### Controls
 
-| **Action**             | **Keys**                                                                          |
-|------------------------|-----------------------------------------------------------------------------------|
-| Movement               | <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>                               |
-| Free-look              | <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd> <kbd>←</kbd>, or the mouse<sup>__*__</sup> |
-| Change elevation       | <kbd>Q</kbd> <kbd>E</kbd>, or <kbd>![MSW]</kbd><sup>__*__</sup>                   |
+| **Action**                     | **Keys**                                                                          |
+|--------------------------------|-----------------------------------------------------------------------------------|
+| Movement                       | <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>                               |
+| Free-look                      | <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd> <kbd>←</kbd>, or the mouse<sup>__*__</sup> |
+| Change elevation               | <kbd>Q</kbd> <kbd>E</kbd>, or <kbd>![MSW]</kbd><sup>__*__</sup>                   |
+| Switch between rendering modes | <kbd>R</kbd>                                                                      |
 
   *<sup>__\*__</sup> You should first click <kbd>![LMB]</kbd> on the `canvas` to
   activate mouse controls.*

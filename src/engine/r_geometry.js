@@ -16,6 +16,10 @@
     const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
     const SCREEN_W_2 = SCREEN_W * 0.5, SCREEN_H_2 = SCREEN_H * 0.5;
 
+    const I_Input = __import__I_Input();
+    const I_GetKeyState = I_Input.I_GetKeyState;
+    const I_Keys = I_Input.I_Keys;
+
     const M_Tri3 = __import__M_Tri3();
     const M_TriNormal3 = M_Tri3.M_TriNormal3;
     const Tri3 = M_Tri3.M_Tri3;
@@ -37,6 +41,26 @@
     const ORIGIN = R_Camera.R_ORIGIN, BWD = R_Camera.R_BWD;
 
     let triPool3;
+
+    const RENDER_MODE = { FLAT: "FLAT", WIREFRAME: "WIREFRAME" };
+
+    const RENDER_MODES = [RENDER_MODE.WIREFRAME, RENDER_MODE.FLAT];
+
+    let renderMode = 1;
+    let lastRenderModeChange = new Date().getTime();
+    let renderModeChangeDebounce = 250;
+
+    function R_ChangeRenderMode ()
+    {
+        const now = new Date().getTime();
+        if (I_GetKeyState(I_Keys.R) &&
+            now - lastRenderModeChange > renderModeChangeDebounce)
+        {
+            ++renderMode;
+            if (renderMode === RENDER_MODES.length) renderMode = 0;
+            lastRenderModeChange = new Date().getTime();
+        }
+    }
 
     function R_LoadGeometry (vertices, triangles, nTriangles)
     {
@@ -86,16 +110,29 @@
                 M_IsInFrontOfPlane3(ORIGIN, aView, triNormal)
             )
             {
-                // directional light, emitted from the surface of the triangle:
-                // calculate the dot product of the directional light and the
-                // unit normal of the triangle to determine the level of
-                // illumination on the surface
-                const faceLuminance = M_Dot3(BWD, triNormal);
-                R_FillTriangle_Flat(ax, ay, bx, by, cx, cy,
-                                    255, 255, 255, 255 * faceLuminance);
-                if (DEBUG_MODE)
-                    R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
-                                            0, 0, 0, 255, 2);
+                switch (RENDER_MODES[renderMode])
+                {
+                    case RENDER_MODE.WIREFRAME:
+                        R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
+                                                255, 255, 255, 255, 2);
+                        break;
+                    case RENDER_MODE.FLAT:
+                    {
+                        // directional light, emitted from the surface of the triangle:
+                        // calculate the dot product of the directional light and the
+                        // unit normal of the triangle to determine the level of
+                        // illumination on the surface
+                        const faceLuminance = M_Dot3(BWD, triNormal);
+                        R_FillTriangle_Flat(ax, ay, bx, by, cx, cy,
+                                            255, 255, 255, 255 * faceLuminance);
+                        if (DEBUG_MODE)
+                            R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
+                                                    0, 0, 0, 255, 2);
+                        break;
+                    }
+                    default:
+                        break;
+                }
             }
         }
         if (DEBUG_MODE) R_DebugAxes();
@@ -109,6 +146,7 @@
     window.__import__R_Geometry = function ()
     {
         return {
+            R_ChangeRenderMode: R_ChangeRenderMode,
             R_LoadGeometry: R_LoadGeometry,
             R_UpdateGeometry: R_UpdateGeometry,
             R_RenderGeometry: R_RenderGeometry,

@@ -37,6 +37,7 @@
     const R_TitleDrawer = R_Drawers.R_TitleDrawer;
 
     const R_Geometry = __import__R_Geometry();
+    const R_ChangeRenderMode = R_Geometry.R_ChangeRenderMode;
     const R_RenderGeometry = R_Geometry.R_RenderGeometry;
     const R_TriPool = R_Geometry.R_TriPool;
 
@@ -50,6 +51,7 @@
     function G_UpdateScreen (deltaT, tris)
     {
         R_ClearBuffer();
+        R_ChangeRenderMode();
         R_RenderGeometry();
         R_FlushBuffer();
         if (DEBUG_MODE) R_DebugStats(deltaT);
