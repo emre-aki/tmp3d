@@ -28,6 +28,22 @@
     const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
     const SCREEN_W_2 = SCREEN_W * 0.5, SCREEN_H_2 = SCREEN_H * 0.5;
 
+    const M_Mat4 = __import__M_Mat4();
+    const M_QuickInv4 = M_Mat4.M_QuickInv4;
+    const M_Vec4FromVec3 = M_Mat4.M_Vec4FromVec3;
+    const M_Transform4 = M_Mat4.M_Transform4;
+    const Mat4 = M_Mat4.M_Mat4;
+
+    const M_Math = __import__M_Math();
+    const M_RadToDeg = M_Math.M_RadToDeg;
+    const M_Clamp = M_Math.M_Clamp;
+    const M_ToFixedDigits = M_Math.M_ToFixedDigits;
+    const M_PI_2 = M_Math.M_PI_2;
+
+    const M_Tri3 = __import__M_Tri3();
+    const M_TransformTri3 = M_Tri3.M_TransformTri3;
+    const Tri3 = M_Tri3.M_Tri3;
+
     const M_Vec3 = __import__M_Vec3();
     const M_Add3 = M_Vec3.M_Add3;
     const M_Sub3 = M_Vec3.M_Sub3;
@@ -38,22 +54,6 @@
     const M_RotateAroundAxis3 = M_Vec3.M_RotateAroundAxis3;
     const M_Vec3FromVec4 = M_Vec3.M_Vec3FromVec4;
     const Vec3 = M_Vec3.M_Vec3;
-
-    const M_Mat4 = __import__M_Mat4();
-    const M_QuickInv4 = M_Mat4.M_QuickInv4;
-    const M_Vec4FromVec3 = M_Mat4.M_Vec4FromVec3;
-    const M_Transform4 = M_Mat4.M_Transform4;
-    const Mat4 = M_Mat4.M_Mat4;
-
-    const M_Tri3 = __import__M_Tri3();
-    const M_TransformTri3 = M_Tri3.M_TransformTri3;
-    const Tri3 = M_Tri3.M_Tri3;
-
-    const M_Math = __import__M_Math();
-    const M_RadToDeg = M_Math.M_RadToDeg;
-    const M_Clamp = M_Math.M_Clamp;
-    const M_ToFixedDigits = M_Math.M_ToFixedDigits;
-    const M_PI_2 = M_Math.M_PI_2;
 
     const R_Draw = __import__R_Draw();
     const R_DrawLine_Bresenham = R_Draw.R_DrawLine_Bresenham;
