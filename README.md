@@ -27,7 +27,7 @@ It currently supports
   - perspective transformations
   - near & far clipping planes
   - back-face culling
-  - flat-shading
+  - flat-shading w/ directional lights
 
 and plans to support
 

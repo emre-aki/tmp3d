@@ -40,6 +40,9 @@
 
     const ORIGIN = R_Camera.R_ORIGIN, BWD = R_Camera.R_BWD;
 
+    // TODO: make a separate lighting controller module, maybe??
+    const DIRECTIONAL_LIGHT = BWD;
+
     let triPool3;
 
     const RENDER_MODE = { FLAT: "FLAT", WIREFRAME: "WIREFRAME" };
@@ -102,12 +105,11 @@
             const triView = trisTransformed[i];
             const aView = triView[0], bView = triView[1], cView = triView[2];
             const aViewZ = aView[2], bViewZ = bView[2], cViewZ = cView[2];
-            const triNormal = M_TriNormal3(triView);
             if (
                 // if the triangle is not behind the camera
                 (aViewZ > 0 || bViewZ > 0 || cViewZ > 0) &&
                 // if the triangle is facing the camera
-                M_IsInFrontOfPlane3(ORIGIN, aView, triNormal)
+                M_IsInFrontOfPlane3(ORIGIN, aView, M_TriNormal3(triView))
             )
             {
                 switch (RENDER_MODES[renderMode])
@@ -118,11 +120,12 @@
                         break;
                     case RENDER_MODE.FLAT:
                     {
-                        // directional light, emitted from the surface of the triangle:
-                        // calculate the dot product of the directional light and the
-                        // unit normal of the triangle to determine the level of
-                        // illumination on the surface
-                        const faceLuminance = M_Dot3(BWD, triNormal);
+                        const triNormal = M_TriNormal3(triPool3[i]);
+                        // calculate the dot product of the directional light
+                        // and the unit normal of the triangle in world space
+                        // to determine the level of illumination on the surface
+                        const faceLuminance =
+                            (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
                         R_FillTriangle_Flat(ax, ay, bx, by, cx, cy,
                                             255, 255, 255, 255 * faceLuminance);
                         if (DEBUG_MODE)
