@@ -70,6 +70,7 @@
     // the orthonormal basis vectors defining the camera
     let camRight, camUp, camFwd;
     let matPerspective; // the viewing frustum used for perspective projection
+    let matLookAt; // the look-at matrix used for view transformation
 
     // TODO: instead of having `eye`, `center`, and `up` as arguments to the
     // function, directly read the camera basis vectors off of the global scope
@@ -176,23 +177,18 @@
         // TODO: implement a collision routine
         // update the camera position by the movement vector
         camPos = M_Add3(camPos, step);
+        // update the look-at matrix used for view transformation
+        matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camUp);
     }
 
-    function R_ToViewSpace (triangles, nTriangles)
+    function R_ToViewSpace (triangle)
     {
-        const trisTransformed = Array(nTriangles);
-        const matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camUp);
-        for (let i = 0; i < nTriangles; ++i)
-            trisTransformed[i] = M_TransformTri3(matLookAt, triangles[i]);
-        return trisTransformed;
+        return M_TransformTri3(matLookAt, triangle);
     }
 
-    function R_ToClipSpace (triangles, nTriangles)
+    function R_ToClipSpace (triangle)
     {
-        const trisProjected = Array(nTriangles);
-        for (let i = 0; i < nTriangles; ++i)
-            trisProjected[i] = M_TransformTri3(matPerspective, triangles[i]);
-        return trisProjected;
+        return M_TransformTri3(matPerspective, triangle);
     }
 
     function R_GetCameraState ()
@@ -213,10 +209,11 @@
         camPitch = 0, camYaw = 0;
         camPos = Vec3(eye[0], eye[1], eye[2]);
         camRight = RIGHT; camUp = UP; camFwd = FWD;
+        matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camUp);
         matPerspective = R_Perspective(fovy, aspect, zNear, zFar);
     }
 
-    function R_DebugStats (deltaT)
+    function R_DebugStats (deltaT, nTrisOnScreen)
     {
         /* print the position of the camera */
         R_Print("pos: <" + M_ToFixedDigits(camPos[0], 2) + ", " +
@@ -234,24 +231,24 @@
                 5, 45,
                 "#FF0000",
                 14);
+        // FIXME: this really shouldn't be here
+        R_Print("tris: " + nTrisOnScreen, 5, 60, "#FF0000", 14);
         // print the instantaneous framerate
-        R_Print("fps: " + Math.round(1000 / deltaT), 5, 60, "#FF0000", 14);
+        R_Print("fps: " + Math.round(1000 / deltaT), 5, 75, "#FF0000", 14);
     }
 
     /* FIXME: move this function to a more sensible file/module */
     function R_DebugAxes ()
     {
-        const matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camUp);
         const originViewSpace4 = M_Transform4(matLookAt,
                                               M_Vec4FromVec3(ORIGIN, 1));
         const originClipSpace3 = M_Vec3FromVec4(M_Transform4(matPerspective,
                                                              originViewSpace4));
-        const axesWorldSpace3 = [Tri3(RIGHT, UP, FWD)];
-        const axesViewSpace3 = R_ToViewSpace(axesWorldSpace3, 1);
-        const axesClipSpace3 = R_ToClipSpace(axesViewSpace3, 1);
-        const rightClipSpace3 = axesClipSpace3[0][0];
-        const upClipSpace3 = axesClipSpace3[0][1];
-        const fwdClipSpace3 = axesClipSpace3[0][2];
+        const axesViewSpace3 = R_ToViewSpace(Tri3(RIGHT, UP, FWD));
+        const axesClipSpace3 = R_ToClipSpace(axesViewSpace3);
+        const rightClipSpace3 = axesClipSpace3[0];
+        const upClipSpace3 = axesClipSpace3[1];
+        const fwdClipSpace3 = axesClipSpace3[2];
         const originScreen2 = [originClipSpace3[0] * SCREEN_W_2 + SCREEN_W_2,
                                originClipSpace3[1] * SCREEN_H_2 + SCREEN_H_2];
         const rightScreen2 = [rightClipSpace3[0] * SCREEN_W_2 + SCREEN_W_2,

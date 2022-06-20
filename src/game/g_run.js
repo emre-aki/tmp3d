@@ -48,13 +48,15 @@
     let tickInterval;
     let lastTick;
 
+    const nTrisOnScreen = new Uint32Array(1);
+
     function G_UpdateScreen (deltaT, tris)
     {
         R_ClearBuffer();
         R_ChangeRenderMode();
-        R_RenderGeometry();
+        R_RenderGeometry(nTrisOnScreen);
         R_FlushBuffer();
-        if (DEBUG_MODE) R_DebugStats(deltaT);
+        if (DEBUG_MODE) R_DebugStats(deltaT, nTrisOnScreen[0]);
     }
 
     function G_UpdateGame (deltaT, tris)

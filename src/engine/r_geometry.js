@@ -43,7 +43,9 @@
     // TODO: make a separate lighting controller module, maybe??
     const DIRECTIONAL_LIGHT = BWD;
 
-    let triPool3;
+    let triPool3; // a pool of raw triangle data
+    let cullBuffer, nCullBuffer;
+
 
     const RENDER_MODE = { FLAT: "FLAT", WIREFRAME: "WIREFRAME" };
 
@@ -68,6 +70,7 @@
     function R_LoadGeometry (vertices, triangles, nTriangles)
     {
         triPool3 = Array(nTriangles);
+        cullBuffer = new Uint32Array(nTriangles); // TODO: maybe 16??
         for (let i = 0; i < nTriangles; ++i)
         {
             const tri3Data = triangles[i];
@@ -85,16 +88,39 @@
         // TODO: implement
     }
 
-    function R_RenderGeometry ()
+    function R_CullGeometry (triangles, nTriangles)
     {
-        /* TODO: do frustum culling & occlusion culling */
-        const nTris = triPool3.length;
-        const trisTransformed = R_ToViewSpace(triPool3, nTris);
-        const trisNormalized = R_ToClipSpace(trisTransformed, nTris);
-        for (let i = 0; i < nTris; ++i)
+        let nTrianglesAfterCulling = 0;
+        for (let i = 0; i < nTriangles; ++i)
         {
-            /* TODO: make into a separate function call, maybe?? */
-            const triClip = trisNormalized[i];
+            const triView = R_ToViewSpace(triangles[i]);
+            const aView = triView[0];
+            if (
+                // TODO: remove this once you implement triangle clipping
+                // if the triangle is at least partially in front of the camera
+                (aView[2] > 0 || triView[1][2] > 0 || triView[2][2] > 0) &&
+                // backface-culling: if the triangle is facing the camera
+                M_IsInFrontOfPlane3(ORIGIN, aView, M_TriNormal3(triView))
+                // TODO: implement occlusion-culling
+            )
+            {
+                cullBuffer[nTrianglesAfterCulling] = i;
+                ++nTrianglesAfterCulling;
+            }
+        }
+        nCullBuffer = nTrianglesAfterCulling;
+    }
+
+    function R_RenderGeometry (nTrisOnScreen)
+    {
+        const nTriangles = triPool3.length; // FIXME: make into a global const.
+        R_CullGeometry(triPool3, nTriangles);
+        for (let i = 0; i < nCullBuffer; ++i)
+        {
+            const triWorld = triPool3[cullBuffer[i]];
+            const triView = R_ToViewSpace(triWorld);
+            /* TODO: implement triangle clipping in world (or clip) space */
+            const triClip = R_ToClipSpace(triView);
             const aClip3 = triClip[0], bClip3 = triClip[1], cClip3 = triClip[2];
             const ax = aClip3[0] * SCREEN_W_2 + SCREEN_W_2;
             const ay = aClip3[1] * SCREEN_H_2 + SCREEN_H_2;
@@ -102,43 +128,34 @@
             const by = bClip3[1] * SCREEN_H_2 + SCREEN_H_2;
             const cx = cClip3[0] * SCREEN_W_2 + SCREEN_W_2;
             const cy = cClip3[1] * SCREEN_H_2 + SCREEN_H_2;
-            const triView = trisTransformed[i];
-            const aView = triView[0], bView = triView[1], cView = triView[2];
-            const aViewZ = aView[2], bViewZ = bView[2], cViewZ = cView[2];
-            if (
-                // if the triangle is not behind the camera
-                (aViewZ > 0 || bViewZ > 0 || cViewZ > 0) &&
-                // if the triangle is facing the camera
-                M_IsInFrontOfPlane3(ORIGIN, aView, M_TriNormal3(triView))
-            )
+            switch (RENDER_MODES[renderMode])
             {
-                switch (RENDER_MODES[renderMode])
+                case RENDER_MODE.WIREFRAME:
+                    R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
+                                            255, 255, 255, 255, 2);
+                    break;
+                case RENDER_MODE.FLAT:
                 {
-                    case RENDER_MODE.WIREFRAME:
+                    const triNormal = M_TriNormal3(triWorld);
+                    // calculate the dot product of the directional light
+                    // and the unit normal of the triangle in world space
+                    // to determine the level of illumination on the surface
+                    const faceLuminance =
+                        (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
+                    R_FillTriangle_Flat(ax, ay, bx, by, cx, cy,
+                                        255, 255, 255, 255 * faceLuminance);
+                    if (DEBUG_MODE)
                         R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
-                                                255, 255, 255, 255, 2);
-                        break;
-                    case RENDER_MODE.FLAT:
-                    {
-                        const triNormal = M_TriNormal3(triPool3[i]);
-                        // calculate the dot product of the directional light
-                        // and the unit normal of the triangle in world space
-                        // to determine the level of illumination on the surface
-                        const faceLuminance =
-                            (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
-                        R_FillTriangle_Flat(ax, ay, bx, by, cx, cy,
-                                            255, 255, 255, 255 * faceLuminance);
-                        if (DEBUG_MODE)
-                            R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
-                                                    0, 0, 0, 255, 2);
-                        break;
-                    }
-                    default:
-                        break;
+                                                0, 0, 0, 255, 2);
+                    break;
                 }
+                default:
+                    break;
             }
         }
         if (DEBUG_MODE) R_DebugAxes();
+        // TODO: re-calculate after implementing triangle clipping
+        nTrisOnScreen[0] = nCullBuffer;
     }
 
     function R_TriPool ()
