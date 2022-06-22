@@ -278,8 +278,8 @@
         // bias the top and mid endpoints in screen-space by -0.5 horizontally
         // as per the coverage rules
         const topXBiased = topX - 0.5, midXBiased = midX - 0.5;
-        /* pre-step from top and mid endpoints as pixel centers are the actual
-         * sampling points
+        /* pre-step from top and mid endpoints bu 0.5 as pixel centers are the
+         * actual sampling points
          */
         const preStepFromTop = startY + 0.5 - topY;
         const preStepFromMid = midStopY + 0.5 - midY;
@@ -289,41 +289,47 @@
         let xMajor = preStepFromTop * stepXAlongMajor + topXBiased;
         // whether the lefmost edge of the triangle is the longest
         const isLeftMajor = stepXAlongMajor < stepXAlongUpper;
-        /* lerp based on `y` in screen-space for the upper half of the triangle
-         */
-        for (let y = startY; y < midStopY; ++y)
+        if (isLeftMajor)
         {
-            let startX, endX;
-            if (isLeftMajor)
+            /* lerp based on `y` in screen-space for the upper half of the
+             * triangle
+             */
+            for (let y = startY; y < midStopY; ++y)
             {
-                startX = Math.ceil(xMajor);
-                endX = Math.ceil(xUpper);
+                const startX = Math.ceil(xMajor), endX = Math.ceil(xUpper);
+                R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
+                xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
             }
-            else
+            /* lerp based on `y` in screen-space for the lower half of the
+             * triangle
+             */
+            for (let y = midStopY; y < endY; ++y)
             {
-                startX = Math.ceil(xUpper);
-                endX = Math.ceil(xMajor);
+                const startX = Math.ceil(xMajor), endX = Math.ceil(xLower);
+                R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
+                xLower += stepXAlongLower; xMajor += stepXAlongMajor;
             }
-            R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
-            xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
         }
-        /* lerp based on `y` in screen-space for the lower half of the triangle
-         */
-        for (let y = midStopY; y < endY; ++y)
+        else
         {
-            let startX, endX;
-            if (isLeftMajor)
-            {
-                startX = Math.ceil(xMajor);
-                endX = Math.ceil(xLower);
-            }
-            else
-            {
-                startX = Math.ceil(xLower);
-                endX = Math.ceil(xMajor);
-            }
-            R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
-            xLower += stepXAlongLower; xMajor += stepXAlongMajor;
+             /* lerp based on `y` in screen-space for the upper half of the
+             * triangle
+             */
+             for (let y = startY; y < midStopY; ++y)
+             {
+                 const startX = Math.ceil(xUpper), endX = Math.ceil(xMajor);
+                 R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
+                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
+             }
+             /* lerp based on `y` in screen-space for the lower half of the
+              * triangle
+              */
+             for (let y = midStopY; y < endY; ++y)
+             {
+                 const startX = Math.ceil(xLower), endX = Math.ceil(xMajor);
+                 R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
+                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
+             }
         }
     }
 
