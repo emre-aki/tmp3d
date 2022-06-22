@@ -42,6 +42,7 @@
         const sY = M_Clamp(Math.floor(y), 0, screenH);
         const dX = M_Clamp(Math.floor(x + w), 0, screenW);
         const dY = M_Clamp(Math.floor(y + h), 0, screenH);
+        if (sX === dX || sY === dY) return; // early return if not a rectangle
         for (let brushY = sY; brushY < dY; ++brushY)
         {
             for (let brushX = sX; brushX < dX; ++brushX)
