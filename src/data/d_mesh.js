@@ -5,7 +5,7 @@
  *  Created by Emre Akı on 2022-02-13.
  *
  *  SYNOPSIS:
- *      The initial 3-D primitives.
+ *      The initial 3-D geometry data and their respective UV mappings.
  */
 
 (function ()
@@ -23,6 +23,16 @@
             /* 5 */ [10, -10, 30],
             /* 6 */ [10, 10, 30],
             /* 7 */ [-10, 10, 30],
+        ];
+    }
+
+    function D_UV ()
+    {
+        return [
+            /* 0 */ [0, 0],
+            /* 1 */ [0, 1],
+            /* 2 */ [1, 0],
+            /* 3 */ [1, 1],
         ];
     }
 
@@ -44,8 +54,31 @@
         ];
     }
 
+    function D_UVMap ()
+    {
+        return [
+            [0, 1, 2],
+            [2, 1, 3],
+            [0, 1, 2],
+            [2, 1, 3],
+            [0, 1, 2],
+            [2, 1, 3],
+            [0, 1, 2],
+            [2, 1, 3],
+            [0, 1, 2],
+            [2, 1, 3],
+            [0, 1, 2],
+            [2, 1, 3],
+        ];
+    }
+
     window.__import__D_Mesh = function ()
     {
-        return { D_Vertices: D_Vertices, D_Triangles: D_Triangles };
+        return {
+            D_Vertices: D_Vertices,
+            D_UV: D_UV,
+            D_Triangles: D_Triangles,
+            D_UVMap: D_UVMap,
+        };
     };
 })();

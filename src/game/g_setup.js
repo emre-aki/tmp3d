@@ -20,6 +20,8 @@
     const D_Mesh = __import__D_Mesh();
     const D_Vertices = D_Mesh.D_Vertices();
     const D_Triangles = D_Mesh.D_Triangles();
+    const D_UV = D_Mesh.D_UV();
+    const D_UVMap = D_Mesh.D_UVMap();
 
     const D_Player = __import__D_Player();
     const D_Velocity = D_Player.D_Velocity;
@@ -45,6 +47,7 @@
     const R_ErrorDrawer = R_Drawers.R_ErrorDrawer;
 
     const R_Geometry = __import__R_Geometry();
+    const R_InitUVTable = R_Geometry.R_InitUVTable;
     const R_LoadGeometry = R_Geometry.R_LoadGeometry;
 
     const R_Screen = __import__R_Screen();
@@ -79,6 +82,7 @@
         R_InitBuffer(SCREEN_W, SCREEN_H);
         R_InitCamera(FOV_Y, ASPECT, Z_NEAR, Z_FAR, D_Eye, D_Velocity);
         R_LoadGeometry(D_Vertices, D_Triangles, D_Triangles.length);
+        R_InitUVTable(D_UV, D_UVMap, D_Triangles.length);
         /* async operations */
         return G_SetupPromise()
             .then(function G_SetupResolver ()

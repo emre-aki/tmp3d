@@ -44,6 +44,7 @@
     const DIRECTIONAL_LIGHT = BWD;
 
     let triPool3; // a pool of raw triangle data
+    let uvTable3; // respective uv-coordinates of each triangle in the pool
     let cullBuffer, nCullBuffer;
 
 
@@ -80,6 +81,21 @@
             triPool3[i] = Tri3(Vec3(triA3[0], triA3[1], triA3[2]),
                                Vec3(triB3[0], triB3[1], triB3[2]),
                                Vec3(triC3[0], triC3[1], triC3[2]));
+        }
+    }
+
+    function R_InitUVTable (vertices, triangles, nTriangles)
+    {
+        uvTable3 = Array(nTriangles);
+        for (let i = 0; i < nTriangles; ++i)
+        {
+            const tri3Data = triangles[i];
+            const texUVA2 = vertices[tri3Data[0]];
+            const texUVB2 = vertices[tri3Data[1]];
+            const texUVC2 = vertices[tri3Data[2]];
+            uvTable3[i] = Tri3(Vec3(texUVA2[0], texUVA2[1], 1),
+                               Vec3(texUVB2[0], texUVB2[1], 1),
+                               Vec3(texUVC2[0], texUVC2[1], 1));
         }
     }
 
@@ -168,6 +184,7 @@
         return {
             R_ChangeRenderMode: R_ChangeRenderMode,
             R_LoadGeometry: R_LoadGeometry,
+            R_InitUVTable: R_InitUVTable,
             R_UpdateGeometry: R_UpdateGeometry,
             R_RenderGeometry: R_RenderGeometry,
             R_TriPool: R_TriPool,
