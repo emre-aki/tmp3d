@@ -15,6 +15,8 @@
     function D_TextureIdTable ()
     {
         return {
+            /* in-game textures */
+            WOOD: "WOOD",
             /* misc. */
             TITLE_TMP3D: "TITLE_TMP3D",
         };
@@ -23,6 +25,7 @@
     function D_TextureFilenameTable ()
     {
         return {
+            [TEXTURE_ID_TABLE.WOOD]: "wood.png",
             [TEXTURE_ID_TABLE.TITLE_TMP3D]: "tmp3d_2x.png",
         };
     }
