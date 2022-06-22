@@ -12,6 +12,12 @@
 {
     const DEBUG_MODE = window.__DEBUG_MODE__;
 
+    const A_Assets = __import__A_Assets();
+    const A_Texture = A_Assets.A_Texture;
+
+    const D_Textures = __import__D_Textures();
+    const D_TextureIdTable = D_Textures.D_TextureIdTable;
+
     const G_Const = __import__G_Const();
     const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
     const SCREEN_W_2 = SCREEN_W * 0.5, SCREEN_H_2 = SCREEN_H * 0.5;
@@ -37,6 +43,8 @@
     const R_Draw = __import__R_Draw();
     const R_DrawTriangleWireframe = R_Draw.R_DrawTriangleWireframe;
     const R_FillTriangle_Flat = R_Draw.R_FillTriangle_Flat;
+    const R_FillTriangle_Textured_Perspective =
+        R_Draw.R_FillTriangle_Textured_Perspective;
 
     const ORIGIN = R_Camera.R_ORIGIN, BWD = R_Camera.R_BWD;
 
@@ -45,14 +53,22 @@
 
     let triPool3; // a pool of raw triangle data
     let uvTable3; // respective uv-coordinates of each triangle in the pool
-    let cullBuffer, nCullBuffer;
+    // buffer culled triangles & uv maps
+    let cullBuffer, cullUVBuffer, nCullBuffer;
 
+    const RENDER_MODE = {
+        FLAT: "FLAT",
+        TEXTURED: "TEXTURED",
+        WIREFRAME: "WIREFRAME",
+    };
 
-    const RENDER_MODE = { FLAT: "FLAT", WIREFRAME: "WIREFRAME" };
+    const RENDER_MODES = [
+        RENDER_MODE.WIREFRAME,
+        RENDER_MODE.FLAT,
+        RENDER_MODE.TEXTURED,
+    ];
 
-    const RENDER_MODES = [RENDER_MODE.WIREFRAME, RENDER_MODE.FLAT];
-
-    let renderMode = 1;
+    let renderMode = 2;
     let lastRenderModeChange = new Date().getTime();
     let renderModeChangeDebounce = 250;
 
@@ -87,6 +103,7 @@
     function R_InitUVTable (vertices, triangles, nTriangles)
     {
         uvTable3 = Array(nTriangles);
+        cullUVBuffer = new Uint32Array(nTriangles); // TODO: maybe 16??
         for (let i = 0; i < nTriangles; ++i)
         {
             const tri3Data = triangles[i];
@@ -121,6 +138,7 @@
             )
             {
                 cullBuffer[nTrianglesAfterCulling] = i;
+                cullUVBuffer[nTrianglesAfterCulling] = i;
                 ++nTrianglesAfterCulling;
             }
         }
@@ -163,6 +181,32 @@
                     if (DEBUG_MODE)
                         R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
                                                 0, 0, 0, 255, 2);
+                    break;
+                }
+                case RENDER_MODE.TEXTURED:
+                {
+                    const uvMap = uvTable3[cullUVBuffer[i]];
+                    const aUV = uvMap[0], bUV = uvMap[1], cUV = uvMap[2];
+                    const au = aUV[0], av = aUV[1], ac = aUV[2];
+                    const bu = bUV[0], bv = bUV[1], bc = bUV[2];
+                    const cu = cUV[0], cv = cUV[1], cc = cUV[2];
+                    const triNormal = M_TriNormal3(triWorld);
+                    const faceLuminance =
+                        (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
+                    /* fill textured triangle */
+                    R_FillTriangle_Textured_Perspective(
+                        A_Texture(D_TextureIdTable.WOOD),
+                        ax, ay, triView[0][2],
+                        bx, by, triView[1][2],
+                        cx, cy, triView[2][2],
+                        au, av, ac,
+                        bu, bv, bc,
+                        cu, cv, cc,
+                        1, faceLuminance
+                    );
+                    if (DEBUG_MODE)
+                        R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
+                                                255, 255, 255, 255, 2);
                     break;
                 }
                 default:

@@ -64,6 +64,12 @@
         }
     }
 
+    function R_ClampLine (sx, sy, dx, dy)
+    {
+        // TODO: implement 2-D line vs. rectangle intersection & utilize in all
+        // line drawing routines
+    }
+
     function R_DrawLine_DDA (sx, sy, dx, dy, r, g, b, a, stroke)
     {
         const stroke_ = stroke || 1;
@@ -343,6 +349,260 @@
         // https://mcejp.github.io/2020/11/06/bresenham.html
     }
 
+    function
+    R_FillTriangle_Textured_Affine
+    ( tex,
+      ax, ay,
+      bx, by,
+      cx, cy,
+      au, av,
+      bu, bv,
+      cu, cv,
+      opacity, lightLevel )
+    {
+        // TODO: implement affine texture-mapping
+    }
+
+    function
+    R_LerpTexturedScanline_Perspective
+    ( tex,
+      dx0, dx1, dy,
+      u0, v0, c0,
+      u1, v1, c1,
+      opacity, lightLevel )
+    {
+        const texWidth = tex.width, texHeight = tex.height, bitmap = tex.bitmap;
+        // raster clipping: clip the scanline if it goes out of bounds of screen
+        // coordinates
+        const clipLeft = Math.max(-dx0, 0);
+        // bias the start and end endpoints in screen-space by -0.5 horizontally
+        // as per the coverage rules
+        const dX0 = Math.ceil(dx0 + clipLeft - 0.5), dX1 = Math.ceil(dx1 - 0.5);
+        const deltaX = dx1 - dx0, _deltaX = 1 / deltaX;
+        // pre-step from start by 0.5 as pixel centers are the actual sampling
+        // points
+        const preStepX = dX0 + 0.5 - dx0;
+        /* 1 step in `+x` equals how many steps in `u`, `v`, and `c` */
+        const gradU = (u1 - u0) * _deltaX;
+        const gradV = (v1 - v0) * _deltaX;
+        const gradC = (c1 - c0) * _deltaX;
+        let u = preStepX * gradU + u0;
+        let v = preStepX * gradV + v0;
+        let c = preStepX * gradC + c0;
+        /* rasterize current scanline */
+        for (let x = dX0; x < dX1 && x < screenW; ++x)
+        {
+            const c_ = 1 / c;
+            const sX = Math.floor(u * c_ * texWidth);
+            const sY = Math.floor(v * c_ * texHeight);
+            // only draw the pixel if the sampling point is within the bounds of
+            // the source image
+            if (sX < 0 || sX >= texWidth || sY < 0 || sY >= texHeight) continue;
+            /* draw a single pixel in screen space sampled from the
+             * perspective-corrected texture space
+             */
+            const sampleIndex = 4 * (sY * texWidth + sX);
+            const sampleRed = bitmap[sampleIndex];
+            const sampleGreen = bitmap[sampleIndex + 1];
+            const sampleBlue = bitmap[sampleIndex + 2];
+            const sampleAlpha = bitmap[sampleIndex + 3] * opacity;
+            const paintIndex = 4 * (dy * screenW + x);
+            const bufferRed = frameBuffer.data[paintIndex];
+            const bufferGreen = frameBuffer.data[paintIndex + 1];
+            const bufferBlue = frameBuffer.data[paintIndex + 2];
+            const bufferAlpha = frameBuffer.data[paintIndex + 3] || 255;
+            const blendRatio = sampleAlpha / bufferAlpha;
+            const blendRatio_ = 1 - blendRatio;
+            const blendWithLightLevel = lightLevel * blendRatio;
+            const newRed =
+                blendWithLightLevel * sampleRed + blendRatio_ * bufferRed;
+            const newGreen =
+                blendWithLightLevel * sampleGreen + blendRatio_ * bufferGreen;
+            const newBlue =
+                blendWithLightLevel * sampleBlue + blendRatio_ * bufferBlue;
+            frameBuffer.data[paintIndex] = newRed;
+            frameBuffer.data[paintIndex + 1] = newGreen;
+            frameBuffer.data[paintIndex + 2] = newBlue;
+            frameBuffer.data[paintIndex + 3] = 255;
+            u += gradU; v += gradV; c += gradC;
+        }
+    }
+
+    function
+    R_FillTriangle_Textured_Perspective
+    ( tex,
+      ax, ay, aDepth,
+      bx, by, bDepth,
+      cx, cy, cDepth,
+      au, av, ac,
+      bu, bv, bc,
+      cu, cv, cc,
+      opacity, lightLevel )
+    {
+        /* coordinates of the triangle in screen-space */
+        let topX = ax, topY = ay;
+        let midX = bx, midY = by;
+        let bottomX = cx, bottomY = cy;
+        /* coordinates of the triangle in perspective-corrected texture-space */
+        let topC = ac / aDepth, midC = bc / bDepth, bottomC = cc / cDepth;
+        let topU = au * topC, topV = av * topC;
+        let midU = bu * midC, midV = bv * midC;
+        let bottomU = cu * bottomC, bottomV = cv * bottomC;
+        /* sort vertices of the triangle so that their y-coordinates are in
+         * ascending order
+         */
+        if (topY > midY)
+        {
+            /* swap in screen-space */
+            const auxX = topX, auxY = topY;
+            topX = midX, topY = midY;
+            midX = auxX, midY = auxY;
+            /* and also, swap in texture-space as well */
+            const auxU = topU, auxV = topV, auxC = topC;
+            topU = midU, topV = midV, topC = midC;
+            midU = auxU, midV = auxV, midC = auxC;
+        }
+        if (midY > bottomY)
+        {
+            /* swap in screen-space */
+            const auxX = midX, auxY = midY;
+            midX = bottomX, midY = bottomY;
+            bottomX = auxX, bottomY = auxY;
+            /* and also, swap in texture-space as well */
+            const auxU = midU, auxV = midV, auxC = midC;
+            midU = bottomU, midV = bottomV, midC = bottomC;
+            bottomU = auxU, bottomV = auxV, bottomC = auxC;
+        }
+        if (topY > midY)
+        {
+            /* swap in screen-space */
+            const auxX = topX, auxY = topY;
+            topX = midX, topY = midY;
+            midX = auxX, midY = auxY;
+            /* and also, swap in texture-space as well */
+            const auxU = topU, auxV = topV, auxC = topC;
+            topU = midU, topV = midV, topC = midC;
+            midU = auxU, midV = auxV, midC = auxC;
+        }
+        const deltaUpper = midY - topY, _deltaUpper = 1 / deltaUpper;
+        const deltaLower = bottomY - midY, _deltaLower = 1 / deltaLower;
+        const deltaMajor = bottomY - topY, _deltaMajor = 1 / deltaMajor;
+        /* 1 step in `+y` equals how many steps in `x` */
+        const stepXAlongUpper = (midX - topX) * _deltaUpper;
+        const stepXAlongLower = (bottomX - midX) * _deltaLower;
+        const stepXAlongMajor = (bottomX - topX) * _deltaMajor;
+        /* 1 step in `+y` equals how many steps in `u` */
+        const stepUAlongUpper = (midU - topU) * _deltaUpper;
+        const stepUAlongLower = (bottomU - midU) * _deltaLower;
+        const stepUAlongMajor = (bottomU - topU) * _deltaMajor;
+        /* 1 step in `+y` equals how many steps in `v` */
+        const stepVAlongUpper = (midV - topV) * _deltaUpper;
+        const stepVAlongLower = (bottomV - midV) * _deltaLower;
+        const stepVAlongMajor = (bottomV - topV) * _deltaMajor;
+        /* 1 step in `+y` equals how many steps in `c` */
+        const stepCAlongUpper = (midC - topC) * _deltaUpper;
+        const stepCAlongLower = (bottomC - midC) * _deltaLower;
+        const stepCAlongMajor = (bottomC - topC) * _deltaMajor;
+        // raster clipping: clip the triangle if it goes out of bounds of screen
+        // coordinates
+        const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
+        /* vertical endpoints of the rasterization in screen-space, biased by
+         * -0.5 as per the coverage rules
+         */
+        const startY = Math.ceil(topY + clipTop - 0.5);
+        const midStopY = Math.ceil(midY + clipMid - 0.5);
+        const endY = Math.ceil(bottomY - 0.5);
+        /* pre-step from top and mid endpoints by 0.5 as pixel centers are the
+         * actual sampling points
+         */
+        const preStepFromTop = startY + 0.5 - topY;
+        const preStepFromMid = midStopY + 0.5 - midY;
+        /* current `x` coordinates in screen-space */
+        let xUpper = preStepFromTop * stepXAlongUpper + topX;
+        let xLower = preStepFromMid * stepXAlongLower + midX;
+        let xMajor = preStepFromTop * stepXAlongMajor + topX;
+        /* current `u` coordinates in screen-space */
+        let uUpper = preStepFromTop * stepUAlongUpper + topU;
+        let uLower = preStepFromMid * stepUAlongLower + midU;
+        let uMajor = preStepFromTop * stepUAlongMajor + topU;
+        /* current `v` coordinates in screen-space */
+        let vUpper = preStepFromTop * stepVAlongUpper + topV;
+        let vLower = preStepFromMid * stepVAlongLower + midV;
+        let vMajor = preStepFromTop * stepVAlongMajor + topV;
+        /* current `c` coordinates in screen-space */
+        let cUpper = preStepFromTop * stepCAlongUpper + topC;
+        let cLower = preStepFromMid * stepCAlongLower + midC;
+        let cMajor = preStepFromTop * stepCAlongMajor + topC;
+        // whether the lefmost edge of the raster triangle is the longest
+        const isLeftMajor = stepXAlongMajor < stepXAlongUpper;
+        if (isLeftMajor)
+        {
+            /* lerp based on `y` in screen-space for the upper half of the
+             * triangle
+             */
+            for (let y = startY; y < midStopY && y < screenH; ++y)
+            {
+                R_LerpTexturedScanline_Perspective(tex,
+                                                   xMajor, xUpper, y,
+                                                   uMajor, vMajor, cMajor,
+                                                   uUpper, vUpper, cUpper,
+                                                   opacity, lightLevel);
+                xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
+                uUpper += stepUAlongUpper; uMajor += stepUAlongMajor;
+                vUpper += stepVAlongUpper; vMajor += stepVAlongMajor;
+                cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
+            }
+            /* lerp based on `y` in screen-space for the lower half of the
+             * triangle
+             */
+            for (let y = midStopY; y < endY && y < screenH; ++y)
+            {
+                R_LerpTexturedScanline_Perspective(tex,
+                                                   xMajor, xLower, y,
+                                                   uMajor, vMajor, cMajor,
+                                                   uLower, vLower, cLower,
+                                                   opacity, lightLevel);
+                xLower += stepXAlongLower; xMajor += stepXAlongMajor;
+                uLower += stepUAlongLower; uMajor += stepUAlongMajor;
+                vLower += stepVAlongLower; vMajor += stepVAlongMajor;
+                cLower += stepCAlongLower; cMajor += stepCAlongMajor;
+            }
+        }
+        else
+        {
+            /* lerp based on `y` in screen-space for the upper half of the
+             * triangle
+             */
+            for (let y = startY; y < midStopY && y < screenH; ++y)
+            {
+                R_LerpTexturedScanline_Perspective(tex,
+                                                   xUpper, xMajor, y,
+                                                   uUpper, vUpper, cUpper,
+                                                   uMajor, vMajor, cMajor,
+                                                   opacity, lightLevel);
+                xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
+                uUpper += stepUAlongUpper; uMajor += stepUAlongMajor;
+                vUpper += stepVAlongUpper; vMajor += stepVAlongMajor;
+                cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
+            }
+            /* lerp based on `y` in screen-space for the lower half of the
+             * triangle
+             */
+            for (let y = midStopY; y < endY && y < screenH; ++y)
+            {
+                R_LerpTexturedScanline_Perspective(tex,
+                                                   xLower, xMajor, y,
+                                                   uLower, vLower, cLower,
+                                                   uMajor, vMajor, cMajor,
+                                                   opacity, lightLevel);
+                xLower += stepXAlongLower; xMajor += stepXAlongMajor;
+                uLower += stepUAlongLower; uMajor += stepUAlongMajor;
+                vLower += stepVAlongLower; vMajor += stepVAlongMajor;
+                cLower += stepCAlongLower; cMajor += stepCAlongMajor;
+            }
+        }
+    }
+
     function R_DrawImage (img, sx, sy, sw, sh, dx, dy, dw, dh, options)
     {
         const imgWidth = img.width, imgHeight = img.height, bitmap = img.bitmap;
@@ -378,33 +638,32 @@
                 /* only draw the pixel if the sampling point is within the
                  * bounds of the source image
                  */
-                if (sampleX >= 0 && sampleX < imgWidth &&
-                    sampleY >= 0 && sampleY < imgHeight)
-                {
-                    const sampleIndex = 4 * (sampleY * imgWidth + sampleX);
-                    const sampleRed = bitmap[sampleIndex];
-                    const sampleGreen = bitmap[sampleIndex + 1];
-                    const sampleBlue = bitmap[sampleIndex + 2];
-                    const sampleAlpha = bitmap[sampleIndex + 3] * opacity;
-                    const paintIndex = 4 * (y * screenW + x);
-                    const bufferRed = frameBuffer.data[paintIndex];
-                    const bufferGreen = frameBuffer.data[paintIndex + 1];
-                    const bufferBlue = frameBuffer.data[paintIndex + 2];
-                    const bufferAlpha = frameBuffer.data[paintIndex + 3] || 255;
-                    const blendRatio = sampleAlpha / bufferAlpha;
-                    const blendRatio_ = 1 - blendRatio;
-                    const blendWithLightLevel = lightLevel * blendRatio;
-                    const newRed = blendWithLightLevel * sampleRed +
-                                   blendRatio_ * bufferRed;
-                    const newGreen = blendWithLightLevel * sampleGreen +
-                                     blendRatio_ * bufferGreen;
-                    const newBlue = blendWithLightLevel * sampleBlue +
-                                    blendRatio_ * bufferBlue;
-                    frameBuffer.data[paintIndex] = newRed;
-                    frameBuffer.data[paintIndex + 1] = newGreen;
-                    frameBuffer.data[paintIndex + 2] = newBlue;
-                    frameBuffer.data[paintIndex + 3] = 255;
-                }
+                if (sampleX < 0 || sampleX >= imgWidth ||
+                    sampleY < 0 || sampleY >= imgHeight)
+                    continue;
+                const sampleIndex = 4 * (sampleY * imgWidth + sampleX);
+                const sampleRed = bitmap[sampleIndex];
+                const sampleGreen = bitmap[sampleIndex + 1];
+                const sampleBlue = bitmap[sampleIndex + 2];
+                const sampleAlpha = bitmap[sampleIndex + 3] * opacity;
+                const paintIndex = 4 * (y * screenW + x);
+                const bufferRed = frameBuffer.data[paintIndex];
+                const bufferGreen = frameBuffer.data[paintIndex + 1];
+                const bufferBlue = frameBuffer.data[paintIndex + 2];
+                const bufferAlpha = frameBuffer.data[paintIndex + 3] || 255;
+                const blendRatio = sampleAlpha / bufferAlpha;
+                const blendRatio_ = 1 - blendRatio;
+                const blendWithLightLevel = lightLevel * blendRatio;
+                const newRed = blendWithLightLevel * sampleRed +
+                               blendRatio_ * bufferRed;
+                const newGreen = blendWithLightLevel * sampleGreen +
+                                 blendRatio_ * bufferGreen;
+                const newBlue = blendWithLightLevel * sampleBlue +
+                                blendRatio_ * bufferBlue;
+                frameBuffer.data[paintIndex] = newRed;
+                frameBuffer.data[paintIndex + 1] = newGreen;
+                frameBuffer.data[paintIndex + 2] = newBlue;
+                frameBuffer.data[paintIndex + 3] = 255;
             }
         }
     }
@@ -429,6 +688,9 @@
             R_DrawTriangleWireframe: R_DrawTriangleWireframe,
             R_FillTriangle_Flat: R_FillTriangle_Flat,
             R_FillTriangle_Flat_Bresenham: R_FillTriangle_Flat_Bresenham,
+            R_FillTriangle_Textured_Affine: R_FillTriangle_Textured_Affine,
+            R_FillTriangle_Textured_Perspective:
+                R_FillTriangle_Textured_Perspective,
             R_DrawImage: R_DrawImage,
             R_Print: R_Print,
         };

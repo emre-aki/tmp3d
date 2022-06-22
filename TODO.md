@@ -15,7 +15,9 @@
 - [x] Back-face culling
 - [ ] Frustum culling, i.e., triangle clipping
 - [x] Flat-shading
-- [ ] Affine & perspective-correct texture-mapping
+- [ ] Texture-mapping
+    - [ ] Affine
+    - [x] Perspective-correct
 - [ ] Occlusion culling (😩)
 
 ## Project-wise

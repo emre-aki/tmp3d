@@ -3,7 +3,7 @@
         src="https://raw.githubusercontent.com/emre-aki/tmp3d/master/.images/tmp3d_2x.png">
     </img>
     <br>
-    <img src="https://media2.giphy.com/media/0cy6jQpqXaNd5rFZiZ/giphy.gif">
+    <img src="https://media1.giphy.com/media/BOFXBO58mR5kGgnw8m/giphy.gif">
     </img>
     <br>
     <a href="https://undefbehav.itch.io/tmp3d" target="_blank">itch.io</a>
@@ -27,13 +27,15 @@ It currently supports
   - perspective transformations
   - near & far clipping planes
   - back-face culling
+  - raster-clipping
   - flat-shading w/ directional lights
+  - perspective-correct texture-mapping
 
 and plans to support
 
   - frustum culling, i.e., triangle clipping
   - depth-sorting
-  - affine & perspective-correct texture-mapping
+  - affine texture-mapping
   - occlusion culling (😩)
 
 ### Why?
