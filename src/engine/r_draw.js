@@ -269,11 +269,14 @@
         const stepXAlongUpper = (midX - topX) * _deltaUpper;
         const stepXAlongLower = (bottomX - midX) * _deltaLower;
         const stepXAlongMajor = (bottomX - topX) * _deltaMajor;
+        // raster clipping: clip the triangle if it goes out of bounds of screen
+        // coordinates
+        const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
         /* vertical endpoints of the rasterization in screen-space, biased by
          * -0.5 as per the coverage rules
          */
-        const startY = Math.ceil(topY - 0.5);
-        const midStopY = Math.ceil(midY - 0.5);
+        const startY = Math.ceil(topY + clipTop - 0.5);
+        const midStopY = Math.ceil(midY + clipMid - 0.5);
         const endY = Math.ceil(bottomY - 0.5);
         // bias the top and mid endpoints in screen-space by -0.5 horizontally
         // as per the coverage rules
@@ -294,7 +297,7 @@
             /* lerp based on `y` in screen-space for the upper half of the
              * triangle
              */
-            for (let y = startY; y < midStopY; ++y)
+            for (let y = startY; y < midStopY && y < screenH; ++y)
             {
                 const startX = Math.ceil(xMajor), endX = Math.ceil(xUpper);
                 R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
@@ -303,7 +306,7 @@
             /* lerp based on `y` in screen-space for the lower half of the
              * triangle
              */
-            for (let y = midStopY; y < endY; ++y)
+            for (let y = midStopY; y < endY && y < screenH; ++y)
             {
                 const startX = Math.ceil(xMajor), endX = Math.ceil(xLower);
                 R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
@@ -315,7 +318,7 @@
              /* lerp based on `y` in screen-space for the upper half of the
              * triangle
              */
-             for (let y = startY; y < midStopY; ++y)
+             for (let y = startY; y < midStopY && y < screenH; ++y)
              {
                  const startX = Math.ceil(xUpper), endX = Math.ceil(xMajor);
                  R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
@@ -324,7 +327,7 @@
              /* lerp based on `y` in screen-space for the lower half of the
               * triangle
               */
-             for (let y = midStopY; y < endY; ++y)
+             for (let y = midStopY; y < endY && y < screenH; ++y)
              {
                  const startX = Math.ceil(xLower), endX = Math.ceil(xMajor);
                  R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
