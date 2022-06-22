@@ -371,10 +371,10 @@
         const dStartY = dY + clipTop, dEndY = dStartY + clippedH;
         for (let y = dStartY; y < dEndY; ++y)
         {
-            const sampleY = Math.round(sy + (y - dY) * scaleY);
+            const sampleY = Math.floor(sy + (y - dY) * scaleY);
             for (let x = dStartX; x < dEndX; ++x)
             {
-                const sampleX = Math.round(sx + (x - dX) * scaleX);
+                const sampleX = Math.floor(sx + (x - dX) * scaleX);
                 /* only draw the pixel if the sampling point is within the
                  * bounds of the source image
                  */
