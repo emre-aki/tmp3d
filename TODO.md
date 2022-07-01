@@ -25,3 +25,4 @@
 - [x] `README.md`
 - [x] File descriptions
 - [x] `CONVENTIONS`
+- [ ] Decoupling? Inspiration from `OLC_PixelGameEngine`, or `OLC_ConsoleGameEngine`?
