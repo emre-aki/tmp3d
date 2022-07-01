@@ -19,10 +19,9 @@
             return queuedAnimations[candidate]
                 ? AN_GenerateAnimationId(candidate + "_1")
                 : candidate;
-        else
-            return runningAnimations[candidate]
-                ? AN_GenerateAnimationId(candidate + "_1")
-                : candidate;
+        return runningAnimations[candidate]
+            ? AN_GenerateAnimationId(candidate + "_1")
+            : candidate;
     }
 
     function AN_CancelAnimation (id, cleanUp)
