@@ -77,12 +77,21 @@
         // play a loading animation during the setup procedure
         const resolution = { loadingId: R_LoadingDrawer() };
         /* sync operations */
-        I_InitKeyboard(document);
-        I_InitMouse(R_ScreenElement);
-        R_InitBuffer(SCREEN_W, SCREEN_H);
-        R_InitCamera(FOV_Y, ASPECT, Z_NEAR, Z_FAR, D_Eye, D_Velocity);
-        R_LoadGeometry(D_Vertices, D_Triangles, D_Triangles.length);
-        R_InitUVTable(D_UV, D_UVMap, D_Triangles.length);
+        try
+        {
+            I_InitKeyboard(document);
+            I_InitMouse(R_ScreenElement);
+            R_InitBuffer(SCREEN_W, SCREEN_H);
+            R_InitCamera(FOV_Y, ASPECT, Z_NEAR, Z_FAR, D_Eye, D_Velocity);
+            R_LoadGeometry(D_Vertices, D_Triangles, D_Triangles.length);
+            R_InitUVTable(D_UV, D_UVMap, D_Triangles.length);
+        }
+        catch (error)
+        {
+            AN_CancelAnimation(resolution.loadingId);
+            R_ErrorDrawer("setup error");
+            throw error;
+        }
         /* async operations */
         return G_SetupPromise()
             .then(function G_SetupResolver ()
