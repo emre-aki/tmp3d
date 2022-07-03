@@ -145,10 +145,30 @@
         nCullBuffer = nTrianglesAfterCulling;
     }
 
+    function R_SortTwoTrianglesInCullBuffer (tri0, tri1)
+    {
+        const tri0View = R_ToViewSpace(triPool3[tri0]);
+        const tri1View = R_ToViewSpace(triPool3[tri1]);
+        return tri1View[0][2] + tri1View[1][2] + tri1View[2][2] -
+               tri0View[0][2] - tri0View[1][2] - tri0View[2][2];
+    }
+
+    /* FIXME: remove this once depth-buffering is implemented */
+    function R_SortGeometry (nTriangles)
+    {
+        const sorted = cullBuffer
+            .slice(0, nCullBuffer)
+            .sort(R_SortTwoTrianglesInCullBuffer);
+        cullBuffer = new Uint32Array(
+            Array.from(sorted).concat(Array(nTriangles - nCullBuffer).fill(0))
+        );
+    }
+
     function R_RenderGeometry (nTrisOnScreen)
     {
         const nTriangles = triPool3.length; // FIXME: make into a global const.
         R_CullGeometry(triPool3, nTriangles);
+        R_SortGeometry(nTriangles); // FIXME: replace with depth-buffering
         for (let i = 0; i < nCullBuffer; ++i)
         {
             const triWorld = triPool3[cullBuffer[i]];
