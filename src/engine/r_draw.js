@@ -612,8 +612,8 @@
             dx + dw <= 0 || dy + dh <= 0 || dx >= screenW || dy >= screenH)
             return;
         /* determine how bright & translucent the image is going to be drawn */
-        const shadowLevel = options && options.shade ? options.shade : 0;
-        const lightLevel = 1 - shadowLevel;
+        const lightLevel = options && Number.isFinite(options.lightLevel)
+            ? options.lightLevel : 1;
         const alpha = options && Number.isFinite(options.alpha)
             ? options.alpha : 1;
         /* calculate the screen coordinates and dimensions */
