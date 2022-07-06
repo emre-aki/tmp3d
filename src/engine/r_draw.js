@@ -242,8 +242,15 @@
         R_DrawLine_Bresenham(bx, by, cx, cy, r, g, b, a, stroke);
     }
 
-    function R_FillTriangle_Flat (ax, ay, bx, by, cx, cy, r, g, b, a)
+    function
+    R_FillTriangle_Flat
+    ( ax, ay,
+      bx, by,
+      cx, cy,
+      r, g, b, a, lightLevel )
     {
+        /* shaded color value to fill the triangle with */
+        const R = r * lightLevel, G = g * lightLevel, B = b * lightLevel;
         /* coordinates of the triangle in screen-space */
         let topX = ax, topY = ay;
         let midX = bx, midY = by;
@@ -307,7 +314,7 @@
             for (let y = startY; y < midStopY && y < screenH; ++y)
             {
                 const startX = Math.ceil(xMajor), endX = Math.ceil(xUpper);
-                R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
+                R_FillRect(startX, y, endX - startX, 1, R, G, B, a);
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
             }
             /* lerp based on `y` in screen-space for the lower half of the
@@ -316,7 +323,7 @@
             for (let y = midStopY; y < endY && y < screenH; ++y)
             {
                 const startX = Math.ceil(xMajor), endX = Math.ceil(xLower);
-                R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
+                R_FillRect(startX, y, endX - startX, 1, R, G, B, a);
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
             }
         }
@@ -328,7 +335,7 @@
              for (let y = startY; y < midStopY && y < screenH; ++y)
              {
                  const startX = Math.ceil(xUpper), endX = Math.ceil(xMajor);
-                 R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
+                 R_FillRect(startX, y, endX - startX, 1, R, G, B, a);
                  xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
              }
              /* lerp based on `y` in screen-space for the lower half of the
@@ -337,7 +344,7 @@
              for (let y = midStopY; y < endY && y < screenH; ++y)
              {
                  const startX = Math.ceil(xLower), endX = Math.ceil(xMajor);
-                 R_FillRect(startX, y, endX - startX, 1, r, g, b, a);
+                 R_FillRect(startX, y, endX - startX, 1, R, G, B, a);
                  xLower += stepXAlongLower; xMajor += stepXAlongMajor;
              }
         }

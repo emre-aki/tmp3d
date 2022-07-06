@@ -177,7 +177,7 @@
                     const faceLuminance =
                         (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
                     R_FillTriangle_Flat(ax, ay, bx, by, cx, cy,
-                                        255, 255, 255, 255 * faceLuminance);
+                                        255, 255, 255, 255, faceLuminance);
                     if (DEBUG_MODE)
                         R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
                                                 0, 0, 0, 255, 2);
