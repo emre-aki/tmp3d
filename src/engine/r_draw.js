@@ -358,7 +358,7 @@
       au, av,
       bu, bv,
       cu, cv,
-      opacity, lightLevel )
+      alpha, lightLevel )
     {
         // TODO: implement affine texture-mapping
     }
@@ -369,7 +369,7 @@
       dx0, dx1, dy,
       u0, v0, c0,
       u1, v1, c1,
-      opacity, lightLevel )
+      alpha, lightLevel )
     {
         const texWidth = tex.width, texHeight = tex.height, bitmap = tex.bitmap;
         // raster clipping: clip the scanline if it goes out of bounds of screen
@@ -405,7 +405,7 @@
             const sampleRed = bitmap[sampleIndex];
             const sampleGreen = bitmap[sampleIndex + 1];
             const sampleBlue = bitmap[sampleIndex + 2];
-            const sampleAlpha = bitmap[sampleIndex + 3] * opacity;
+            const sampleAlpha = bitmap[sampleIndex + 3] * alpha;
             const paintIndex = 4 * (dy * screenW + x);
             const bufferRed = frameBuffer.data[paintIndex];
             const bufferGreen = frameBuffer.data[paintIndex + 1];
@@ -437,7 +437,7 @@
       au, av, ac,
       bu, bv, bc,
       cu, cv, cc,
-      opacity, lightLevel )
+      alpha, lightLevel )
     {
         /* coordinates of the triangle in screen-space */
         let topX = ax, topY = ay;
@@ -546,7 +546,7 @@
                                                    xMajor, xUpper, y,
                                                    uMajor, vMajor, cMajor,
                                                    uUpper, vUpper, cUpper,
-                                                   opacity, lightLevel);
+                                                   alpha, lightLevel);
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
                 uUpper += stepUAlongUpper; uMajor += stepUAlongMajor;
                 vUpper += stepVAlongUpper; vMajor += stepVAlongMajor;
@@ -561,7 +561,7 @@
                                                    xMajor, xLower, y,
                                                    uMajor, vMajor, cMajor,
                                                    uLower, vLower, cLower,
-                                                   opacity, lightLevel);
+                                                   alpha, lightLevel);
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
                 uLower += stepUAlongLower; uMajor += stepUAlongMajor;
                 vLower += stepVAlongLower; vMajor += stepVAlongMajor;
@@ -579,7 +579,7 @@
                                                    xUpper, xMajor, y,
                                                    uUpper, vUpper, cUpper,
                                                    uMajor, vMajor, cMajor,
-                                                   opacity, lightLevel);
+                                                   alpha, lightLevel);
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
                 uUpper += stepUAlongUpper; uMajor += stepUAlongMajor;
                 vUpper += stepVAlongUpper; vMajor += stepVAlongMajor;
@@ -594,7 +594,7 @@
                                                    xLower, xMajor, y,
                                                    uLower, vLower, cLower,
                                                    uMajor, vMajor, cMajor,
-                                                   opacity, lightLevel);
+                                                   alpha, lightLevel);
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
                 uLower += stepUAlongLower; uMajor += stepUAlongMajor;
                 vLower += stepVAlongLower; vMajor += stepVAlongMajor;
@@ -614,7 +614,7 @@
         /* determine how bright & translucent the image is going to be drawn */
         const shadowLevel = options && options.shade ? options.shade : 0;
         const lightLevel = 1 - shadowLevel;
-        const opacity = options && Number.isFinite(options.alpha)
+        const alpha = options && Number.isFinite(options.alpha)
             ? options.alpha : 1;
         /* calculate the screen coordinates and dimensions */
         const dX = Math.floor(dx), dW = Math.ceil(dw);
@@ -645,7 +645,7 @@
                 const sampleRed = bitmap[sampleIndex];
                 const sampleGreen = bitmap[sampleIndex + 1];
                 const sampleBlue = bitmap[sampleIndex + 2];
-                const sampleAlpha = bitmap[sampleIndex + 3] * opacity;
+                const sampleAlpha = bitmap[sampleIndex + 3] * alpha;
                 const paintIndex = 4 * (y * screenW + x);
                 const bufferRed = frameBuffer.data[paintIndex];
                 const bufferGreen = frameBuffer.data[paintIndex + 1];
