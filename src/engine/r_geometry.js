@@ -56,6 +56,7 @@
     const RENDER_MODE = {
         FLAT: "FLAT",
         TEXTURED: "TEXTURED",
+        TEXTURED_SHADED: "TEXTURED_SHADED",
         WIREFRAME: "WIREFRAME",
     };
 
@@ -63,6 +64,7 @@
         RENDER_MODE.WIREFRAME,
         RENDER_MODE.FLAT,
         RENDER_MODE.TEXTURED,
+        RENDER_MODE.TEXTURED_SHADED,
     ];
 
     let renderMode = 2;
@@ -202,6 +204,7 @@
                     break;
                 }
                 case RENDER_MODE.TEXTURED:
+                case RENDER_MODE.TEXTURED_SHADED:
                 {
                     // skip if the mesh does not have texture-mapping
                     if (!uvTable3) continue;
@@ -210,9 +213,14 @@
                     const au = aUV[0], av = aUV[1], ac = aUV[2];
                     const bu = bUV[0], bv = bUV[1], bc = bUV[2];
                     const cu = cUV[0], cv = cUV[1], cc = cUV[2];
-                    const triNormal = M_TriNormal3(triWorld);
-                    const faceLuminance =
-                        (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
+                    let faceLuminance = 1;
+                    if (RENDER_MODES[renderMode] ===
+                        RENDER_MODE.TEXTURED_SHADED)
+                    {
+                        const triNormal = M_TriNormal3(triWorld);
+                        faceLuminance =
+                            (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
+                    }
                     /* fill textured triangle */
                     R_FillTriangle_Textured_Perspective(
                         A_Texture(textureTable[triIndex]),
