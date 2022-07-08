@@ -11,8 +11,6 @@
 
 (function ()
 {
-    const TEXTURES_DIRNAME = "/textures/"; // TODO: should this be here??
-
     const TEXTURES_LUT = {};
 
     function A_ToBitmap (texture)
@@ -36,7 +34,7 @@
         resolve();
     }
 
-    function A_TexturePromise (filename, id)
+    function A_TexturePromise (id, filename)
     {
         return new Promise(function A_TexturePromiseExecutor (resolve, reject)
         {
@@ -44,17 +42,17 @@
             texture.onload = A_OnTextureLoad.bind(texture, resolve,
                                                   texture, id);
             texture.onerror = reject;
-            texture.src = TEXTURES_DIRNAME + filename;
+            texture.src = filename;
         });
     }
 
-    function A_LoadTextures (filenames, ids, numTextures)
+    function A_LoadTextures (ids, filenames, numTextures)
     {
         // TODO: throw an error should the `filenames` and `ids` have different
         // lengths, maybe??
         const texturePromises = Array(numTextures);
         for (let i = 0; i < numTextures; ++i)
-            texturePromises[i] = A_TexturePromise(filenames[i], ids[i]);
+            texturePromises[i] = A_TexturePromise(ids[i], filenames[i]);
         return Promise.all(texturePromises);
     }
 

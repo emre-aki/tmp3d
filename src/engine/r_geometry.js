@@ -15,9 +15,6 @@
     const A_Assets = __import__A_Assets();
     const A_Texture = A_Assets.A_Texture;
 
-    const D_Textures = __import__D_Textures();
-    const D_TextureIdTable = D_Textures.D_TextureIdTable;
-
     const G_Const = __import__G_Const();
     const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
     const SCREEN_W_2 = SCREEN_W * 0.5, SCREEN_H_2 = SCREEN_H * 0.5;
@@ -53,6 +50,7 @@
 
     let triPool3; // a pool of raw triangle data
     let uvTable3; // respective uv-coordinates of each triangle in the pool
+    let textureTable; // respective texture ids of each triangle in the pool
     let cullBuffer, nCullBuffer; // buffer culled triangles
 
     const RENDER_MODE = {
@@ -102,15 +100,17 @@
     function R_InitUVTable (vertices, triangles, nTriangles)
     {
         uvTable3 = Array(nTriangles);
+        textureTable = Array(nTriangles);
         for (let i = 0; i < nTriangles; ++i)
         {
-            const tri3Data = triangles[i];
-            const texUVA2 = vertices[tri3Data[0]];
-            const texUVB2 = vertices[tri3Data[1]];
-            const texUVC2 = vertices[tri3Data[2]];
+            const uvFaceData = triangles[i];
+            const texUVA2 = vertices[uvFaceData[0]];
+            const texUVB2 = vertices[uvFaceData[1]];
+            const texUVC2 = vertices[uvFaceData[2]];
             uvTable3[i] = Tri3(Vec3(texUVA2[0], texUVA2[1], 1),
                                Vec3(texUVB2[0], texUVB2[1], 1),
                                Vec3(texUVC2[0], texUVC2[1], 1));
+            textureTable[i] = uvFaceData[3];
         }
     }
 
@@ -168,7 +168,8 @@
         R_SortGeometry(nTriangles); // FIXME: replace with depth-buffering
         for (let i = 0; i < nCullBuffer; ++i)
         {
-            const triWorld = triPool3[cullBuffer[i]];
+            const triIndex = cullBuffer[i];
+            const triWorld = triPool3[triIndex];
             const triView = R_ToViewSpace(triWorld);
             /* TODO: implement triangle clipping in world (or clip) space */
             const triClip = R_ToClipSpace(triView);
@@ -204,7 +205,7 @@
                 {
                     // skip if the mesh does not have texture-mapping
                     if (!uvTable3) continue;
-                    const uvMap = uvTable3[cullBuffer[i]];
+                    const uvMap = uvTable3[triIndex];
                     const aUV = uvMap[0], bUV = uvMap[1], cUV = uvMap[2];
                     const au = aUV[0], av = aUV[1], ac = aUV[2];
                     const bu = bUV[0], bv = bUV[1], bc = bUV[2];
@@ -214,7 +215,7 @@
                         (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
                     /* fill textured triangle */
                     R_FillTriangle_Textured_Perspective(
-                        A_Texture(D_TextureIdTable.WOOD),
+                        A_Texture(textureTable[triIndex]),
                         ax, ay, triView[0][2],
                         bx, by, triView[1][2],
                         cx, cy, triView[2][2],

@@ -20,8 +20,8 @@
     const AN_Animation = __import__AN_Animation();
     const AN_CancelAnimation = AN_Animation.AN_CancelAnimation;
 
-    const D_Textures = __import__D_Textures();
-    const D_TextureIdTable = D_Textures.D_TextureIdTable;
+    const D_GlobTextures = __import__D_GlobTextures();
+    const D_GlobTextureIdTable = D_GlobTextures.D_GlobTextureIdTable;
 
     const G_Const = __import__G_Const();
     const FPS = G_Const.FPS;
@@ -95,8 +95,9 @@
         R_ClearBuffer();
         // then, clear the loading animation that is currently running
         AN_CancelAnimation(setupResolution.loadingId);
-        // finally, start the animation for the title screen
-        const titleId = R_TitleDrawer(A_Texture(D_TextureIdTable.TITLE_TMP3D));
+        /* finally, start the animation for the title screen */
+        const titleId =
+            R_TitleDrawer(A_Texture(D_GlobTextureIdTable.TITLE_TMP3D));
         document.addEventListener("keydown",
                                   G_StartGame.bind(this, titleId),
                                   { once: 1 });

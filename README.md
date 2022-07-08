@@ -30,6 +30,7 @@ It currently supports
   - raster-clipping
   - flat-shading w/ directional lights
   - perspective-correct texture-mapping
+  - loading & rendering 3-D models in the [Wavefront `.obj` format](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
 
 and plans to support
 

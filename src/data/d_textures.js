@@ -5,36 +5,28 @@
  *  Created by Emre Akı on 2022-05-03.
  *
  *  SYNOPSIS:
- *      Texture lookup tables.
+ *      Lookup tables for "global" textures.
  */
 
 (function ()
 {
-    const TEXTURE_ID_TABLE = D_TextureIdTable();
+    const TEXTURE_ID_TABLE = D_GlobTextureIdTable();
 
-    function D_TextureIdTable ()
+    function D_GlobTextureIdTable ()
     {
-        return {
-            /* in-game textures */
-            WOOD: "WOOD",
-            /* misc. */
-            TITLE_TMP3D: "TITLE_TMP3D",
-        };
+        return { TITLE_TMP3D: "TITLE_TMP3D" };
     }
 
-    function D_TextureFilenameTable ()
+    function D_GlobTextureFilenameTable ()
     {
-        return {
-            [TEXTURE_ID_TABLE.WOOD]: "wood.png",
-            [TEXTURE_ID_TABLE.TITLE_TMP3D]: "tmp3d_2x.png",
-        };
+        return { [TEXTURE_ID_TABLE.TITLE_TMP3D]: "/textures/tmp3d_2x.png" };
     }
 
-    window.__import__D_Textures = function ()
+    window.__import__D_GlobTextures = function ()
     {
         return {
-            D_TextureIdTable: D_TextureIdTable(),
-            D_TextureFilenameTable: D_TextureFilenameTable(),
+            D_GlobTextureIdTable: D_GlobTextureIdTable(),
+            D_GlobTextureFilenameTable: D_GlobTextureFilenameTable(),
         };
     };
 })();

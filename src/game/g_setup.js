@@ -22,14 +22,16 @@
     const D_Triangles = D_Mesh.D_Triangles();
     const D_UV = D_Mesh.D_UV();
     const D_UVMap = D_Mesh.D_UVMap();
+    const D_TextureAtlas = D_Mesh.D_TextureAtlas();
 
     const D_Player = __import__D_Player();
     const D_Velocity = D_Player.D_Velocity;
     const D_Eye = D_Player.D_Eye();
 
-    const D_Textures = __import__D_Textures();
-    const D_TextureIdTable = D_Textures.D_TextureIdTable;
-    const D_TextureFilenameTable = D_Textures.D_TextureFilenameTable;
+    const D_GlobTextures = __import__D_GlobTextures();
+    const D_GlobTextureIdTable = D_GlobTextures.D_GlobTextureIdTable;
+    const D_GlobTextureFilenameTable =
+        D_GlobTextures.D_GlobTextureFilenameTable;
 
     const G_Const = __import__G_Const();
     const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
@@ -60,10 +62,15 @@
 
     function G_LoadTextures ()
     {
-        const textureIds = Object.keys(D_TextureIdTable);
-        const textureFilenames = Object.values(D_TextureFilenameTable);
+        const meshTextureIds = Object.keys(D_TextureAtlas);
+        const globTextureIds = Object.keys(D_GlobTextureIdTable);
+        const textureIds = meshTextureIds.concat(globTextureIds);
+        const meshTextureFilenames = Object.values(D_TextureAtlas);
+        const globTextureFilenames = Object.values(D_GlobTextureFilenameTable);
+        const textureFilenames = meshTextureFilenames
+            .concat(globTextureFilenames);
         const numTextures = textureFilenames.length;
-        return A_LoadTextures(textureFilenames, textureIds, numTextures);
+        return A_LoadTextures(textureIds, textureFilenames, numTextures);
     }
 
     function G_SetupPromise ()
