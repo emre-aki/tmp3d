@@ -53,8 +53,7 @@
 
     let triPool3; // a pool of raw triangle data
     let uvTable3; // respective uv-coordinates of each triangle in the pool
-    // buffer culled triangles & uv maps
-    let cullBuffer, cullUVBuffer, nCullBuffer;
+    let cullBuffer, nCullBuffer; // buffer culled triangles
 
     const RENDER_MODE = {
         FLAT: "FLAT",
@@ -103,7 +102,6 @@
     function R_InitUVTable (vertices, triangles, nTriangles)
     {
         uvTable3 = Array(nTriangles);
-        cullUVBuffer = new Uint32Array(nTriangles); // TODO: maybe 16??
         for (let i = 0; i < nTriangles; ++i)
         {
             const tri3Data = triangles[i];
@@ -138,7 +136,6 @@
             )
             {
                 cullBuffer[nTrianglesAfterCulling] = i;
-                if (cullUVBuffer) cullUVBuffer[nTrianglesAfterCulling] = i;
                 ++nTrianglesAfterCulling;
             }
         }
@@ -207,7 +204,7 @@
                 {
                     // skip if the mesh does not have texture-mapping
                     if (!uvTable3) continue;
-                    const uvMap = uvTable3[cullUVBuffer[i]];
+                    const uvMap = uvTable3[cullBuffer[i]];
                     const aUV = uvMap[0], bUV = uvMap[1], cUV = uvMap[2];
                     const au = aUV[0], av = aUV[1], ac = aUV[2];
                     const bu = bUV[0], bv = bUV[1], bc = bUV[2];
