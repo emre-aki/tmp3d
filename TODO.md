@@ -19,8 +19,9 @@
     - [ ] Affine
     - [x] Perspective-correct
 - [ ] Occlusion culling (😩)
+- [ ] Functionality for dynamically (re)loading mesh data (should go to server?)
 
-## Project-wise
+## Project Organization
 
 - [x] `README.md`
 - [x] File descriptions
