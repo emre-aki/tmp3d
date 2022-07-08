@@ -400,11 +400,13 @@
         for (let x = dX0; x < dX1 && x < screenW; ++x)
         {
             const c_ = 1 / c;
-            const sX = Math.floor(u * c_ * texWidth);
-            const sY = Math.floor(v * c_ * texHeight);
-            // only draw the pixel if the sampling point is within the bounds of
-            // the source image
-            if (sX < 0 || sX >= texWidth || sY < 0 || sY >= texHeight) continue;
+            let sX = Math.floor(u * c_ * texWidth);
+            let sY = Math.floor(v * c_ * texHeight);
+            /* wrap-around the texture if the sampling point is out-of-bounds */
+            if (sX < 0) sX = ((sX % texWidth) + texWidth) % texWidth;
+            else if (sX >= texWidth) sX %= texWidth;
+            if (sY < 0) sY = ((sY % texHeight) + texHeight) % texHeight;
+            else if (sY >= texHeight) sY %= texHeight;
             /* draw a single pixel in screen space sampled from the
              * perspective-corrected texture space
              */
