@@ -138,7 +138,7 @@
             )
             {
                 cullBuffer[nTrianglesAfterCulling] = i;
-                cullUVBuffer[nTrianglesAfterCulling] = i;
+                if (cullUVBuffer) cullUVBuffer[nTrianglesAfterCulling] = i;
                 ++nTrianglesAfterCulling;
             }
         }
@@ -185,6 +185,8 @@
                 }
                 case RENDER_MODE.TEXTURED:
                 {
+                    // skip if the mesh does not have texture-mapping
+                    if (!uvTable3) continue;
                     const uvMap = uvTable3[cullUVBuffer[i]];
                     const aUV = uvMap[0], bUV = uvMap[1], cUV = uvMap[2];
                     const au = aUV[0], av = aUV[1], ac = aUV[2];

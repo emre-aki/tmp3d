@@ -84,7 +84,9 @@
             R_InitBuffer(SCREEN_W, SCREEN_H);
             R_InitCamera(FOV_Y, ASPECT, Z_NEAR, Z_FAR, D_Eye, D_Velocity);
             R_LoadGeometry(D_Vertices, D_Triangles, D_Triangles.length);
-            R_InitUVTable(D_UV, D_UVMap, D_Triangles.length);
+            /* initialize the uv table if the mesh data have texture-mapping */
+            if (D_UV.length && D_UVMap.length)
+                R_InitUVTable(D_UV, D_UVMap, D_UVMap.length);
         }
         catch (error)
         {
