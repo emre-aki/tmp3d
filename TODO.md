@@ -1,4 +1,4 @@
-*Items are in the order of priority*
+# Unsorted
 
 ## Debugging-aid
 
@@ -27,3 +27,14 @@
 - [x] File descriptions
 - [x] `CONVENTIONS`
 - [ ] Decoupling? Inspiration from `OLC_PixelGameEngine`, or `OLC_ConsoleGameEngine`?
+
+# Tentative Backlog
+
+### release: 0.0.4
+- [x] Loading Wavefront `.obj` files
+
+### release: 0.0.5
+- [ ] Z-buffering
+
+### release: 0.0.6
+- [ ] Clipping geometries against the view frustum
