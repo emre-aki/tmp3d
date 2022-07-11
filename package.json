@@ -1,7 +1,7 @@
 {
     "name": "tmp3d",
     "version": "0.0.3",
-    "description": "A 3-D software rasterizer written from scratch in nothing but JavaScript",
+    "description": "A 3-D software renderer written from scratch in nothing but JavaScript",
     "main": "server.js",
     "scripts": {
         "start": "node ./src/server.js",
@@ -13,6 +13,7 @@
     "keywords": [
         "rendering engine",
         "3-D graphics",
+        "software renderer",
         "software rasterizer",
         "canvas",
         "html5"

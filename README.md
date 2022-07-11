@@ -27,7 +27,7 @@
     </img>
 </p>
 
-Tmp3D is a 3-D software rasterizer written from scratch in nothing but plain-old
+Tmp3D is a 3-D software renderer written from scratch in nothing but plain-old
 JavaScript, just for kicks. It makes use of the `2d` graphics context of the
 HTML5 `<canvas>` to draw some graphics primitives and is heavily inspired by
 OpenGL sub-routines.
