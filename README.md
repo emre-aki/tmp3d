@@ -7,6 +7,11 @@
     <a href="https://tmp3d.herokuapp.com" target="_blank">
         Play in the browser
     </a>
+    •
+    <a href="https://www.youtube.com/watch?v=r31ziBZT98k&list=PLmmhlHT3LkQx-cADfV5HChiBPVYwCbYuf"
+       target="_blank">
+        Feature showcases
+    </a>
 </p>
 <p align="center">
     <img width="320"
