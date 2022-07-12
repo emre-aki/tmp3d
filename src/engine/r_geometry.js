@@ -5,7 +5,8 @@
  *  Created by Emre Akı on 2022-02-20.
  *
  *  SYNOPSIS:
- *      The module that helps load, update and read 3-D geometry data in memory.
+ *      The module that helps load, update and render 3-D geometry data in
+ *      memory.
  */
 
 (function ()
