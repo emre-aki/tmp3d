@@ -21,6 +21,7 @@
     const R_SetBuffer = R_Screen.R_SetBuffer;
 
     let frameBuffer;
+    let zBuffer, cleanZBuffer;
     let screenW, screenH;
 
     function R_ClearBuffer ()
@@ -31,7 +32,10 @@
             frameBuffer = R_SetBuffer();
             screenW = frameBuffer.width;
             screenH = frameBuffer.height;
+            cleanZBuffer = new Float32Array(screenW * screenH);
+            zBuffer = new Float32Array(screenW * screenH);
         }
+        zBuffer.set(cleanZBuffer);
         R_Ctx.clearRect(0, 0, screenW, screenH);
         frameBuffer = R_SetBuffer();
     }
@@ -242,39 +246,86 @@
         R_DrawLine_Bresenham(bx, by, cx, cy, r, g, b, a, stroke);
     }
 
+    function R_LerpShadedScanline (dx0, dx1, dy, c0, c1, r, g, b, a, lightLevel)
+    {
+        // shaded color value to fill the triangle with
+        const R = r * lightLevel, G = g * lightLevel, B = b * lightLevel;
+        // raster clipping: clip the scanline if it goes out of bounds of screen
+        // coordinates
+        const clipLeft = Math.max(-dx0, 0);
+        // bias the start and end endpoints in screen-space by -0.5 horizontally
+        // as per the coverage rules
+        const dX0 = Math.ceil(dx0 + clipLeft - 0.5), dX1 = Math.ceil(dx1 - 0.5);
+        // pre-step from start by 0.5 as pixel centers are the actual sampling
+        // points
+        const preStepX = dX0 + 0.5 - dx0;
+        // 1 step in `+x` equals how many steps in `c`
+        const gradC = (c1 - c0) / (dx1 - dx0);
+        let c = preStepX * gradC + c0;
+        /* rasterize current scanline */
+        for (let x = dX0; x < dX1 && x < screenW; ++x)
+        {
+            const bufferIndex = dy * screenW + x;
+            /* skip filling in the pixel unless the current pixel in the raster
+             * triangle is closer (1 / zRaster > 1 / zBuffer) than what's
+             * already in the z-buffer at the position we want to draw
+             */
+            if (c <= zBuffer[bufferIndex]) { c += gradC; continue; }
+            zBuffer[bufferIndex] = c; // don't forget to update the z-buffer!
+            /* fill a single pixel in screen-space with the color defined by
+             * parameters `r`, `g`, `b`, and `a`.
+             */
+            const paintIndex = 4 * bufferIndex;
+            const bufferRed = frameBuffer.data[paintIndex];
+            const bufferGreen = frameBuffer.data[paintIndex + 1];
+            const bufferBlue = frameBuffer.data[paintIndex + 2];
+            const bufferAlpha = frameBuffer.data[paintIndex + 3] || 255;
+            const blendRatio = a / bufferAlpha;
+            const blendRatio_ = 1 - blendRatio;
+            const newRed = blendRatio * R + blendRatio_ * bufferRed;
+            const newGreen = blendRatio * G + blendRatio_ * bufferGreen;
+            const newBlue = blendRatio * B + blendRatio_ * bufferBlue;
+            frameBuffer.data[paintIndex] = newRed;
+            frameBuffer.data[paintIndex + 1] = newGreen;
+            frameBuffer.data[paintIndex + 2] = newBlue;
+            frameBuffer.data[paintIndex + 3] = 255;
+            c += gradC;
+        }
+    }
+
     function
     R_FillTriangle_Flat
-    ( ax, ay,
-      bx, by,
-      cx, cy,
+    ( ax, ay, aDepth,
+      bx, by, bDepth,
+      cx, cy, cDepth,
       r, g, b, a, lightLevel )
     {
-        /* shaded color value to fill the triangle with */
-        const R = r * lightLevel, G = g * lightLevel, B = b * lightLevel;
+        // lerp depth values between the edges of the triangle for z-buffering
+        const ca = 1 / aDepth, cb = 1 / bDepth, cc = 1 / cDepth;
         /* coordinates of the triangle in screen-space */
-        let topX = ax, topY = ay;
-        let midX = bx, midY = by;
-        let bottomX = cx, bottomY = cy;
+        let topX = ax, topY = ay, topC = ca;
+        let midX = bx, midY = by, midC = cb;
+        let bottomX = cx, bottomY = cy, bottomC = cc;
         /* sort vertices of the triangle so that their y-coordinates are in
          * ascending order
          */
         if (topY > midY)
         {
-            const auxX = topX, auxY = topY;
-            topX = midX; topY = midY;
-            midX = auxX; midY = auxY;
+            const auxX = topX, auxY = topY, auxC = topC;
+            topX = midX; topY = midY; topC = midC;
+            midX = auxX; midY = auxY; midC = auxC;
         }
         if (midY > bottomY)
         {
-            const auxX = midX, auxY = midY;
-            midX = bottomX; midY = bottomY;
-            bottomX = auxX; bottomY = auxY;
+            const auxX = midX, auxY = midY, auxC = midC;
+            midX = bottomX; midY = bottomY; midC = bottomC;
+            bottomX = auxX; bottomY = auxY; bottomC = auxC;
         }
         if (topY > midY)
         {
-            const auxX = topX, auxY = topY;
-            topX = midX; topY = midY;
-            midX = auxX; midY = auxY;
+            const auxX = topX, auxY = topY, auxC = topC;
+            topX = midX; topY = midY; topC = midC;
+            midX = auxX; midY = auxY; midC = auxC;
         }
         const deltaUpper = midY - topY, _deltaUpper = 1 / deltaUpper;
         const deltaLower = bottomY - midY, _deltaLower = 1 / deltaLower;
@@ -283,6 +334,10 @@
         const stepXAlongUpper = (midX - topX) * _deltaUpper;
         const stepXAlongLower = (bottomX - midX) * _deltaLower;
         const stepXAlongMajor = (bottomX - topX) * _deltaMajor;
+        /* 1 step in `+y` equals how many steps in `c` */
+        const stepCAlongUpper = (midC - topC) * _deltaUpper;
+        const stepCAlongLower = (bottomC - midC) * _deltaLower;
+        const stepCAlongMajor = (bottomC - topC) * _deltaMajor;
         // raster clipping: clip the triangle if it goes out of bounds of screen
         // coordinates
         const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
@@ -304,6 +359,10 @@
         let xUpper = preStepFromTop * stepXAlongUpper + topXBiased;
         let xLower = preStepFromMid * stepXAlongLower + midXBiased;
         let xMajor = preStepFromTop * stepXAlongMajor + topXBiased;
+        /* current `c` coordinates in screen-space */
+        let cUpper = preStepFromTop * stepCAlongUpper + topC;
+        let cLower = preStepFromMid * stepCAlongLower + midC;
+        let cMajor = preStepFromTop * stepCAlongMajor + topC;
         // whether the lefmost edge of the triangle is the longest
         const isLeftMajor = stepXAlongMajor < stepXAlongUpper;
         if (isLeftMajor)
@@ -314,8 +373,10 @@
             for (let y = startY; y < midStopY && y < screenH; ++y)
             {
                 const startX = Math.ceil(xMajor), endX = Math.ceil(xUpper);
-                R_FillRect(startX, y, endX - startX, 1, R, G, B, a);
+                R_LerpShadedScanline(startX, endX, y, cMajor, cUpper,
+                                     r, g, b, a, lightLevel);
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
+                cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
             }
             /* lerp based on `y` in screen-space for the lower half of the
              * triangle
@@ -323,8 +384,10 @@
             for (let y = midStopY; y < endY && y < screenH; ++y)
             {
                 const startX = Math.ceil(xMajor), endX = Math.ceil(xLower);
-                R_FillRect(startX, y, endX - startX, 1, R, G, B, a);
+                R_LerpShadedScanline(startX, endX, y, cMajor, cLower,
+                                     r, g, b, a, lightLevel);
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
+                cLower += stepCAlongLower; cMajor += stepCAlongMajor;
             }
         }
         else
@@ -335,8 +398,10 @@
              for (let y = startY; y < midStopY && y < screenH; ++y)
              {
                  const startX = Math.ceil(xUpper), endX = Math.ceil(xMajor);
-                 R_FillRect(startX, y, endX - startX, 1, R, G, B, a);
+                 R_LerpShadedScanline(startX, endX, y, cUpper, cMajor,
+                                      r, g, b, a, lightLevel);
                  xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
+                 cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
              }
              /* lerp based on `y` in screen-space for the lower half of the
               * triangle
@@ -344,8 +409,10 @@
              for (let y = midStopY; y < endY && y < screenH; ++y)
              {
                  const startX = Math.ceil(xLower), endX = Math.ceil(xMajor);
-                 R_FillRect(startX, y, endX - startX, 1, R, G, B, a);
+                 R_LerpShadedScanline(startX, endX, y, cLower, cMajor,
+                                      r, g, b, a, lightLevel);
                  xLower += stepXAlongLower; xMajor += stepXAlongMajor;
+                 cLower += stepCAlongLower; cMajor += stepCAlongMajor;
              }
         }
     }
@@ -410,6 +477,17 @@
         /* rasterize current scanline */
         for (let x = dX0; x < dX1 && x < screenW; ++x)
         {
+            const bufferIndex = dy * screenW + x;
+            /* skip drawing the pixel unless the current pixel in the raster
+             * triangle is closer (1 / zRaster > 1 / zBuffer) than what's
+             * already in the z-buffer at the position we want to draw
+             */
+            if (c <= zBuffer[bufferIndex])
+            {
+                u += gradU; v += gradV; c += gradC;
+                continue;
+            }
+            zBuffer[bufferIndex] = c; // don't forget to update the z-buffer!
             const c_ = 1 / c;
             let sX = Math.floor(u * c_ * texWidth);
             let sY = Math.floor(v * c_ * texHeight);
@@ -426,7 +504,7 @@
             const sampleGreen = bitmap[sampleIndex + 1];
             const sampleBlue = bitmap[sampleIndex + 2];
             const sampleAlpha = bitmap[sampleIndex + 3] * alpha;
-            const paintIndex = 4 * (dy * screenW + x);
+            const paintIndex = 4 * bufferIndex;
             const bufferRed = frameBuffer.data[paintIndex];
             const bufferGreen = frameBuffer.data[paintIndex + 1];
             const bufferBlue = frameBuffer.data[paintIndex + 2];

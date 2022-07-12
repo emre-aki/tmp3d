@@ -153,7 +153,9 @@
                tri0View[0][2] - tri0View[1][2] - tri0View[2][2];
     }
 
-    /* FIXME: remove this once depth-buffering is implemented */
+    /* TODO: unused for the time being, going to be useful once more advanced
+     * features like translucency are implemented
+     */
     function R_SortGeometry (nTriangles)
     {
         const sorted = cullBuffer
@@ -168,7 +170,6 @@
     {
         const nTriangles = triPool3.length; // FIXME: make into a global const.
         R_CullGeometry(triPool3, nTriangles);
-        R_SortGeometry(nTriangles); // FIXME: replace with depth-buffering
         for (let i = 0; i < nCullBuffer; ++i)
         {
             const triIndex = cullBuffer[i];
@@ -197,7 +198,9 @@
                     // to determine the level of illumination on the surface
                     const faceLuminance =
                         (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
-                    R_FillTriangle_Flat(ax, ay, bx, by, cx, cy,
+                    R_FillTriangle_Flat(ax, ay, triView[0][2],
+                                        bx, by, triView[1][2],
+                                        cx, cy, triView[2][2],
                                         255, 255, 255, 255, faceLuminance);
                     if (DEBUG_MODE)
                         R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
