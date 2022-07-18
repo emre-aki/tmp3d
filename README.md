@@ -40,7 +40,7 @@ OpenGL sub-routines.
 The project is still heavily a work-in-progress and in its very early stages, so
 you may take it as it is and expect many more features to follow very soon.
 
-It currently supports
+Tmp3D currently supports
 
   - a first-person camera with 2 degrees-of-freedom: _yaw_ and _pitch_
   - perspective transformations
