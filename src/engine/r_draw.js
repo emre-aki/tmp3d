@@ -407,8 +407,8 @@
             else if (sX >= texWidth) sX %= texWidth;
             if (sY < 0) sY = ((sY % texHeight) + texHeight) % texHeight;
             else if (sY >= texHeight) sY %= texHeight;
-            /* draw a single pixel in screen space sampled from the
-             * perspective-corrected texture space
+            /* draw a single pixel in screen-space sampled from the
+             * perspective-corrected texture-space
              */
             const sampleIndex = 4 * (sY * texWidth + sX);
             const sampleRed = bitmap[sampleIndex];
@@ -530,15 +530,15 @@
         let xUpper = preStepFromTop * stepXAlongUpper + topX;
         let xLower = preStepFromMid * stepXAlongLower + midX;
         let xMajor = preStepFromTop * stepXAlongMajor + topX;
-        /* current `u` coordinates in screen-space */
+        /* current `u` coordinates in texture-space */
         let uUpper = preStepFromTop * stepUAlongUpper + topU;
         let uLower = preStepFromMid * stepUAlongLower + midU;
         let uMajor = preStepFromTop * stepUAlongMajor + topU;
-        /* current `v` coordinates in screen-space */
+        /* current `v` coordinates in texture-space */
         let vUpper = preStepFromTop * stepVAlongUpper + topV;
         let vLower = preStepFromMid * stepVAlongLower + midV;
         let vMajor = preStepFromTop * stepVAlongMajor + topV;
-        /* current `c` coordinates in screen-space */
+        /* current `c` coordinates in texture-space */
         let cUpper = preStepFromTop * stepCAlongUpper + topC;
         let cLower = preStepFromMid * stepCAlongLower + midC;
         let cMajor = preStepFromTop * stepCAlongMajor + topC;
