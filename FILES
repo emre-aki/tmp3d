@@ -41,6 +41,6 @@ r_screen.js     - rendering front-end--access to framebuffer APIs
 --------------------------------------------------------------------------------
 D        Data
 --------------------------------------------------------------------------------
-d_mesh.js       - initial level data
+mesh/d_*.js     - initial mesh data
 d_player.js     - initial player data
 d_textures.js   - texture lookup tables
