@@ -357,6 +357,17 @@
     }
 
     function
+    R_LerpTexturedScanline_Affine
+    ( tex,
+      dx0, dx1, dy,
+      u0, v0,
+      u1, v1,
+      alpha, lightLevel )
+    {
+        // TODO: implement affine texture-mapping
+    }
+
+    function
     R_FillTriangle_Textured_Affine
     ( tex,
       ax, ay,
