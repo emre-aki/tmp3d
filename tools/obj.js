@@ -248,9 +248,9 @@ function HandleCommand (pathToObj, args)
 function main ()
 {
     cli
-    .name("obj-utils")
-    .description("A set of utility functions to help work with .obj files")
-    .version("0.0.1");
+        .name("obj-utils")
+        .description("A set of utility functions to help work with .obj files")
+        .version("0.0.1");
     cli
         .command("convert")
         .argument("<path>", "Path to the .obj file to convert")
