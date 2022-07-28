@@ -17,6 +17,7 @@ const { ArrayToStr, DateToStr } = require("./misc.js");
 const ROOT = path.join(__dirname, "..");
 const ASSETS_PATH = path.join(ROOT, "assets");
 const MESH_PATH = path.join(ROOT, "src", "data", "mesh");
+const VIEW_PATH = path.join(ROOT, "src", "view", "index.ejs");
 
 const DELIMITER = ",\n            ";
 
@@ -221,27 +222,32 @@ function ObjToTmp3D (pathToObj, pathToMtl, outputFilename, zOffset)
         .replace(/\%ta$/m, `${textureAtlasSerialized.join(DELIMITER)}`);
 }
 
+function ReplaceModelPathInView (modelFilename)
+{
+    const indexEjs = ReadFile(VIEW_PATH, { encoding: "utf8" });
+    const replaced = indexEjs.replace(/\/data\/mesh\/.+\.js/,
+                                      `/data/mesh/${modelFilename}`);
+    WriteFile(VIEW_PATH, replaced, { encoding: "utf8" });
+}
+
 function HandleCommand (pathToObj, args)
 {
     /* read optional arguments */
     const pathToMtl = args.material;
     const zOffset = parseFloat(args.zOffset);
     const verbose = args.verbose;
-    let outputPath = args.outputPath;
-    /* fallback to the name of the `.obj` file if an `outputPath` is not
-     * specified
-     */
-    if (!outputPath)
-    {
-        const objFilename = path.basename(pathToObj).match(/(.+)\.obj$/)[1];
-        if (!objFilename)
-            throw new Error("HandleCommand: The input is not an .obj file.");
-        outputPath = path.join(MESH_PATH, `d_${objFilename.toLowerCase()}.js`);
-    }
+    /* throw an error if the input is not an `.obj` file */
+    const objFilename = path.basename(pathToObj).match(/(.+)\.obj$/)[1];
+    if (!objFilename)
+        throw new Error("HandleCommand: The input is not an .obj file.");
+    /* determine the path into which the output will be written */
+    const outputPath = path.join(MESH_PATH,
+                                 `d_${objFilename.toLowerCase()}.js`);
     const outputFilename = path.basename(outputPath);
     const tmp3Data = ObjToTmp3D(pathToObj, pathToMtl, outputFilename, zOffset);
     if (verbose) console.log(tmp3Data);
     WriteFile(outputPath, tmp3Data, { encoding: "utf8" });
+    ReplaceModelPathInView(outputFilename);
     console.log(`Mesh saved at ${path.relative(ROOT, outputPath)}`);
 }
 
@@ -257,7 +263,6 @@ function main ()
         .alias("c")
         .description("Convert a Wavefront .obj file into a format that Tmp3D could operate on")
         .option("-m --material [value]", "Material library file")
-        .option("-o, --output-path [value]", "Path to write the output into")
         .option("-z, --z-offset [value]", "Offset the model along z-axis", "0.001")
         .option("-v, --verbose", "Verbose mode")
         .action(HandleCommand);

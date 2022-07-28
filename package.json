@@ -5,7 +5,8 @@
     "main": "server.js",
     "scripts": {
         "start": "node ./src/server.js",
-        "start:debug": "DEBUG=1 node ./src/server.js"
+        "start:debug": "DEBUG=1 node ./src/server.js",
+        "load-obj": "node ./tools/obj.js convert"
     },
     "repository": {
         "type": "git"

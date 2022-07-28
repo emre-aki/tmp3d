@@ -93,6 +93,45 @@ To enable the debugging features, run:
 $ npm run start:debug
 ```
 
+Finally, open up your browser of choice and go to
+[127.0.0.1:3000](https://127.0.0.1:3000).
+
+### Loading `.obj` models
+
+To load `.obj` models into Tmp3D in a format that the engine can operate on,
+you may use the integrated CLI tool:
+
+```bash
+$ npm run load-obj path/to/obj
+```
+
+If your `.obj` model has a reference to a material library, you can load that as
+well, by passing the path to it in an optional argument with `--material`, or
+`-m`:
+
+```bash
+$ npm run load-obj path/to/obj -- -m path/to/mtl
+```
+
+You may optionally offset the model by translating it along the z-axis by a
+certain amount:
+
+```bash
+$ npm run load-obj path/to/obj -- -z 100
+```
+
+To view the full list of arguments, you may run:
+
+```bash
+$ npm run load-obj -- -h
+```
+
+Once loaded, refresh the page to view your model in 3D!
+
+> ⚠️ *Tmp3D can process and render only triangles at this point in time, so
+please make sure your source geometries consist strictly of triangles--the CLI
+will reject it otherwise.*
+
 ### Controls
 
 | **Action**                     | **Keys**                                                                          |
@@ -102,7 +141,7 @@ $ npm run start:debug
 | Change elevation               | <kbd>Q</kbd> <kbd>E</kbd>, or <kbd>![MSW]</kbd><sup>__*__</sup>                   |
 | Switch between rendering modes | <kbd>R</kbd>                                                                      |
 
-  *<sup>__\*__</sup> You should first click <kbd>![LMB]</kbd> on the `canvas` to
+> ⚠️ *<sup>__\*__</sup> You should first click <kbd>![LMB]</kbd> on the `canvas` to
   activate mouse controls.*
 
 ### Live Demo
