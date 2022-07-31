@@ -261,20 +261,20 @@
         if (topY > midY)
         {
             const auxX = topX, auxY = topY;
-            topX = midX, topY = midY;
-            midX = auxX, midY = auxY;
+            topX = midX; topY = midY;
+            midX = auxX; midY = auxY;
         }
         if (midY > bottomY)
         {
             const auxX = midX, auxY = midY;
-            midX = bottomX, midY = bottomY;
-            bottomX = auxX, bottomY = auxY;
+            midX = bottomX; midY = bottomY;
+            bottomX = auxX; bottomY = auxY;
         }
         if (topY > midY)
         {
             const auxX = topX, auxY = topY;
-            topX = midX, topY = midY;
-            midX = auxX, midY = auxY;
+            topX = midX; topY = midY;
+            midX = auxX; midY = auxY;
         }
         const deltaUpper = midY - topY, _deltaUpper = 1 / deltaUpper;
         const deltaLower = bottomY - midY, _deltaLower = 1 / deltaLower;
@@ -475,34 +475,34 @@
         {
             /* swap in screen-space */
             const auxX = topX, auxY = topY;
-            topX = midX, topY = midY;
-            midX = auxX, midY = auxY;
+            topX = midX; topY = midY;
+            midX = auxX; midY = auxY;
             /* and also, swap in texture-space as well */
             const auxU = topU, auxV = topV, auxC = topC;
-            topU = midU, topV = midV, topC = midC;
-            midU = auxU, midV = auxV, midC = auxC;
+            topU = midU; topV = midV; topC = midC;
+            midU = auxU; midV = auxV; midC = auxC;
         }
         if (midY > bottomY)
         {
             /* swap in screen-space */
             const auxX = midX, auxY = midY;
-            midX = bottomX, midY = bottomY;
-            bottomX = auxX, bottomY = auxY;
+            midX = bottomX; midY = bottomY;
+            bottomX = auxX; bottomY = auxY;
             /* and also, swap in texture-space as well */
             const auxU = midU, auxV = midV, auxC = midC;
-            midU = bottomU, midV = bottomV, midC = bottomC;
-            bottomU = auxU, bottomV = auxV, bottomC = auxC;
+            midU = bottomU; midV = bottomV; midC = bottomC;
+            bottomU = auxU; bottomV = auxV; bottomC = auxC;
         }
         if (topY > midY)
         {
             /* swap in screen-space */
             const auxX = topX, auxY = topY;
-            topX = midX, topY = midY;
-            midX = auxX, midY = auxY;
+            topX = midX; topY = midY;
+            midX = auxX; midY = auxY;
             /* and also, swap in texture-space as well */
             const auxU = topU, auxV = topV, auxC = topC;
-            topU = midU, topV = midV, topC = midC;
-            midU = auxU, midV = auxV, midC = auxC;
+            topU = midU; topV = midV; topC = midC;
+            midU = auxU; midV = auxV; midC = auxC;
         }
         const deltaUpper = midY - topY, _deltaUpper = 1 / deltaUpper;
         const deltaLower = bottomY - midY, _deltaLower = 1 / deltaLower;
