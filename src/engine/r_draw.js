@@ -13,45 +13,60 @@
 
 (function ()
 {
+    const G_Const = __import__G_Const();
+    const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
+    const N_PIXELS = SCREEN_W * SCREEN_H;
+
     const M_Math = __import__M_Math();
     const M_Clamp = M_Math.M_Clamp;
 
     const R_Screen = __import__R_Screen();
     const R_Ctx = R_Screen.R_Ctx;
-    const R_SetBuffer = R_Screen.R_SetBuffer;
+    const R_FlushBuffer = R_Screen.R_FlushBuffer;
+    const R_InitBuffer = R_Screen.R_InitBuffer;
 
     let frameBuffer;
     let zBuffer, cleanZBuffer;
-    let screenW, screenH;
 
-    function R_ClearBuffer ()
+    function R_InitFrameBuffer ()
     {
-        /* initialize the frame buffer if it has not been already */
-        if (screenW === undefined || screenH === undefined)
-        {
-            frameBuffer = R_SetBuffer();
-            screenW = frameBuffer.width;
-            screenH = frameBuffer.height;
-            cleanZBuffer = new Float32Array(screenW * screenH);
-            zBuffer = new Float32Array(screenW * screenH);
-        }
+        frameBuffer = R_InitBuffer(SCREEN_W, SCREEN_H);
+    }
+
+    function R_ClearFrameBuffer ()
+    {
+        R_Ctx.clearRect(0, 0, SCREEN_W, SCREEN_H);
+        R_InitFrameBuffer();
+    }
+
+    function R_FlushFrame ()
+    {
+        R_FlushBuffer(frameBuffer);
+    }
+
+    function R_InitZBuffer ()
+    {
+        cleanZBuffer = new Float32Array(N_PIXELS);
+        zBuffer = new Float32Array(N_PIXELS);
+    }
+
+    function R_ResetZBuffer ()
+    {
         zBuffer.set(cleanZBuffer);
-        R_Ctx.clearRect(0, 0, screenW, screenH);
-        frameBuffer = R_SetBuffer();
     }
 
     function R_FillRect (x, y, w, h, r, g, b, a)
     {
-        const sX = M_Clamp(Math.floor(x), 0, screenW);
-        const sY = M_Clamp(Math.floor(y), 0, screenH);
-        const dX = M_Clamp(Math.floor(x + w), 0, screenW);
-        const dY = M_Clamp(Math.floor(y + h), 0, screenH);
+        const sX = M_Clamp(Math.floor(x), 0, SCREEN_W);
+        const sY = M_Clamp(Math.floor(y), 0, SCREEN_H);
+        const dX = M_Clamp(Math.floor(x + w), 0, SCREEN_W);
+        const dY = M_Clamp(Math.floor(y + h), 0, SCREEN_H);
         if (sX === dX || sY === dY) return; // early return if not a rectangle
         for (let brushY = sY; brushY < dY; ++brushY)
         {
             for (let brushX = sX; brushX < dX; ++brushX)
             {
-                const pixIndex = 4 * (screenW * brushY + brushX);
+                const pixIndex = 4 * (SCREEN_W * brushY + brushX);
                 const bufferRed = frameBuffer.data[pixIndex];
                 const bufferGreen = frameBuffer.data[pixIndex + 1];
                 const bufferBlue = frameBuffer.data[pixIndex + 2];
@@ -263,9 +278,9 @@
         const gradC = (c1 - c0) / (dx1 - dx0);
         let c = preStepX * gradC + c0;
         /* rasterize current scanline */
-        for (let x = dX0; x < dX1 && x < screenW; ++x)
+        for (let x = dX0; x < dX1 && x < SCREEN_W; ++x)
         {
-            const bufferIndex = dy * screenW + x;
+            const bufferIndex = dy * SCREEN_W + x;
             /* skip filling in the pixel unless the current pixel in the raster
              * triangle is closer (1 / zRaster > 1 / zBuffer) than what's
              * already in the z-buffer at the position we want to draw
@@ -370,7 +385,7 @@
             /* lerp based on `y` in screen-space for the upper half of the
              * triangle
              */
-            for (let y = startY; y < midStopY && y < screenH; ++y)
+            for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
             {
                 const startX = Math.ceil(xMajor), endX = Math.ceil(xUpper);
                 R_LerpShadedScanline(startX, endX, y, cMajor, cUpper,
@@ -381,7 +396,7 @@
             /* lerp based on `y` in screen-space for the lower half of the
              * triangle
              */
-            for (let y = midStopY; y < endY && y < screenH; ++y)
+            for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
             {
                 const startX = Math.ceil(xMajor), endX = Math.ceil(xLower);
                 R_LerpShadedScanline(startX, endX, y, cMajor, cLower,
@@ -395,7 +410,7 @@
              /* lerp based on `y` in screen-space for the upper half of the
              * triangle
              */
-             for (let y = startY; y < midStopY && y < screenH; ++y)
+             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
              {
                  const startX = Math.ceil(xUpper), endX = Math.ceil(xMajor);
                  R_LerpShadedScanline(startX, endX, y, cUpper, cMajor,
@@ -406,7 +421,7 @@
              /* lerp based on `y` in screen-space for the lower half of the
               * triangle
               */
-             for (let y = midStopY; y < endY && y < screenH; ++y)
+             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
              {
                  const startX = Math.ceil(xLower), endX = Math.ceil(xMajor);
                  R_LerpShadedScanline(startX, endX, y, cLower, cMajor,
@@ -475,9 +490,9 @@
         let v = preStepX * gradV + v0;
         let c = preStepX * gradC + c0;
         /* rasterize current scanline */
-        for (let x = dX0; x < dX1 && x < screenW; ++x)
+        for (let x = dX0; x < dX1 && x < SCREEN_W; ++x)
         {
-            const bufferIndex = dy * screenW + x;
+            const bufferIndex = dy * SCREEN_W + x;
             /* skip drawing the pixel unless the current pixel in the raster
              * triangle is closer (1 / zRaster > 1 / zBuffer) than what's
              * already in the z-buffer at the position we want to draw
@@ -638,7 +653,7 @@
             /* lerp based on `y` in screen-space for the upper half of the
              * triangle
              */
-            for (let y = startY; y < midStopY && y < screenH; ++y)
+            for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
             {
                 R_LerpTexturedScanline_Perspective(tex,
                                                    xMajor, xUpper, y,
@@ -653,7 +668,7 @@
             /* lerp based on `y` in screen-space for the lower half of the
              * triangle
              */
-            for (let y = midStopY; y < endY && y < screenH; ++y)
+            for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
             {
                 R_LerpTexturedScanline_Perspective(tex,
                                                    xMajor, xLower, y,
@@ -671,7 +686,7 @@
             /* lerp based on `y` in screen-space for the upper half of the
              * triangle
              */
-            for (let y = startY; y < midStopY && y < screenH; ++y)
+            for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
             {
                 R_LerpTexturedScanline_Perspective(tex,
                                                    xUpper, xMajor, y,
@@ -686,7 +701,7 @@
             /* lerp based on `y` in screen-space for the lower half of the
              * triangle
              */
-            for (let y = midStopY; y < endY && y < screenH; ++y)
+            for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
             {
                 R_LerpTexturedScanline_Perspective(tex,
                                                    xLower, xMajor, y,
@@ -707,7 +722,7 @@
         /* early return if either the source or the destination is out of bounds
          */
         if (sx + sw <= 0 || sy + sh <= 0 || sx >= imgWidth || sy >= imgHeight ||
-            dx + dw <= 0 || dy + dh <= 0 || dx >= screenW || dy >= screenH)
+            dx + dw <= 0 || dy + dh <= 0 || dx >= SCREEN_W || dy >= SCREEN_H)
             return;
         /* determine how bright & translucent the image is going to be drawn */
         const lightLevel = options && Number.isFinite(options.lightLevel)
@@ -720,8 +735,8 @@
         const scaleX = sw / dw, scaleY = sh / dh;
         /* clip the screen coordinates against the bounds of the buffer */
         const clipLeft = Math.max(-dX, 0), clipTop = Math.max(-dY, 0);
-        const clipRight = Math.max(dX + dW - screenW, 0);
-        const clipBottom = Math.max(dY + dH - screenH, 0);
+        const clipRight = Math.max(dX + dW - SCREEN_W, 0);
+        const clipBottom = Math.max(dY + dH - SCREEN_H, 0);
         const clippedW = dW - clipLeft - clipRight;
         const clippedH = dH - clipTop - clipBottom;
         /* calculate draw endpoints */
@@ -744,7 +759,7 @@
                 const sampleGreen = bitmap[sampleIndex + 1];
                 const sampleBlue = bitmap[sampleIndex + 2];
                 const sampleAlpha = bitmap[sampleIndex + 3] * alpha;
-                const paintIndex = 4 * (y * screenW + x);
+                const paintIndex = 4 * (y * SCREEN_W + x);
                 const bufferRed = frameBuffer.data[paintIndex];
                 const bufferGreen = frameBuffer.data[paintIndex + 1];
                 const bufferBlue = frameBuffer.data[paintIndex + 2];
@@ -778,7 +793,11 @@
     window.__import__R_Draw = function ()
     {
         return {
-            R_ClearBuffer: R_ClearBuffer,
+            R_InitFrameBuffer: R_InitFrameBuffer,
+            R_ClearFrameBuffer: R_ClearFrameBuffer,
+            R_FlushFrame: R_FlushFrame,
+            R_InitZBuffer: R_InitZBuffer,
+            R_ResetZBuffer: R_ResetZBuffer,
             R_FillRect: R_FillRect,
             R_DrawLine_DDA: R_DrawLine_DDA,
             R_DrawLine_Bresenham: R_DrawLine_Bresenham,

@@ -31,7 +31,9 @@
     const R_DebugStats = R_Camera.R_DebugStats;
 
     const R_Draw = __import__R_Draw();
-    const R_ClearBuffer = R_Draw.R_ClearBuffer;
+    const R_ClearFrameBuffer = R_Draw.R_ClearFrameBuffer;
+    const R_FlushFrame = R_Draw.R_FlushFrame;
+    const R_ResetZBuffer = R_Draw.R_ResetZBuffer;
 
     const R_Drawers = __import__R_Drawers();
     const R_TitleDrawer = R_Drawers.R_TitleDrawer;
@@ -41,9 +43,6 @@
     const R_RenderGeometry = R_Geometry.R_RenderGeometry;
     const R_TriPool = R_Geometry.R_TriPool;
 
-    const R_Screen = __import__R_Screen();
-    const R_FlushBuffer = R_Screen.R_FlushBuffer;
-
     const TICK_DELAY = 1000 / FPS;
     let tickInterval;
     let lastTick;
@@ -52,10 +51,12 @@
 
     function G_UpdateScreen (deltaT, tris)
     {
-        R_ClearBuffer();
+        // clear the frame buffer so that the frame can start fresh
+        R_ClearFrameBuffer();
+        R_ResetZBuffer();
         R_ChangeRenderMode();
         R_RenderGeometry(nTrisOnScreen);
-        R_FlushBuffer();
+        R_FlushFrame();
         if (DEBUG_MODE) R_DebugStats(deltaT, nTrisOnScreen[0]);
     }
 
@@ -92,7 +93,7 @@
     {
         if (!setupResolution) return; // exit with error
         // first, clear the frame buffer for any further drawing to take place
-        R_ClearBuffer();
+        R_ClearFrameBuffer();
         // then, clear the loading animation that is currently running
         AN_CancelAnimation(setupResolution.loadingId);
         /* finally, start the animation for the title screen */

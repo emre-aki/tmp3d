@@ -17,27 +17,15 @@
     const screen = document.getElementById("canvas");
     const ctx = screen.getContext("2d");
 
-    let screenW, screenH;
-    let screenBuffer;
-
-    function R_FlushBuffer ()
+    function R_FlushBuffer (buffer)
     {
-        ctx.putImageData(screenBuffer, 0, 0);
+        ctx.putImageData(buffer, 0, 0);
     }
 
-    function R_SetBuffer ()
-    {
-        screenBuffer = ctx.getImageData(0, 0, screenW, screenH);
-        return screenBuffer;
-    }
-
-    // TODO: just initialize the screen dimensions, rather than initializing the
-    // frame buffer with it, maybe??
     function R_InitBuffer (w, h)
     {
-        screenW = w; screenH = h;
-        screen.width = screenW; screen.height = screenH;
-        return R_SetBuffer();
+        screen.width = w; screen.height = h;
+        return ctx.getImageData(0, 0, w, h);
     }
 
     window.__import__R_Screen = function ()
@@ -46,7 +34,6 @@
             R_ScreenElement: screen,
             R_Ctx: ctx,
             R_FlushBuffer: R_FlushBuffer,
-            R_SetBuffer: R_SetBuffer,
             R_InitBuffer: R_InitBuffer,
         };
     };

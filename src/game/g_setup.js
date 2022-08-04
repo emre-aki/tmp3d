@@ -44,6 +44,10 @@
     const R_Camera = __import__R_Camera();
     const R_InitCamera = R_Camera.R_InitCamera;
 
+    const R_Draw = __import__R_Draw();
+    const R_InitFrameBuffer = R_Draw.R_InitFrameBuffer;
+    const R_InitZBuffer = R_Draw.R_InitZBuffer;
+
     const R_Drawers = __import__R_Drawers();
     const R_LoadingDrawer = R_Drawers.R_LoadingDrawer;
     const R_ErrorDrawer = R_Drawers.R_ErrorDrawer;
@@ -53,7 +57,6 @@
     const R_LoadGeometry = R_Geometry.R_LoadGeometry;
 
     const R_Screen = __import__R_Screen();
-    const R_InitBuffer = R_Screen.R_InitBuffer;
     const R_ScreenElement = R_Screen.R_ScreenElement;
 
     const Z_NEAR = SCREEN_H * 0.5 / Math.tan(FOV_Y * 0.5);
@@ -81,6 +84,9 @@
 
     function G_Setup ()
     {
+        // initialize the frame buffer first, before anything could be drawn on
+        // the screen
+        R_InitFrameBuffer();
         // play a loading animation during the setup procedure
         const resolution = { loadingId: R_LoadingDrawer() };
         /* sync operations */
@@ -88,7 +94,7 @@
         {
             I_InitKeyboard(document);
             I_InitMouse(R_ScreenElement);
-            R_InitBuffer(SCREEN_W, SCREEN_H);
+            R_InitZBuffer();
             R_InitCamera(FOV_Y, ASPECT, Z_NEAR, Z_FAR, D_Eye, D_Velocity);
             R_LoadGeometry(D_Vertices, D_Triangles, D_Triangles.length);
             /* initialize the uv table if the mesh data have texture-mapping */

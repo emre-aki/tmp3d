@@ -21,11 +21,11 @@
     const R_Draw = __import__R_Draw();
     const R_DrawImage = R_Draw.R_DrawImage;
     const R_FillRect = R_Draw.R_FillRect;
+    const R_FlushFrame = R_Draw.R_FlushFrame;
     const R_Print = R_Draw.R_Print;
 
     const R_Screen = __import__R_Screen();
     const R_Ctx = R_Screen.R_Ctx;
-    const R_FlushBuffer = R_Screen.R_FlushBuffer;
 
     const N_LOADING_STATES = 4, LOADING_INTERVAL = 375;
     const LOADING_FONT_COLOR = "#FFFFFF";
@@ -61,7 +61,7 @@
                     0, 0, decor.width, decor.height,
                     SCREEN_W_2 - 100, SCREEN_H_2 - 217,
                     decor.width, decor.height);
-        R_FlushBuffer();
+        R_FlushFrame();
         R_Print("Tmp3D Engine", SCREEN_W_2 - 117, SCREEN_H_2 + 20,
                 TITLE_FONT_COLOR, TITLE_PRIMARY_FONT_SIZE);
         R_Print("v" + __VERSION__, SCREEN_W_2 - 30, SCREEN_H_2 + 44,
