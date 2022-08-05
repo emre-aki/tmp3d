@@ -33,10 +33,9 @@
         frameBuffer = R_InitBuffer(SCREEN_W, SCREEN_H);
     }
 
-    function R_ClearFrameBuffer ()
+    function R_ResetFrameBuffer ()
     {
-        R_Ctx.clearRect(0, 0, SCREEN_W, SCREEN_H);
-        R_InitFrameBuffer();
+        R_FillRect(0, 0, SCREEN_W, SCREEN_H, 0, 0, 0, 255);
     }
 
     function R_FlushFrame ()
@@ -794,7 +793,7 @@
     {
         return {
             R_InitFrameBuffer: R_InitFrameBuffer,
-            R_ClearFrameBuffer: R_ClearFrameBuffer,
+            R_ResetFrameBuffer: R_ResetFrameBuffer,
             R_FlushFrame: R_FlushFrame,
             R_InitZBuffer: R_InitZBuffer,
             R_ResetZBuffer: R_ResetZBuffer,
