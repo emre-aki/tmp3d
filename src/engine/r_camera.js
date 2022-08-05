@@ -235,6 +235,12 @@
         R_Print("tris: " + nTrisOnScreen, 5, 60, "#FF0000", 14);
         // print the instantaneous framerate
         R_Print("fps: " + Math.round(1000 / deltaT), 5, 75, "#FF0000", 14);
+        /* print in milliseconds how much time has passed since the last frame
+         */
+        R_Print("frametime: " + Math.round(deltaT) + " ms",
+                5, 90,
+                "#FF0000",
+                14);
     }
 
     /* FIXME: move this function to a more sensible file/module */
