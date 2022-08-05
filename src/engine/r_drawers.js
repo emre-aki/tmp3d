@@ -16,7 +16,7 @@
 
     const G_Const = __import__G_Const();
     const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
-    const SCREEN_W_2 = SCREEN_W * 0.5, SCREEN_H_2 = SCREEN_H * 0.5;
+    const SCREEN_W_2 = G_Const.SCREEN_W_2, SCREEN_H_2 = G_Const.SCREEN_H_2;
 
     const R_Draw = __import__R_Draw();
     const R_DrawImage = R_Draw.R_DrawImage;

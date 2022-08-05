@@ -26,7 +26,7 @@
     const G_Const = __import__G_Const();
     const FOV_X = G_Const.FOV_X, FOV_Y = G_Const.FOV_Y;
     const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
-    const SCREEN_W_2 = SCREEN_W * 0.5, SCREEN_H_2 = SCREEN_H * 0.5;
+    const SCREEN_W_2 = G_Const.SCREEN_W_2, SCREEN_H_2 = G_Const.SCREEN_H_2;
 
     const M_Mat4 = __import__M_Mat4();
     const M_QuickInv4 = M_Mat4.M_QuickInv4;

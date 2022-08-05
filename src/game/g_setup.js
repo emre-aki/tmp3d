@@ -34,8 +34,9 @@
         D_GlobTextures.D_GlobTextureFilenameTable;
 
     const G_Const = __import__G_Const();
-    const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
+    const ASPECT = G_Const.ASPECT;
     const FOV_Y = G_Const.FOV_Y;
+    const Z_NEAR = G_Const.Z_NEAR, Z_FAR = G_Const.Z_FAR;
 
     const I_Input = __import__I_Input();
     const I_InitKeyboard = I_Input.I_InitKeyboard;
@@ -58,10 +59,6 @@
 
     const R_Screen = __import__R_Screen();
     const R_ScreenElement = R_Screen.R_ScreenElement;
-
-    const Z_NEAR = SCREEN_H * 0.5 / Math.tan(FOV_Y * 0.5);
-    const Z_FAR = 4 * Z_NEAR;
-    const ASPECT = SCREEN_W / SCREEN_H;
 
     function G_LoadTextures ()
     {

@@ -17,8 +17,7 @@
     const A_Texture = A_Assets.A_Texture;
 
     const G_Const = __import__G_Const();
-    const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
-    const SCREEN_W_2 = SCREEN_W * 0.5, SCREEN_H_2 = SCREEN_H * 0.5;
+    const SCREEN_W_2 = G_Const.SCREEN_W_2, SCREEN_H_2 = G_Const.SCREEN_H_2;
 
     const I_Input = __import__I_Input();
     const I_GetKeyState = I_Input.I_GetKeyState;
