@@ -2,8 +2,14 @@
 Coordinate systems
 --------------------------------------------------------------------------------
 
-Tmp3D uses column-vectors conceptually, but they are transposed to row-vectors
-before getting written in the memory to leverage CPU cache.
+Tmp3D uses column-vectors.
+
+┌                 ┐
+| x.x y.x z.x t.x |
+| x.y y.y z.y t.y |
+| x.z y.z z.z t.z |
+| x.w y.w z.w t.w |
+└                 ┘
 
 A right-handed coordinate system is used, and the untransformed camera is
 situated at the origin <0, 0, 0>, looking towards +z.

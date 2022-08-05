@@ -32,10 +32,10 @@
     function M_Mat4 (x, y, z, w)
     {
         const mat = new Float32Array(SIZE);
-        mat[0] = x[0]; mat[1] = x[1]; mat[2] = x[2]; mat[3] = x[3];
-        mat[4] = y[0]; mat[5] = y[1]; mat[6] = y[2]; mat[7] = y[3];
-        mat[8] = z[0]; mat[9] = z[1]; mat[10] = z[2]; mat[11] = z[3];
-        mat[12] = w[0]; mat[13] = w[1]; mat[14] = w[2]; mat[15] = w[3];
+        mat[0] = x[0]; mat[4] = x[1]; mat[8] = x[2]; mat[12] = x[3];
+        mat[1] = y[0]; mat[5] = y[1]; mat[9] = y[2]; mat[13] = y[3];
+        mat[2] = z[0]; mat[6] = z[1]; mat[10] = z[2]; mat[14] = z[3];
+        mat[3] = w[0]; mat[7] = w[1]; mat[11] = w[2]; mat[15] = w[3];
         return mat;
     }
 
@@ -46,19 +46,23 @@
          *
          *   m = T * R
          *
+         *       ┌          ┐   ┌               ┐
          *       | 1 0 0 tx |   | x.x y.x z.x 0 |
          *     = | 0 1 0 ty | * | x.y y.y z.y 0 |
          *       | 0 0 1 tz |   | x.z y.z z.z 0 |
          *       | 0 0 0 1  |   | 0   0   0   1 |
+         *       └          ┘   └               ┘
          *
          * decomposing this way, we can invert `T` and `R` separately:
          *
          *   m^(-1) = R^(-1) * T^(-1)
          *
+         *            ┌               ┐   ┌            ┐
          *            | x.x x.y x.z 0 |   | 1 0 0 -t.x |
          *          = | y.x y.y y.z 0 | * | 0 1 0 -t.y |
          *            | z.x z.y z.z 0 |   | 0 0 1 -t.z |
          *            | 0   0   0   1 |   | 0 0 0  1   |
+         *            └               ┘   └            ┘
          *
          * because the basis vectors `x`, `y`, and `z` (the first 3 columns in
          * `R`) are guaranteed to be orthonormal, we were able to take a
@@ -68,23 +72,25 @@
          *
          * this gives us the inverted transform:
          *
+         *            ┌                     ┐
          *            | x.x x.y x.z -<t, x> |
          *   m^(-1) = | y.x y.y y.z -<t, y> |
          *            | z.x z.y z.z -<t, z> |
          *            | 0   0   0    1      |
+         *            └                     ┘
          */
         /* invert `R` */
-        const inverted = new Float32Array(SIZE);
-        inverted[0] = mat[0]; inverted[4] = mat[1]; inverted[8] = mat[2];
-        inverted[1] = mat[4]; inverted[5] = mat[5]; inverted[9] = mat[6];
-        inverted[2] = mat[8]; inverted[6] = mat[9]; inverted[10] = mat[10];
+        const inv = new Float32Array(SIZE);
+        inv[0] = mat[0]; inv[4] = mat[1]; inv[8] = mat[2];
+        inv[1] = mat[4]; inv[5] = mat[5]; inv[9] = mat[6];
+        inv[2] = mat[8]; inv[6] = mat[9]; inv[10] = mat[10];
         /* invert `T` */
-        const T = M_Vec4(mat[12], mat[13], mat[14], mat[15]);
-        inverted[12] = -M_Dot4(M_Vec4(mat[0], mat[1], mat[2], mat[3]), T);
-        inverted[13] = -M_Dot4(M_Vec4(mat[4], mat[5], mat[6], mat[7]), T);
-        inverted[14] = -M_Dot4(M_Vec4(mat[8], mat[9], mat[10], mat[11]), T);
-        inverted[15] = 1;
-        return inverted;
+        const T = M_Vec4(mat[3], mat[7], mat[11], mat[15]);
+        inv[3] = -M_Dot4(M_Vec4(inv[0], inv[1], inv[2], mat[12]), T);
+        inv[7] = -M_Dot4(M_Vec4(inv[4], inv[5], inv[6], mat[13]), T);
+        inv[11] = -M_Dot4(M_Vec4(inv[8], inv[9], inv[10], mat[14]), T);
+        inv[15] = 1;
+        return inv;
     }
 
     function M_Inv4 (mat)
@@ -94,10 +100,10 @@
 
     function M_Transform4 (mat, vec)
     {
-        const matRow0 = M_Vec4(mat[0], mat[4], mat[8], mat[12]);
-        const matRow1 = M_Vec4(mat[1], mat[5], mat[9], mat[13]);
-        const matRow2 = M_Vec4(mat[2], mat[6], mat[10], mat[14]);
-        const matRow3 = M_Vec4(mat[3], mat[7], mat[11], mat[15]);
+        const matRow0 = M_Vec4(mat[0], mat[1], mat[2], mat[3]);
+        const matRow1 = M_Vec4(mat[4], mat[5], mat[6], mat[7]);
+        const matRow2 = M_Vec4(mat[8], mat[9], mat[10], mat[11]);
+        const matRow3 = M_Vec4(mat[12], mat[13], mat[14], mat[15]);
         return M_Vec4(M_Dot4(matRow0, vec), M_Dot4(matRow1, vec),
                       M_Dot4(matRow2, vec), M_Dot4(matRow3, vec));
     }
