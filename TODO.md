@@ -38,3 +38,6 @@
 
 ### release: 0.0.6
 - [ ] Clipping geometries against the view frustum
+
+### release: 0.0.7
+- [ ] Fix the oscillation in the frametimes

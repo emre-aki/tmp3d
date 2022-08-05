@@ -44,8 +44,9 @@
     const R_TriPool = R_Geometry.R_TriPool;
 
     const TICK_DELAY = 1000 / FPS;
-    let tickInterval;
-    let lastTick;
+
+    let lastTickId; // an id that uniquely identifies the latest game tick
+    let lastTick; // the unix timestamp of the latest game tick
 
     const nTrisOnScreen = new Uint32Array(1);
 
@@ -73,20 +74,25 @@
         G_UpdateScreen(deltaT, tris); // update screen buffer
     }
 
-    function G_AdvanceTick ()
+    function G_AdvanceTick (currentTick)
     {
-        const currentTick = Date.now();
         if (lastTick === undefined) lastTick = currentTick;
-        G_Tick(currentTick - lastTick);
-        lastTick = currentTick;
+        const deltaT = currentTick - lastTick;
+        if (deltaT >= TICK_DELAY)
+        {
+            // TODO: consider executing only the screen updates in the `RAF`
+            // callback
+            G_Tick(deltaT);
+            lastTick = currentTick;
+        }
+        lastTickId = requestAnimationFrame(G_AdvanceTick);
     }
 
     function G_StartGame (titleId)
     {
         // first, clear the title screen animation that is running
         AN_CancelAnimation(titleId);
-        // then, kickstart the game ticks
-        tickInterval = setInterval(G_AdvanceTick, TICK_DELAY);
+        requestAnimationFrame(G_AdvanceTick); // then, kickstart the game ticks
     }
 
     function G_Run (setupResolution)
