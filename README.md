@@ -30,6 +30,14 @@
          height="240"
          src="https://media1.giphy.com/media/nwioIaZNYJTTkOXDGO/giphy.gif">
     </img>
+    <img width="320"
+         height="240"
+         src="https://media1.giphy.com/media/bSlge1Ee52ncGgwcpx/giphy.gif">
+    </img>
+    <img width="320"
+         height="240"
+         src="https://media1.giphy.com/media/6Z9fe1ckUyGCZuBPOQ/giphy.gif">
+    </img>
 </p>
 
 Tmp3D is a 3-D software renderer written from scratch in nothing but plain-old

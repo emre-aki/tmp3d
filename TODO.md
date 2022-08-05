@@ -34,7 +34,7 @@
 - [x] Loading Wavefront `.obj` files
 
 ### release: 0.0.5
-- [ ] Z-buffering
+- [x] Z-buffering
 
 ### release: 0.0.6
 - [ ] Clipping geometries against the view frustum
