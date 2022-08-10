@@ -103,8 +103,8 @@
     function R_Perspective (fovy, aspect, zNear, zFar)
     {
         const tanFovy_ = 1 / Math.tan(fovy * 0.5);
-        const A = (zFar + zNear) / (zFar - zNear);
-        const B = 2 * zFar * zNear / (zNear - zFar);
+        const A = zFar / (zFar - zNear);
+        const B = zFar * zNear / (zNear - zFar);
         /* FIXME: dirty `M_Vec4FromVec3` shortcut with array literals */
         const vecPersX4 = M_Vec4FromVec3([tanFovy_ / aspect, 0, 0], 0);
         const vecPersY4 = M_Vec4FromVec3([0, tanFovy_, 0], 0);
