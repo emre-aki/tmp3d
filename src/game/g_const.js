@@ -15,10 +15,10 @@
     const SCREEN_W_2 = SCREEN_W * 0.5, SCREEN_H_2 = SCREEN_H * 0.5;
     const ASPECT = SCREEN_W / SCREEN_H;
 
-    const FOV_Y = Math.PI / 3;
-    const FOV_X = ASPECT * FOV_Y;
+    const FOV_Y = Math.PI / 3, TAN_FOV_Y_2 = Math.tan(FOV_Y * 0.5);
+    const FOV_X = 2 * Math.atan(ASPECT * TAN_FOV_Y_2);
 
-    const Z_NEAR = SCREEN_H_2 / Math.tan(FOV_Y * 0.5);
+    const Z_NEAR = 1 / TAN_FOV_Y_2;
     const Z_FAR = 4 * Z_NEAR;
 
     const FPS = 30;
