@@ -40,7 +40,7 @@
 
     const R_Geometry = __import__R_Geometry();
     const R_ChangeRenderMode = R_Geometry.R_ChangeRenderMode;
-    const R_RenderGeometry = R_Geometry.R_RenderGeometry;
+    const R_RenderGeometries = R_Geometry.R_RenderGeometries;
     const R_TriPool = R_Geometry.R_TriPool;
 
     const TICK_DELAY = 1000 / FPS;
@@ -56,7 +56,7 @@
         R_ResetFrameBuffer();
         R_ResetZBuffer();
         R_ChangeRenderMode();
-        R_RenderGeometry(nTrisOnScreen);
+        R_RenderGeometries(nTrisOnScreen);
         R_FlushFrame();
         if (DEBUG_MODE) R_DebugStats(deltaT, nTrisOnScreen[0]);
     }

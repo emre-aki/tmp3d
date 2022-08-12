@@ -67,7 +67,7 @@
         RENDER_MODE.TEXTURED_SHADED,
     ];
 
-    let renderMode = 2;
+    let renderMode = 3;
     let lastRenderModeChange = new Date().getTime();
     let renderModeChangeDebounce = 250;
 
@@ -165,10 +165,8 @@
         );
     }
 
-    function R_RenderGeometry (nTrisOnScreen)
+    function R_RenderGeomeries_Wireframe ()
     {
-        const nTriangles = triPool3.length; // FIXME: make into a global const.
-        R_CullGeometry(triPool3, nTriangles);
         for (let i = 0; i < nCullBuffer; ++i)
         {
             const triIndex = cullBuffer[i];
@@ -183,66 +181,124 @@
             const by = bClip3[1] * SCREEN_H_2 + SCREEN_H_2;
             const cx = cClip3[0] * SCREEN_W_2 + SCREEN_W_2;
             const cy = cClip3[1] * SCREEN_H_2 + SCREEN_H_2;
-            switch (RENDER_MODES[renderMode])
+            R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
+                                    255, 255, 255, 255, 2);
+        }
+    }
+
+    function R_RenderGeomeries_Flat ()
+    {
+        for (let i = 0; i < nCullBuffer; ++i)
+        {
+            const triIndex = cullBuffer[i];
+            const triWorld = triPool3[triIndex];
+            const triView = R_ToViewSpace(triWorld);
+            /* TODO: implement triangle clipping in world (or clip) space */
+            const triClip = R_ToClipSpace(triView);
+            const aClip3 = triClip[0], bClip3 = triClip[1], cClip3 = triClip[2];
+            const ax = aClip3[0] * SCREEN_W_2 + SCREEN_W_2;
+            const ay = aClip3[1] * SCREEN_H_2 + SCREEN_H_2;
+            const bx = bClip3[0] * SCREEN_W_2 + SCREEN_W_2;
+            const by = bClip3[1] * SCREEN_H_2 + SCREEN_H_2;
+            const cx = cClip3[0] * SCREEN_W_2 + SCREEN_W_2;
+            const cy = cClip3[1] * SCREEN_H_2 + SCREEN_H_2;
+            /* TODO: consider using the actual non-linear depth values,
+             * `triClip[i][2]`, i.e., the `z` in `gl_FragCoord`, in the
+             * depth-buffering instead
+             */
+            const aDepth = triView[0][2];
+            const bDepth = triView[1][2];
+            const cDepth = triView[2][2];
+            const triNormal = M_TriNormal3(triWorld);
+            // calculate the dot product of the directional light and the unit
+            // normal of the triangle in world space to determine the level of
+            // illumination on the surface
+            const faceLuminance =
+                (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
+            R_FillTriangle_Flat(ax, ay, aDepth,
+                                bx, by, bDepth,
+                                cx, cy, cDepth,
+                                255, 255, 255, 255, faceLuminance);
+            if (DEBUG_MODE)
+                R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
+                                        0, 0, 0, 255, 2);
+        }
+    }
+
+    function R_RenderGeometries_Textured ()
+    {
+        // early return if the mesh does not have texture-mapping
+        if (!uvTable3) return;
+        for (let i = 0; i < nCullBuffer; ++i)
+        {
+            const triIndex = cullBuffer[i];
+            const triWorld = triPool3[triIndex];
+            const triView = R_ToViewSpace(triWorld);
+            /* TODO: implement triangle clipping in world (or clip) space */
+            const triClip = R_ToClipSpace(triView);
+            const aClip3 = triClip[0], bClip3 = triClip[1], cClip3 = triClip[2];
+            const ax = aClip3[0] * SCREEN_W_2 + SCREEN_W_2;
+            const ay = aClip3[1] * SCREEN_H_2 + SCREEN_H_2;
+            const bx = bClip3[0] * SCREEN_W_2 + SCREEN_W_2;
+            const by = bClip3[1] * SCREEN_H_2 + SCREEN_H_2;
+            const cx = cClip3[0] * SCREEN_W_2 + SCREEN_W_2;
+            const cy = cClip3[1] * SCREEN_H_2 + SCREEN_H_2;
+            /* TODO: consider using the actual non-linear depth values,
+             * `triClip[i][2]`, i.e., the `z` in `gl_FragCoord`, in the
+             * depth-buffering instead
+             */
+            const aDepth = triView[0][2];
+            const bDepth = triView[1][2];
+            const cDepth = triView[2][2];
+            const uvMap = uvTable3[triIndex];
+            const aUV = uvMap[0], bUV = uvMap[1], cUV = uvMap[2];
+            const au = aUV[0], av = aUV[1], ac = aUV[2];
+            const bu = bUV[0], bv = bUV[1], bc = bUV[2];
+            const cu = cUV[0], cv = cUV[1], cc = cUV[2];
+            let faceLuminance = 1;
+            if (RENDER_MODES[renderMode] === RENDER_MODE.TEXTURED_SHADED)
             {
-                case RENDER_MODE.WIREFRAME:
-                    R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
-                                            255, 255, 255, 255, 2);
-                    break;
-                case RENDER_MODE.FLAT:
-                {
-                    const triNormal = M_TriNormal3(triWorld);
-                    // calculate the dot product of the directional light
-                    // and the unit normal of the triangle in world space
-                    // to determine the level of illumination on the surface
-                    const faceLuminance =
-                        (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
-                    R_FillTriangle_Flat(ax, ay, triView[0][2],
-                                        bx, by, triView[1][2],
-                                        cx, cy, triView[2][2],
-                                        255, 255, 255, 255, faceLuminance);
-                    if (DEBUG_MODE)
-                        R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
-                                                0, 0, 0, 255, 2);
-                    break;
-                }
-                case RENDER_MODE.TEXTURED:
-                case RENDER_MODE.TEXTURED_SHADED:
-                {
-                    // skip if the mesh does not have texture-mapping
-                    if (!uvTable3) continue;
-                    const uvMap = uvTable3[triIndex];
-                    const aUV = uvMap[0], bUV = uvMap[1], cUV = uvMap[2];
-                    const au = aUV[0], av = aUV[1], ac = aUV[2];
-                    const bu = bUV[0], bv = bUV[1], bc = bUV[2];
-                    const cu = cUV[0], cv = cUV[1], cc = cUV[2];
-                    let faceLuminance = 1;
-                    if (RENDER_MODES[renderMode] ===
-                        RENDER_MODE.TEXTURED_SHADED)
-                    {
-                        const triNormal = M_TriNormal3(triWorld);
-                        faceLuminance =
-                            (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
-                    }
-                    /* fill textured triangle */
-                    R_FillTriangle_Textured_Perspective(
-                        A_Texture(textureTable[triIndex]),
-                        ax, ay, triView[0][2],
-                        bx, by, triView[1][2],
-                        cx, cy, triView[2][2],
-                        au, av, ac,
-                        bu, bv, bc,
-                        cu, cv, cc,
-                        1, faceLuminance
-                    );
-                    if (DEBUG_MODE)
-                        R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
-                                                255, 255, 255, 255, 2);
-                    break;
-                }
-                default:
-                    break;
+                const triNormal = M_TriNormal3(triWorld);
+                // calculate the dot product of the directional light and the
+                // unit normal of the triangle in world space to determine the
+                // level of illumination on the surface
+                faceLuminance =
+                    (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
             }
+            R_FillTriangle_Textured_Perspective(
+                A_Texture(textureTable[triIndex]),
+                ax, ay, aDepth,
+                bx, by, bDepth,
+                cx, cy, cDepth,
+                au, av, ac,
+                bu, bv, bc,
+                cu, cv, cc,
+                1, faceLuminance
+            );
+            if (DEBUG_MODE)
+                R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
+                                        255, 255, 255, 255, 2);
+        }
+    }
+
+    function R_RenderGeometries (nTrisOnScreen)
+    {
+        const nTriangles = triPool3.length; // FIXME: make into a global const.
+        R_CullGeometry(triPool3, nTriangles);
+        switch (RENDER_MODES[renderMode])
+        {
+            case RENDER_MODE.WIREFRAME:
+                R_RenderGeomeries_Wireframe();
+                break;
+            case RENDER_MODE.FLAT:
+                R_RenderGeomeries_Flat();
+                break;
+            case RENDER_MODE.TEXTURED:
+            case RENDER_MODE.TEXTURED_SHADED:
+                R_RenderGeometries_Textured();
+                break;
+            default:
+                break;
         }
         if (DEBUG_MODE) R_DebugAxes();
         // TODO: re-calculate after implementing triangle clipping
@@ -261,7 +317,7 @@
             R_LoadGeometry: R_LoadGeometry,
             R_InitUVTable: R_InitUVTable,
             R_UpdateGeometry: R_UpdateGeometry,
-            R_RenderGeometry: R_RenderGeometry,
+            R_RenderGeometries: R_RenderGeometries,
             R_TriPool: R_TriPool,
         };
     };
