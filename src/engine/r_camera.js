@@ -71,6 +71,7 @@
     let camRight, camUp, camFwd;
     let matPerspective; // the viewing frustum used for perspective projection
     let matLookAt; // the look-at matrix used for view transformation
+    let projectionOrigin; // the center of the projection (near-clipping) plane
 
     // TODO: instead of having `eye`, `center`, and `up` as arguments to the
     // function, directly read the camera basis vectors off of the global scope
@@ -203,8 +204,14 @@
         };
     }
 
+    function R_GetProjectionOrigin ()
+    {
+        return projectionOrigin;
+    }
+
     function R_InitCamera (fovy, aspect, zNear, zFar, eye, velocity)
     {
+        projectionOrigin = Vec3(0, 0, zNear);
         veloc = velocity;
         camPitch = 0; camYaw = 0;
         camPos = Vec3(eye[0], eye[1], eye[2]);
@@ -226,7 +233,8 @@
         R_Print("pitch: " + M_ToFixedDigits(M_RadToDeg(camPitch), 2) + " deg",
                 5, 45, "#FF0000", 14);
         // FIXME: this really shouldn't be here
-        R_Print("tris: " + nTrisOnScreen, 5, 60, "#FF0000", 14);
+        R_Print("tris: " + nTrisOnScreen[0] + " (" + nTrisOnScreen[1] + ")",
+                5, 60, "#FF0000", 14);
         // print the instantaneous framerate
         R_Print("fps: " + Math.round(1000 / deltaT), 5, 75, "#FF0000", 14);
         /* print in milliseconds how much time has passed since the last frame
@@ -277,6 +285,7 @@
             R_InitCamera: R_InitCamera,
             R_UpdateCamera: R_UpdateCamera,
             R_GetCameraState: R_GetCameraState,
+            R_GetProjectionOrigin: R_GetProjectionOrigin,
             R_ToViewSpace: R_ToViewSpace,
             R_ToClipSpace: R_ToClipSpace,
             R_DebugStats: R_DebugStats,

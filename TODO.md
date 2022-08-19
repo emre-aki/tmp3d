@@ -13,7 +13,14 @@
     - [x] Lines
     - [x] Triangles
 - [x] Back-face culling
-- [ ] Frustum culling, i.e., triangle clipping
+- [x] Raster-clipping
+- [ ] Culling & clipping based on the view space
+    - [ ] Frustum-culling
+    - [ ] Clipping geometries against the view frustum
+        - [x] Clipping against the near-plane
+        - [ ] Clipping against the far-plane
+        - [ ] Clipping against other planes? (Or would raster-clipping be
+              enough?)
 - [x] Flat-shading
 - [ ] Texture-mapping
     - [ ] Affine
@@ -26,7 +33,8 @@
 - [x] `README.md`
 - [x] File descriptions
 - [x] `CONVENTIONS`
-- [ ] Decoupling? Inspiration from `OLC_PixelGameEngine`, or `OLC_ConsoleGameEngine`?
+- [ ] Decoupling? Inspiration from `OLC_PixelGameEngine`, or
+      `OLC_ConsoleGameEngine`?
 
 # Tentative Backlog
 
@@ -37,7 +45,9 @@
 - [x] Z-buffering
 
 ### release: 0.0.6
-- [ ] Clipping geometries against the view frustum
+- [x] Clipping geometries against the view frustum (Against the near-plane
+      spefically for the time being)
+- [ ] Crude frustum-culling
 
 ### release: 0.0.7
 - [ ] Fix the oscillation in the frametimes

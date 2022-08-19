@@ -30,8 +30,9 @@
 
     function M_TriNormal3 (tri3)
     {
-        const ab = M_Sub3(tri3[1], tri3[0]), ac = M_Sub3(tri3[2], tri3[0]);
-        return M_Norm3(M_Cross3(ab, ac));
+        // (b - a) x (c - a) === (b - a) x (c - b)
+        const ab = M_Sub3(tri3[1], tri3[0]), bc = M_Sub3(tri3[2], tri3[1]);
+        return M_Norm3(M_Cross3(ab, bc));
     }
 
     function M_TransformTri3 (transform4, tri3)

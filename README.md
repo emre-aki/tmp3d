@@ -53,9 +53,9 @@ Tmp3D currently supports
   - a first-person camera with _5_ degrees-of-freedom: translating along _x_,
     _y_ & _z_ axes, and _yaw_ & _pitch_
   - perspective transformations
-  - near & far clipping planes
   - back-face culling
   - raster-clipping
+  - clipping against the near-clipping plane
   - flat-shading w/ directional lights
   - perspective-correct texture-mapping
   - loading & rendering 3-D models in the [Wavefront `.obj` format](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
@@ -63,7 +63,7 @@ Tmp3D currently supports
 
 and plans to support
 
-  - frustum culling, i.e., triangle clipping
+  - frustum-culling
   - affine texture-mapping
   - occlusion culling (😩)
 

@@ -85,7 +85,7 @@
     }
 
     function
-    M_LineSegmentVsPlaneCollision3
+    M_TimeBeforePlaneCollision3
     ( lineSrc, lineDest,
       planeRef, planeNormal )
     {
@@ -97,14 +97,22 @@
         if (distToPlaneSrc >= 0 && distToPlaneDest >= 0 ||
             distToPlaneSrc < 0 && distToPlaneDest < 0)
             return;
-        const line = M_Sub3(lineDest, lineSrc);
         const absDistToPlaneSrc = Math.abs(distToPlaneSrc);
         const absDistToPlaneDest = Math.abs(distToPlaneDest);
-        const lineLength = absDistToPlaneSrc + absDistToPlaneDest;
         // how far we should walk along the line segment, from its start, before
         // we get to the intersection with the plane
-        const scale = absDistToPlaneSrc / lineLength;
-        return M_Add3(lineSrc, M_Scale3(line, scale));
+        return absDistToPlaneSrc / (absDistToPlaneSrc + absDistToPlaneDest);
+    }
+
+    function
+    M_LineSegmentVsPlaneCollision3
+    ( lineSrc, lineDest,
+      planeRef, planeNormal )
+    {
+        const scale = M_TimeBeforePlaneCollision3(lineSrc, lineDest,
+                                                  planeRef, planeNormal);
+        if (scale === undefined) return; // early return if there's no collision
+        return M_Add3(lineSrc, M_Scale3(M_Sub3(lineDest, lineSrc), scale));
     }
 
     window.__import__M_Vec3 = function ()
@@ -123,6 +131,7 @@
             M_RotateAroundAxis3: M_RotateAroundAxis3,
             M_DistToPlane3: M_DistToPlane3,
             M_IsInFrontOfPlane3: M_IsInFrontOfPlane3,
+            M_TimeBeforePlaneCollision3: M_TimeBeforePlaneCollision3,
             M_LineSegmentVsPlaneCollision3: M_LineSegmentVsPlaneCollision3,
         };
     };

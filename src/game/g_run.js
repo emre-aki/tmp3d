@@ -48,7 +48,7 @@
     let lastTickId; // an id that uniquely identifies the latest game tick
     let lastTick; // the unix timestamp of the latest game tick
 
-    const nTrisOnScreen = new Uint32Array(1);
+    const nTrisOnScreen = new Uint32Array(2);
 
     function G_UpdateScreen (deltaT, tris)
     {
@@ -58,7 +58,7 @@
         R_ChangeRenderMode();
         R_RenderGeometries(nTrisOnScreen);
         R_FlushFrame();
-        if (DEBUG_MODE) R_DebugStats(deltaT, nTrisOnScreen[0]);
+        if (DEBUG_MODE) R_DebugStats(deltaT, nTrisOnScreen);
     }
 
     function G_UpdateGame (deltaT, tris)
