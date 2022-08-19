@@ -91,35 +91,20 @@
     {
         const distToPlaneSrc = M_DistToPlane3(lineSrc, planeRef, planeNormal);
         const distToPlaneDest = M_DistToPlane3(lineDest, planeRef, planeNormal);
-        let front, distFront, distRear, isLineStartInFront = 0;
         /* if both ends of the line segment are on the same side of the plane,
          * then they do not intersect--return immediately
          */
         if (distToPlaneSrc >= 0 && distToPlaneDest >= 0 ||
             distToPlaneSrc < 0 && distToPlaneDest < 0)
             return;
-        /* if the start of the line segment is in front of the plane */
-        if (distToPlaneSrc >= 0)
-        {
-            front = lineSrc;
-            distFront = distToPlaneSrc;
-            distRear = Math.abs(distToPlaneDest);
-            isLineStartInFront = 1;
-        }
-        /* if the end of the line segment is in front of the plane */
-        else
-        {
-            front = lineDest;
-            distFront = distToPlaneDest;
-            distRear = Math.abs(distToPlaneSrc);
-        }
         const line = M_Sub3(lineDest, lineSrc);
+        const absDistToPlaneSrc = Math.abs(distToPlaneSrc);
+        const absDistToPlaneDest = Math.abs(distToPlaneDest);
+        const lineLength = absDistToPlaneSrc + absDistToPlaneDest;
         // how far we should walk along the line segment, from its start, before
         // we get to the intersection with the plane
-        const scale = distFront / (distFront + distRear);
-        return isLineStartInFront
-            ? M_Add3(front, M_Scale3(line, scale))
-            : M_Sub3(front, M_Scale3(line, scale));
+        const scale = absDistToPlaneSrc / lineLength;
+        return M_Add3(lineSrc, M_Scale3(line, scale));
     }
 
     window.__import__M_Vec3 = function ()
