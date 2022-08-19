@@ -309,13 +309,13 @@
 
     function
     R_FillTriangle_Flat
-    ( ax, ay, aDepth,
-      bx, by, bDepth,
-      cx, cy, cDepth,
+    ( ax, ay, aw,
+      bx, by, bw,
+      cx, cy, cw,
       r, g, b, a, lightLevel )
     {
         // lerp depth values between the edges of the triangle for z-buffering
-        const ca = 1 / aDepth, cb = 1 / bDepth, cc = 1 / cDepth;
+        const ca = 1 / aw, cb = 1 / bw, cc = 1 / cw;
         /* coordinates of the triangle in screen-space */
         let topX = ax, topY = ay, topC = ca;
         let midX = bx, midY = by, midC = cb;
@@ -536,9 +536,9 @@
     function
     R_FillTriangle_Textured_Perspective
     ( tex,
-      ax, ay, aDepth,
-      bx, by, bDepth,
-      cx, cy, cDepth,
+      ax, ay, aw,
+      bx, by, bw,
+      cx, cy, cw,
       au, av, ac,
       bu, bv, bc,
       cu, cv, cc,
@@ -549,7 +549,7 @@
         let midX = bx, midY = by;
         let bottomX = cx, bottomY = cy;
         /* coordinates of the triangle in perspective-corrected texture-space */
-        let topC = ac / aDepth, midC = bc / bDepth, bottomC = cc / cDepth;
+        let topC = ac / aw, midC = bc / bw, bottomC = cc / cw;
         let topU = au * topC, topV = av * topC;
         let midU = bu * midC, midV = bv * midC;
         let bottomU = cu * bottomC, bottomV = cv * bottomC;

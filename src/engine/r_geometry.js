@@ -202,22 +202,19 @@
             const by = bClip3[1] * SCREEN_H_2 + SCREEN_H_2;
             const cx = cClip3[0] * SCREEN_W_2 + SCREEN_W_2;
             const cy = cClip3[1] * SCREEN_H_2 + SCREEN_H_2;
-            /* TODO: consider using the actual non-linear depth values,
-             * `triClip[i][2]`, i.e., the `z` in `gl_FragCoord`, in the
-             * depth-buffering instead
-             */
-            const aDepth = triView[0][2];
-            const bDepth = triView[1][2];
-            const cDepth = triView[2][2];
+            // TODO: consider using the actual non-linear depth values,
+            // `triClip[i][2]`, i.e., the `z` in `gl_FragCoord`, in the
+            // depth-buffering instead
+            const aw = triView[0][2], bw = triView[1][2], cw = triView[2][2];
             const triNormal = M_TriNormal3(triWorld);
             // calculate the dot product of the directional light and the unit
             // normal of the triangle in world space to determine the level of
             // illumination on the surface
             const faceLuminance =
                 (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
-            R_FillTriangle_Flat(ax, ay, aDepth,
-                                bx, by, bDepth,
-                                cx, cy, cDepth,
+            R_FillTriangle_Flat(ax, ay, aw,
+                                bx, by, bw,
+                                cx, cy, cw,
                                 255, 255, 255, 255, faceLuminance);
             if (DEBUG_MODE)
                 R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
@@ -243,13 +240,10 @@
             const by = bClip3[1] * SCREEN_H_2 + SCREEN_H_2;
             const cx = cClip3[0] * SCREEN_W_2 + SCREEN_W_2;
             const cy = cClip3[1] * SCREEN_H_2 + SCREEN_H_2;
-            /* TODO: consider using the actual non-linear depth values,
-             * `triClip[i][2]`, i.e., the `z` in `gl_FragCoord`, in the
-             * depth-buffering instead
-             */
-            const aDepth = triView[0][2];
-            const bDepth = triView[1][2];
-            const cDepth = triView[2][2];
+            // TODO: consider using the actual non-linear depth values,
+            // `triClip[i][2]`, i.e., the `z` in `gl_FragCoord`, in the
+            // depth-buffering instead
+            const aw = triView[0][2], bw = triView[1][2], cw = triView[2][2];
             const uvMap = uvTable3[triIndex];
             const aUV = uvMap[0], bUV = uvMap[1], cUV = uvMap[2];
             const au = aUV[0], av = aUV[1], ac = aUV[2];
@@ -267,9 +261,9 @@
             }
             R_FillTriangle_Textured_Perspective(
                 A_Texture(textureTable[triIndex]),
-                ax, ay, aDepth,
-                bx, by, bDepth,
-                cx, cy, cDepth,
+                ax, ay, aw,
+                bx, by, bw,
+                cx, cy, cw,
                 au, av, ac,
                 bu, bv, bc,
                 cu, cv, cc,
