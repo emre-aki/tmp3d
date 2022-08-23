@@ -361,18 +361,15 @@
         const startY = Math.ceil(topY + clipTop - 0.5);
         const midStopY = Math.ceil(midY + clipMid - 0.5);
         const endY = Math.ceil(bottomY - 0.5);
-        // bias the top and mid endpoints in screen-space by -0.5 horizontally
-        // as per the coverage rules
-        const topXBiased = topX - 0.5, midXBiased = midX - 0.5;
         /* pre-step from top and mid endpoints bu 0.5 as pixel centers are the
          * actual sampling points
          */
         const preStepFromTop = startY + 0.5 - topY;
         const preStepFromMid = midStopY + 0.5 - midY;
         /* current `x` coordinates in screen-space */
-        let xUpper = preStepFromTop * stepXAlongUpper + topXBiased;
-        let xLower = preStepFromMid * stepXAlongLower + midXBiased;
-        let xMajor = preStepFromTop * stepXAlongMajor + topXBiased;
+        let xUpper = preStepFromTop * stepXAlongUpper + topX;
+        let xLower = preStepFromMid * stepXAlongLower + midX;
+        let xMajor = preStepFromTop * stepXAlongMajor + topX;
         /* current `c` coordinates in screen-space */
         let cUpper = preStepFromTop * stepCAlongUpper + topC;
         let cLower = preStepFromMid * stepCAlongLower + midC;
@@ -386,8 +383,7 @@
              */
             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
             {
-                const startX = Math.ceil(xMajor), endX = Math.ceil(xUpper);
-                R_LerpShadedScanline(startX, endX, y, cMajor, cUpper,
+                R_LerpShadedScanline(xMajor, xUpper, y, cMajor, cUpper,
                                      r, g, b, a, lightLevel);
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
                 cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
@@ -397,8 +393,7 @@
              */
             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
             {
-                const startX = Math.ceil(xMajor), endX = Math.ceil(xLower);
-                R_LerpShadedScanline(startX, endX, y, cMajor, cLower,
+                R_LerpShadedScanline(xMajor, xLower, y, cMajor, cLower,
                                      r, g, b, a, lightLevel);
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
                 cLower += stepCAlongLower; cMajor += stepCAlongMajor;
@@ -411,8 +406,7 @@
              */
              for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
              {
-                 const startX = Math.ceil(xUpper), endX = Math.ceil(xMajor);
-                 R_LerpShadedScanline(startX, endX, y, cUpper, cMajor,
+                 R_LerpShadedScanline(xUpper, xMajor, y, cUpper, cMajor,
                                       r, g, b, a, lightLevel);
                  xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
                  cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
@@ -422,8 +416,7 @@
               */
              for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
              {
-                 const startX = Math.ceil(xLower), endX = Math.ceil(xMajor);
-                 R_LerpShadedScanline(startX, endX, y, cLower, cMajor,
+                 R_LerpShadedScanline(xLower, xMajor, y, cLower, cMajor,
                                       r, g, b, a, lightLevel);
                  xLower += stepXAlongLower; xMajor += stepXAlongMajor;
                  cLower += stepCAlongLower; cMajor += stepCAlongMajor;
