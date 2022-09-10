@@ -206,7 +206,7 @@
     function R_InitCamera (fovy, aspect, zNear, zFar, eye, velocity)
     {
         veloc = velocity;
-        camPitch = 0, camYaw = 0;
+        camPitch = 0; camYaw = 0;
         camPos = Vec3(eye[0], eye[1], eye[2]);
         camRight = RIGHT; camUp = UP; camFwd = FWD;
         matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camUp);
