@@ -38,7 +38,7 @@
     const R_ToClipSpace = R_Camera.R_ToClipSpace;
 
     const R_Draw = __import__R_Draw();
-    const R_DrawTriangleWireframe = R_Draw.R_DrawTriangleWireframe;
+    const R_DrawTriangle_Wireframe = R_Draw.R_DrawTriangle_Wireframe;
     const R_FillTriangle_Flat = R_Draw.R_FillTriangle_Flat;
     const R_FillTriangle_Textured_Perspective =
         R_Draw.R_FillTriangle_Textured_Perspective;
@@ -181,8 +181,8 @@
             const by = bClip3[1] * SCREEN_H_2 + SCREEN_H_2;
             const cx = cClip3[0] * SCREEN_W_2 + SCREEN_W_2;
             const cy = cClip3[1] * SCREEN_H_2 + SCREEN_H_2;
-            R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
-                                    255, 255, 255, 255, 2);
+            R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
+                                     255, 255, 255, 255, 2);
         }
     }
 
@@ -217,8 +217,8 @@
                                 cx, cy, cw,
                                 255, 255, 255, 255, faceLuminance);
             if (DEBUG_MODE)
-                R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
-                                        0, 0, 0, 255, 2);
+                R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
+                                         0, 0, 0, 255, 2);
         }
     }
 
@@ -270,8 +270,8 @@
                 1, faceLuminance
             );
             if (DEBUG_MODE)
-                R_DrawTriangleWireframe(ax, ay, bx, by, cx, cy,
-                                        255, 255, 255, 255, 2);
+                R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
+                                         255, 255, 255, 255, 2);
         }
     }
 

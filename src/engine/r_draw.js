@@ -248,7 +248,7 @@
     }
 
     function
-    R_DrawTriangleWireframe
+    R_DrawTriangle_Wireframe
     ( ax, ay,
       bx, by,
       cx, cy,
@@ -260,7 +260,11 @@
         R_DrawLine_Bresenham(bx, by, cx, cy, r, g, b, a, stroke);
     }
 
-    function R_LerpShadedScanline (dx0, dx1, dy, c0, c1, r, g, b, a, lightLevel)
+    function
+    R_LerpShadedScanline_Flat
+    ( dx0, dx1, dy,
+      c0, c1,
+      r, g, b, a, lightLevel)
     {
         // shaded color value to fill the triangle with
         const R = r * lightLevel, G = g * lightLevel, B = b * lightLevel;
@@ -383,8 +387,8 @@
              */
             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
             {
-                R_LerpShadedScanline(xMajor, xUpper, y, cMajor, cUpper,
-                                     r, g, b, a, lightLevel);
+                R_LerpShadedScanline_Flat(xMajor, xUpper, y, cMajor, cUpper,
+                                          r, g, b, a, lightLevel);
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
                 cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
             }
@@ -393,8 +397,8 @@
              */
             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
             {
-                R_LerpShadedScanline(xMajor, xLower, y, cMajor, cLower,
-                                     r, g, b, a, lightLevel);
+                R_LerpShadedScanline_Flat(xMajor, xLower, y, cMajor, cLower,
+                                          r, g, b, a, lightLevel);
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
                 cLower += stepCAlongLower; cMajor += stepCAlongMajor;
             }
@@ -406,8 +410,8 @@
              */
              for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
              {
-                 R_LerpShadedScanline(xUpper, xMajor, y, cUpper, cMajor,
-                                      r, g, b, a, lightLevel);
+                 R_LerpShadedScanline_Flat(xUpper, xMajor, y, cUpper, cMajor,
+                                           r, g, b, a, lightLevel);
                  xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
                  cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
              }
@@ -416,8 +420,8 @@
               */
              for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
              {
-                 R_LerpShadedScanline(xLower, xMajor, y, cLower, cMajor,
-                                      r, g, b, a, lightLevel);
+                 R_LerpShadedScanline_Flat(xLower, xMajor, y, cLower, cMajor,
+                                           r, g, b, a, lightLevel);
                  xLower += stepXAlongLower; xMajor += stepXAlongMajor;
                  cLower += stepCAlongLower; cMajor += stepCAlongMajor;
              }
@@ -794,7 +798,7 @@
             R_DrawLine_DDA: R_DrawLine_DDA,
             R_DrawLine_Bresenham: R_DrawLine_Bresenham,
             R_DrawLine_RayCast: R_DrawLine_RayCast,
-            R_DrawTriangleWireframe: R_DrawTriangleWireframe,
+            R_DrawTriangle_Wireframe: R_DrawTriangle_Wireframe,
             R_FillTriangle_Flat: R_FillTriangle_Flat,
             R_FillTriangle_Flat_Bresenham: R_FillTriangle_Flat_Bresenham,
             R_FillTriangle_Textured_Affine: R_FillTriangle_Textured_Affine,
