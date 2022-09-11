@@ -14,7 +14,7 @@
 
     function D_Eye ()
     {
-        return [0, 0, -1];
+        return [-105, -3, 366];
     }
 
     window.__import__D_Player = function ()
