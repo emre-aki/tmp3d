@@ -219,18 +219,12 @@
         R_Print("pos: <" + M_ToFixedDigits(camPos[0], 2) + ", " +
                            M_ToFixedDigits(camPos[1], 2) + ", " +
                            M_ToFixedDigits(camPos[2], 2) + ">",
-                5, 15,
-                "#FF0000",
-                14);
+                5, 15, "#FF0000", 14);
         /* print the pitch and yaw for the camera */
         R_Print("yaw: " + M_ToFixedDigits(M_RadToDeg(camYaw), 2) + " deg",
-                5, 30,
-                "#FF0000",
-                14);
+                5, 30, "#FF0000", 14);
         R_Print("pitch: " + M_ToFixedDigits(M_RadToDeg(camPitch), 2) + " deg",
-                5, 45,
-                "#FF0000",
-                14);
+                5, 45, "#FF0000", 14);
         // FIXME: this really shouldn't be here
         R_Print("tris: " + nTrisOnScreen, 5, 60, "#FF0000", 14);
         // print the instantaneous framerate
@@ -238,9 +232,7 @@
         /* print in milliseconds how much time has passed since the last frame
          */
         R_Print("frametime: " + Math.round(deltaT) + " ms",
-                5, 90,
-                "#FF0000",
-                14);
+                5, 90, "#FF0000", 14);
     }
 
     /* FIXME: move this function to a more sensible file/module */
