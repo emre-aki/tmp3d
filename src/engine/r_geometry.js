@@ -206,9 +206,9 @@
             // `triClip[i][2]`, i.e., the `z` in `gl_FragCoord`, in the
             // depth-buffering instead
             const aw = triView[0][2], bw = triView[1][2], cw = triView[2][2];
-            const triNormal = M_TriNormal3(triWorld);
+            const triNormal = M_TriNormal3(triView);
             // calculate the dot product of the directional light and the unit
-            // normal of the triangle in world space to determine the level of
+            // normal of the triangle in view space to determine the level of
             // illumination on the surface
             const faceLuminance =
                 (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
@@ -252,9 +252,9 @@
             let faceLuminance = 1;
             if (RENDER_MODES[renderMode] === RENDER_MODE.TEXTURED_SHADED)
             {
-                const triNormal = M_TriNormal3(triWorld);
+                const triNormal = M_TriNormal3(triView);
                 // calculate the dot product of the directional light and the
-                // unit normal of the triangle in world space to determine the
+                // unit normal of the triangle in view space to determine the
                 // level of illumination on the surface
                 faceLuminance =
                     (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
