@@ -50,7 +50,8 @@ you may take it as it is and expect many more features to follow very soon.
 
 Tmp3D currently supports
 
-  - a first-person camera with 2 degrees-of-freedom: _yaw_ and _pitch_
+  - a first-person camera with _5_ degrees-of-freedom: translating along _x_,
+    _y_ & _z_ axes, and _yaw_ & _pitch_
   - perspective transformations
   - near & far clipping planes
   - back-face culling
