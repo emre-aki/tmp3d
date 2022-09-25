@@ -19,6 +19,7 @@
     const G_Const = __import__G_Const();
     const SCREEN_W_2 = G_Const.SCREEN_W_2, SCREEN_H_2 = G_Const.SCREEN_H_2;
     const Z_NEAR = G_Const.Z_NEAR;
+    const FRUSTUM_AABB3 = G_Const.FRUSTUM_AABB3;
 
     const I_Input = __import__I_Input();
     const I_GetKeyState = I_Input.I_GetKeyState;
@@ -27,9 +28,12 @@
     const M_Collision3 = __import__M_Collision3();
     const M_TimeBeforePlaneCollision3 =
         M_Collision3.M_TimeBeforePlaneCollision3;
+    const M_BoundingBoxVsBoundingBoxCollision3 =
+        M_Collision3.M_BoundingBoxVsBoundingBoxCollision3;
 
     const M_Tri3 = __import__M_Tri3();
     const M_TriNormal3 = M_Tri3.M_TriNormal3;
+    const M_AABB3FromTri3 = M_Tri3.M_AABB3FromTri3;
     const Tri3 = M_Tri3.M_Tri3;
 
     const M_Vec3 = __import__M_Vec3();
@@ -133,6 +137,13 @@
         // TODO: implement
     }
 
+    /* TODO: improve the crude frustum-culling technique used here */
+    function R_FrustumCull (triView)
+    {
+        const triAABB3 = M_AABB3FromTri3(triView);
+        return M_BoundingBoxVsBoundingBoxCollision3(FRUSTUM_AABB3, triAABB3);
+    }
+
     function R_CullGeometry (triangles, nTriangles)
     {
         let nTrianglesAfterCulling = 0;
@@ -141,7 +152,10 @@
             const triView = R_ToViewSpace(triangles[i]);
             const aView = triView[0];
             if (
-                // backface-culling: if the triangle is facing the camera
+                // frustum-culling: is the triangle at least partially within
+                // the view frustum?
+                R_FrustumCull(triView) &&
+                // backface-culling: is the triangle facing the camera?
                 M_IsInFrontOfPlane3(ORIGIN, aView, M_TriNormal3(triView))
                 // TODO: implement occlusion-culling
             )

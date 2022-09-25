@@ -16,12 +16,19 @@
 - [x] Raster-clipping
 - [ ] Culling & clipping based on the view space
     - [ ] Frustum-culling
+        - [x] Crude (AABB vs. AABB)
+        - [ ] Smart (some other more optimized technique)
     - [ ] Clipping geometries against the view frustum
         - [x] Clipping against the near-plane
         - [ ] Clipping against the far-plane
         - [ ] Clipping against other planes? (Or would raster-clipping be
               enough?)
 - [x] Flat-shading
+- [ ] Phong reflection model
+    - [x] Ambient lighting
+    - [ ] Diffuse shading
+    - [ ] Specular lighting
+
 - [ ] Texture-mapping
     - [ ] Affine
     - [x] Perspective-correct
@@ -49,7 +56,8 @@
       spefically for the time being)
 
 ### release: 0.0.7
-- [ ] Crude frustum-culling
+- [x] Crude frustum-culling
+- [ ] Diffuse-shading
 
 ### release: 0.0.8
 - [ ] Fix the oscillation in the frametimes

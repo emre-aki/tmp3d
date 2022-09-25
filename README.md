@@ -54,6 +54,7 @@ Tmp3D currently supports
     _y_ & _z_ axes, and _yaw_ & _pitch_
   - perspective transformations
   - back-face culling
+  - AABB-based, crude frustum-culling
   - raster-clipping
   - clipping against the near-clipping plane
   - flat-shading w/ directional lights
@@ -63,7 +64,7 @@ Tmp3D currently supports
 
 and plans to support
 
-  - frustum-culling
+  - Phong reflection model
   - affine texture-mapping
   - occlusion culling (😩)
 

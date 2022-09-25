@@ -18,6 +18,10 @@
     const M_Cross3 = M_Vec3.M_Cross3;
     const M_Norm3 = M_Vec3.M_Norm3;
     const M_Vec3FromVec4 = M_Vec3.M_Vec3FromVec4;
+    const Vec3 = M_Vec3.M_Vec3;
+
+    const M_AABB3 = __import__M_AABB3();
+    const AABB3 = M_AABB3.M_AABB3;
 
     const M_Mat4 = __import__M_Mat4();
     const M_Transform4 = M_Mat4.M_Transform4;
@@ -49,12 +53,27 @@
                       M_Vec3FromVec4(triCTransformed4));
     }
 
+    function M_AABB3FromTri3 (tri3)
+    {
+        const triA3 = tri3[0], triB3 = tri3[1], triC3 = tri3[2];
+        const origin3 = Vec3(Math.min(triA3[0], triB3[0], triC3[0]),
+                             Math.min(triA3[1], triB3[1], triC3[1]),
+                             Math.min(triA3[2], triB3[2], triC3[2]));
+        const dimensions3 = Vec3(
+            Math.max(triA3[0], triB3[0], triC3[0]) - origin3[0],
+            Math.max(triA3[1], triB3[1], triC3[1]) - origin3[1],
+            Math.max(triA3[2], triB3[2], triC3[2]) - origin3[2]
+        );
+        return AABB3(origin3, dimensions3);
+    }
+
     window.__import__M_Tri3 = function ()
     {
         return {
             M_Tri3: M_Tri3,
             M_TriNormal3: M_TriNormal3,
             M_TransformTri3: M_TransformTri3,
+            M_AABB3FromTri3: M_AABB3FromTri3,
         };
     };
 })();
