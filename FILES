@@ -28,6 +28,7 @@ m_math.js       - math utilities
 m_mat4.js       - 4x4 matrix
 m_tri3.js       - 3-D triangle
 m_vec3.js       - 3-D vector
+m_collision3.js - 3-D collisions
 
 --------------------------------------------------------------------------------
 R        Rendering
