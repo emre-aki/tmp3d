@@ -47,7 +47,12 @@
 ### release: 0.0.6
 - [x] Clipping geometries against the view frustum (Against the near-plane
       spefically for the time being)
-- [ ] Crude frustum-culling
 
 ### release: 0.0.7
+- [ ] Crude frustum-culling
+
+### release: 0.0.8
 - [ ] Fix the oscillation in the frametimes
+
+### release: 0.0.x
+- [ ] Occlusion-culling
