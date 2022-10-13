@@ -26,21 +26,21 @@
     const G_Const = __import__G_Const();
     const FPS = G_Const.FPS;
 
+    const G_Demo = __import__G_Demo();
+    const G_RenderDemoFrame = G_Demo.G_RenderDemoFrame;
+
     const R_Camera = __import__R_Camera();
     const R_UpdateCamera = R_Camera.R_UpdateCamera;
     const R_DebugStats = R_Camera.R_DebugStats;
 
     const R_Draw = __import__R_Draw();
     const R_ResetFrameBuffer = R_Draw.R_ResetFrameBuffer;
-    const R_FlushFrame = R_Draw.R_FlushFrame;
     const R_ResetZBuffer = R_Draw.R_ResetZBuffer;
 
     const R_Drawers = __import__R_Drawers();
     const R_TitleDrawer = R_Drawers.R_TitleDrawer;
 
     const R_Geometry = __import__R_Geometry();
-    const R_ChangeRenderMode = R_Geometry.R_ChangeRenderMode;
-    const R_RenderGeometries = R_Geometry.R_RenderGeometries;
     const R_TriPool = R_Geometry.R_TriPool;
 
     const TICK_DELAY = 1000 / FPS;
@@ -55,10 +55,7 @@
         // clear the frame buffer so that the frame can start fresh
         R_ResetFrameBuffer();
         R_ResetZBuffer();
-        R_ChangeRenderMode();
-        R_RenderGeometries(nTrisOnScreen);
-        R_FlushFrame();
-        if (DEBUG_MODE) R_DebugStats(deltaT, nTrisOnScreen);
+        G_RenderDemoFrame(nTrisOnScreen);
     }
 
     function G_UpdateGame (deltaT, tris)

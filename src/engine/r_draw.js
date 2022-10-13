@@ -264,13 +264,15 @@
     R_LerpShadedScanline_Flat
     ( dx0, dx1, dy,
       c0, c1,
-      r, g, b, a, lightLevel)
+      r, g, b, a, lightLevel,
+      frameX, frameW )
     {
         // shaded color value to fill the triangle with
         const R = r * lightLevel, G = g * lightLevel, B = b * lightLevel;
         // raster clipping: clip the scanline if it goes out of bounds of screen
         // coordinates
-        const clipLeft = Math.max(-dx0, 0);
+        const frameEnd = frameX + frameW;
+        const clipLeft = Math.max(frameX - dx0, 0);
         // bias the start and end endpoints in screen-space by -0.5 horizontally
         // as per the coverage rules
         const dX0 = Math.ceil(dx0 + clipLeft - 0.5), dX1 = Math.ceil(dx1 - 0.5);
@@ -281,7 +283,7 @@
         const gradC = (c1 - c0) / (dx1 - dx0);
         let c = preStepX * gradC + c0;
         /* rasterize current scanline */
-        for (let x = dX0; x < dX1 && x < SCREEN_W; ++x)
+        for (let x = dX0; x < dX1 && x < frameEnd; ++x)
         {
             const bufferIndex = dy * SCREEN_W + x;
             /* skip filling in the pixel unless the current pixel in the raster
@@ -316,7 +318,8 @@
     ( ax, ay, aw,
       bx, by, bw,
       cx, cy, cw,
-      r, g, b, a, lightLevel )
+      r, g, b, a, lightLevel,
+      frameX, frameY, frameW, frameH )
     {
         // lerp depth values between the edges of the triangle for z-buffering
         const ca = 1 / aw, cb = 1 / bw, cc = 1 / cw;
@@ -358,7 +361,9 @@
         const stepCAlongMajor = (bottomC - topC) * _deltaMajor;
         // raster clipping: clip the triangle if it goes out of bounds of screen
         // coordinates
-        const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
+        const frameEnd = frameY + frameH;
+        const clipTop = Math.max(frameY - topY, 0);
+        const clipMid = Math.max(frameY - midY, 0);
         /* vertical endpoints of the rasterization in screen-space, biased by
          * -0.5 as per the coverage rules
          */
@@ -385,20 +390,22 @@
             /* lerp based on `y` in screen-space for the upper half of the
              * triangle
              */
-            for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
+            for (let y = startY; y < midStopY && y < frameEnd; ++y)
             {
                 R_LerpShadedScanline_Flat(xMajor, xUpper, y, cMajor, cUpper,
-                                          r, g, b, a, lightLevel);
+                                          r, g, b, a, lightLevel,
+                                          frameX, frameW);
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
                 cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
             }
             /* lerp based on `y` in screen-space for the lower half of the
              * triangle
              */
-            for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
+            for (let y = midStopY; y < endY && y < frameEnd; ++y)
             {
                 R_LerpShadedScanline_Flat(xMajor, xLower, y, cMajor, cLower,
-                                          r, g, b, a, lightLevel);
+                                          r, g, b, a, lightLevel,
+                                          frameX, frameW);
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
                 cLower += stepCAlongLower; cMajor += stepCAlongMajor;
             }
@@ -408,20 +415,22 @@
              /* lerp based on `y` in screen-space for the upper half of the
              * triangle
              */
-             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
+             for (let y = startY; y < midStopY && y < frameEnd; ++y)
              {
                  R_LerpShadedScanline_Flat(xUpper, xMajor, y, cUpper, cMajor,
-                                           r, g, b, a, lightLevel);
+                                           r, g, b, a, lightLevel,
+                                           frameX, frameW);
                  xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
                  cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
              }
              /* lerp based on `y` in screen-space for the lower half of the
               * triangle
               */
-             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
+             for (let y = midStopY; y < endY && y < frameEnd; ++y)
              {
                  R_LerpShadedScanline_Flat(xLower, xMajor, y, cLower, cMajor,
-                                           r, g, b, a, lightLevel);
+                                           r, g, b, a, lightLevel,
+                                           frameX, frameW);
                  xLower += stepXAlongLower; xMajor += stepXAlongMajor;
                  cLower += stepCAlongLower; cMajor += stepCAlongMajor;
              }

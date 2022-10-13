@@ -1,6 +1,6 @@
 {
     "name": "tmp3d",
-    "version": "0.0.6",
+    "version": "0.0.6_x",
     "description": "A 3-D software renderer written from scratch in nothing but JavaScript",
     "main": "server.js",
     "scripts": {

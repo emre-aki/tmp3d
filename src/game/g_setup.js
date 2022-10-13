@@ -17,12 +17,9 @@
     const AN_Animation = __import__AN_Animation();
     const AN_CancelAnimation = AN_Animation.AN_CancelAnimation;
 
-    const D_Mesh = __import__D_Mesh();
-    const D_Vertices = D_Mesh.D_Vertices();
-    const D_Triangles = D_Mesh.D_Triangles();
-    const D_UV = D_Mesh.D_UV();
-    const D_UVMap = D_Mesh.D_UVMap();
-    const D_TextureAtlas = D_Mesh.D_TextureAtlas();
+    const G_Demo = __import__G_Demo();
+    const G_DemoVertices = G_Demo.G_DemoVertices();
+    const G_DemoTriangles = G_Demo.G_DemoTriangles();
 
     const D_Player = __import__D_Player();
     const D_Velocity = D_Player.D_Velocity;
@@ -62,13 +59,10 @@
 
     function G_LoadTextures ()
     {
-        const meshTextureIds = Object.keys(D_TextureAtlas);
         const globTextureIds = Object.keys(D_GlobTextureIdTable);
-        const textureIds = meshTextureIds.concat(globTextureIds);
-        const meshTextureFilenames = Object.values(D_TextureAtlas);
+        const textureIds = globTextureIds;
         const globTextureFilenames = Object.values(D_GlobTextureFilenameTable);
-        const textureFilenames = meshTextureFilenames
-            .concat(globTextureFilenames);
+        const textureFilenames = globTextureFilenames;
         const numTextures = textureFilenames.length;
         return A_LoadTextures(textureIds, textureFilenames, numTextures);
     }
@@ -93,10 +87,9 @@
             I_InitMouse(R_ScreenElement);
             R_InitZBuffer();
             R_InitCamera(FOV_Y, ASPECT, Z_NEAR, Z_FAR, D_Eye, D_Velocity);
-            R_LoadGeometry(D_Vertices, D_Triangles, D_Triangles.length);
-            /* initialize the uv table if the mesh data have texture-mapping */
-            if (D_UV.length && D_UVMap.length)
-                R_InitUVTable(D_UV, D_UVMap, D_UVMap.length);
+            R_LoadGeometry(G_DemoVertices,
+                           G_DemoTriangles,
+                           G_DemoTriangles.length);
         }
         catch (error)
         {

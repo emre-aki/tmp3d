@@ -78,7 +78,7 @@
         RENDER_MODE.TEXTURED_SHADED,
     ];
 
-    let renderMode = 3;
+    let renderMode = 1;
     let lastRenderModeChange = new Date().getTime();
     let renderModeChangeDebounce = 250;
 
@@ -318,8 +318,13 @@
         nTrisOnScreen[1] = nCullBuffer;
     }
 
-    function R_RenderGeomeries_Flat (nTrisOnScreen)
+    function
+    R_RenderGeomeries_Flat
+    ( nTrisOnScreen,
+      frameX, frameY,
+      frameW, frameH )
     {
+        const frameW_2 = frameW * 0.5, frameH_2 = frameH * 0.5;
         let trisRendered = 0;
         for (let i = 0; i < nCullBuffer; ++i)
         {
@@ -338,12 +343,12 @@
                 const aClip3 = triClip[0];
                 const bClip3 = triClip[1];
                 const cClip3 = triClip[2];
-                const ax = aClip3[0] * SCREEN_W_2 + SCREEN_W_2;
-                const ay = aClip3[1] * SCREEN_H_2 + SCREEN_H_2;
-                const bx = bClip3[0] * SCREEN_W_2 + SCREEN_W_2;
-                const by = bClip3[1] * SCREEN_H_2 + SCREEN_H_2;
-                const cx = cClip3[0] * SCREEN_W_2 + SCREEN_W_2;
-                const cy = cClip3[1] * SCREEN_H_2 + SCREEN_H_2;
+                const ax = aClip3[0] * frameW_2 + frameW_2 + frameX;
+                const ay = aClip3[1] * frameH_2 + frameH_2 + frameY;
+                const bx = bClip3[0] * frameW_2 + frameW_2 + frameX;
+                const by = bClip3[1] * frameH_2 + frameH_2 + frameY;
+                const cx = cClip3[0] * frameW_2 + frameW_2 + frameX;
+                const cy = cClip3[1] * frameH_2 + frameH_2 + frameY;
                 /* TODO: consider using the actual non-linear depth values,
                  * `triClip[i][2]`, i.e., the `z` in `gl_FragCoord`, in the
                  * depth-buffering instead
@@ -360,10 +365,8 @@
                 R_FillTriangle_Flat(ax, ay, aw,
                                     bx, by, bw,
                                     cx, cy, cw,
-                                    255, 255, 255, 255, faceLuminance);
-                if (DEBUG_MODE)
-                    R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
-                                             0, 0, 0, 255, 2);
+                                    255, 255, 0, 255, faceLuminance,
+                                    frameX, frameY, frameW, frameH);
                 ++trisRendered;
             }
         }
@@ -449,7 +452,7 @@
         nTrisOnScreen[1] = nCullBuffer;
     }
 
-    function R_RenderGeometries (nTrisOnScreen)
+    function R_RenderGeometries (nTrisOnScreen, frameX, frameY, frameW, frameH)
     {
         const nTriangles = triPool3.length; // FIXME: make into a global const.
         R_CullGeometry(triPool3, nTriangles);
@@ -459,7 +462,9 @@
                 R_RenderGeomeries_Wireframe(nTrisOnScreen);
                 break;
             case RENDER_MODE.FLAT:
-                R_RenderGeomeries_Flat(nTrisOnScreen);
+                R_RenderGeomeries_Flat(nTrisOnScreen,
+                                       frameX, frameY,
+                                       frameW, frameH);
                 break;
             case RENDER_MODE.TEXTURED:
             case RENDER_MODE.TEXTURED_SHADED:
@@ -468,7 +473,6 @@
             default:
                 break;
         }
-        if (DEBUG_MODE) R_DebugAxes();
     }
 
     function R_TriPool ()

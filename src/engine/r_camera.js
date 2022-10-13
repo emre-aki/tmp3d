@@ -213,7 +213,7 @@
     {
         projectionOrigin = Vec3(0, 0, zNear);
         veloc = velocity;
-        camPitch = 0; camYaw = Math.PI;
+        camPitch = 0; camYaw = 0;
         camPos = Vec3(eye[0], eye[1], eye[2]);
         camRight = RIGHT; camUp = UP; camFwd = FWD;
         matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camUp);
@@ -277,6 +277,16 @@
                                  0, 0, 255, 255, 2);
     }
 
+    function R_GetPointAt ()
+    {
+        return M_QuickInv4(matLookAt);
+    }
+
+    function R_GetLookAt ()
+    {
+        return matLookAt;
+    }
+
     window.__import__R_Camera = function ()
     {
         return {
@@ -290,6 +300,8 @@
             R_ToClipSpace: R_ToClipSpace,
             R_DebugStats: R_DebugStats,
             R_DebugAxes: R_DebugAxes,
+            R_GetPointAt: R_GetPointAt,
+            R_GetLookAt: R_GetLookAt,
         };
     };
 })();
