@@ -78,7 +78,7 @@
         RENDER_MODE.TEXTURED_SHADED,
     ];
 
-    let renderMode = 3;
+    let renderMode = 1;
     let lastRenderModeChange = new Date().getTime();
     let renderModeChangeDebounce = 250;
 
@@ -361,9 +361,6 @@
                                     bx, by, bw,
                                     cx, cy, cw,
                                     255, 255, 255, 255, faceLuminance);
-                if (DEBUG_MODE)
-                    R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
-                                             0, 0, 0, 255, 2);
                 ++trisRendered;
             }
         }
