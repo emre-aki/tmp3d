@@ -138,8 +138,17 @@
         let nTrianglesAfterCulling = 0;
         for (let i = 0; i < nTriangles; ++i)
         {
-            cullBuffer[nTrianglesAfterCulling] = i;
-            ++nTrianglesAfterCulling;
+            const triView = R_ToViewSpace(triangles[i]);
+            const aView = triView[0];
+            if (
+                // backface-culling: if the triangle is facing the camera
+                M_IsInFrontOfPlane3(ORIGIN, aView, M_TriNormal3(triView))
+                // TODO: implement occlusion-culling
+            )
+            {
+                cullBuffer[nTrianglesAfterCulling] = i;
+                ++nTrianglesAfterCulling;
+            }
         }
         nCullBuffer = nTrianglesAfterCulling;
     }
