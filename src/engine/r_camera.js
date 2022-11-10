@@ -179,7 +179,7 @@
         // update the camera position by the movement vector
         camPos = M_Add3(camPos, step);
         // update the look-at matrix used for view transformation
-        matLookAt = R_PointAt(camPos, M_Add3(camPos, camFwd), camUp);
+        matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camUp);
     }
 
     function R_ToViewSpace (triangle)
@@ -213,7 +213,7 @@
     {
         projectionOrigin = Vec3(0, 0, zNear);
         veloc = velocity;
-        camPitch = 0; camYaw = Math.PI;
+        camPitch = 0; camYaw = 0;
         camPos = Vec3(eye[0], eye[1], eye[2]);
         camRight = RIGHT; camUp = UP; camFwd = FWD;
         matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camUp);
@@ -222,22 +222,25 @@
 
     function R_DebugStats (deltaT, nTrisOnScreen)
     {
-        R_Print(camRight[0].toFixed(1).padStart(4, camRight[0] < 0 ? "" : " ") + " " +
-                camUp[0].toFixed(1).padStart(4, camUp[0] < 0 ? "" : " ") + " " +
-                camFwd[0].toFixed(1).padStart(4, camFwd[0] < 0 ? "" : " ") + " " +
-                camPos[0].toFixed(1).padStart(4, camPos[0] < 0 ? "" : " "),
-                5, 25, "#FF0000", 25);
-        R_Print(camRight[1].toFixed(1).padStart(4, camRight[1] < 0 ? "" : " ") + " " +
-                camUp[1].toFixed(1).padStart(4, camUp[1] < 0 ? "" : " ") + " " +
-                camFwd[1].toFixed(1).padStart(4, camFwd[1] < 0 ? "" : " ") + " " +
-                camPos[1].toFixed(1).padStart(4, camPos[1] < 0 ? "" : " "),
-                5, 51, "#FF0000", 25);
-        R_Print(camRight[2].toFixed(1).padStart(4, camPos[2] < 0 ? "" : " ") + " " +
-                camUp[2].toFixed(1).padStart(4, camUp[2] < 0 ? "" : " ") + " " +
-                camFwd[2].toFixed(1).padStart(4, camFwd[2] < 0 ? "" : " ") + " " +
-                camPos[2].toFixed(1).padStart(4, camPos[2] < 0 ? "" : " "),
-                5, 77, "#FF0000", 25);
-        R_Print(" 0.0  0.0  0.0  1.0", 5, 103, "#FF0000", 25);
+        /* print the position of the camera */
+        R_Print("pos: <" + M_ToFixedDigits(camPos[0], 2) + ", " +
+                           M_ToFixedDigits(camPos[1], 2) + ", " +
+                           M_ToFixedDigits(camPos[2], 2) + ">",
+                5, 15, "#FF0000", 14);
+        /* print the pitch and yaw for the camera */
+        R_Print("yaw: " + M_ToFixedDigits(M_RadToDeg(camYaw), 2) + " deg",
+                5, 30, "#FF0000", 14);
+        R_Print("pitch: " + M_ToFixedDigits(M_RadToDeg(camPitch), 2) + " deg",
+                5, 45, "#FF0000", 14);
+        // FIXME: this really shouldn't be here
+        R_Print("tris: " + nTrisOnScreen[0] + " (" + nTrisOnScreen[1] + ")",
+                5, 60, "#FF0000", 14);
+        // print the instantaneous framerate
+        R_Print("fps: " + Math.round(1000 / deltaT), 5, 75, "#FF0000", 14);
+        /* print in milliseconds how much time has passed since the last frame
+         */
+        R_Print("frametime: " + Math.round(deltaT) + " ms",
+                5, 90, "#FF0000", 14);
     }
 
     /* FIXME: move this function to a more sensible file/module */
