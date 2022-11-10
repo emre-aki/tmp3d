@@ -73,6 +73,21 @@
     let matLookAt; // the look-at matrix used for view transformation
     let projectionOrigin; // the center of the projection (near-clipping) plane
 
+    let isThirdPerson = true;
+    let lastViewModeChange = new Date().getTime();
+    let viewModeChangeDebounce = 100;
+
+    function R_ChangeViewMode ()
+    {
+        const now = new Date().getTime();
+        if (I_GetKeyState(I_Keys.V) &&
+            now - lastViewModeChange > viewModeChangeDebounce)
+        {
+            isThirdPerson = !isThirdPerson;
+            lastViewModeChange = new Date().getTime();
+        }
+    }
+
     // TODO: instead of having `eye`, `center`, and `up` as arguments to the
     // function, directly read the camera basis vectors off of the global scope
     function R_PointAt (eye, center, up)
@@ -179,7 +194,8 @@
         // update the camera position by the movement vector
         camPos = M_Add3(camPos, step);
         // update the look-at matrix used for view transformation
-        matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camUp);
+        if (!isThirdPerson)
+            matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camUp);
     }
 
     function R_ToViewSpace (triangle)
@@ -215,44 +231,48 @@
         veloc = velocity;
         camPitch = 0; camYaw = 0;
         camPos = Vec3(eye[0], eye[1], eye[2]);
-        camRight = RIGHT; camUp = UP; camFwd = FWD;
+        R_OrientCamera(camYaw, camPitch);
         matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camUp);
         matPerspective = R_Perspective(fovy, aspect, zNear, zFar);
     }
 
     function R_DebugStats (deltaT, nTrisOnScreen)
     {
-        /* print the position of the camera */
-        R_Print("pos: <" + M_ToFixedDigits(camPos[0], 2) + ", " +
-                           M_ToFixedDigits(camPos[1], 2) + ", " +
-                           M_ToFixedDigits(camPos[2], 2) + ">",
-                5, 15, "#FF0000", 14);
-        /* print the pitch and yaw for the camera */
-        R_Print("yaw: " + M_ToFixedDigits(M_RadToDeg(camYaw), 2) + " deg",
-                5, 30, "#FF0000", 14);
-        R_Print("pitch: " + M_ToFixedDigits(M_RadToDeg(camPitch), 2) + " deg",
-                5, 45, "#FF0000", 14);
-        // FIXME: this really shouldn't be here
-        R_Print("tris: " + nTrisOnScreen[0] + " (" + nTrisOnScreen[1] + ")",
-                5, 60, "#FF0000", 14);
-        // print the instantaneous framerate
-        R_Print("fps: " + Math.round(1000 / deltaT), 5, 75, "#FF0000", 14);
-        /* print in milliseconds how much time has passed since the last frame
-         */
-        R_Print("frametime: " + Math.round(deltaT) + " ms",
-                5, 90, "#FF0000", 14);
+        R_Print(M_ToFixedDigits(camRight[0], 2) + " " +
+                M_ToFixedDigits(camUp[0], 2) + " " +
+                M_ToFixedDigits(camFwd[0], 2) + " " +
+                M_ToFixedDigits(camPos[0], 2),
+                5, 25, "#FF0000", 25);
+        R_Print(M_ToFixedDigits(camRight[1], 2) + " " +
+                M_ToFixedDigits(camUp[1], 2) + " " +
+                M_ToFixedDigits(camFwd[1], 2) + " " +
+                M_ToFixedDigits(camPos[1], 2),
+                5, 51, "#FF0000", 25);
+        R_Print(M_ToFixedDigits(camRight[2], 2) + " " +
+                M_ToFixedDigits(camUp[2], 2) + " " +
+                M_ToFixedDigits(camFwd[2], 2) + " " +
+                M_ToFixedDigits(camPos[2], 2),
+                5, 77, "#FF0000", 25);
+        R_Print("0 0 0 1", 5, 103, "#FF0000", 25);
     }
 
     /* FIXME: move this function to a more sensible file/module */
     function R_DebugAxes ()
     {
-        const originViewSpace4 = M_Transform4(matLookAt,
-                                              M_Vec4FromVec3(ORIGIN, 1));
+        if (!isThirdPerson) return;
+        const eye = M_Add3(camPos, M_Scale3(camFwd, 0.0001));
+        const center = M_Add3(eye, camFwd);
+        const matPointAt = R_PointAt(eye, center, camUp);
+        let originViewSpace4 = M_Transform4(matPointAt,
+                                            M_Vec4FromVec3(ORIGIN, 1));
+        originViewSpace4 = M_Transform4(matLookAt, originViewSpace4);
         const originClipSpace3 = M_Vec3FromVec4(M_Transform4(matPerspective,
                                                              originViewSpace4));
-        const axesViewSpace3 = R_ToViewSpace(Tri3(M_Scale3(RIGHT, 2),
+        let axesViewSpace3 = M_TransformTri3(matPointAt,
+                                             Tri3(M_Scale3(RIGHT, 2),
                                                   M_Scale3(UP, 2),
                                                   M_Scale3(FWD, 2)));
+        axesViewSpace3 = R_ToViewSpace(axesViewSpace3);
         const axesClipSpace3 = R_ToClipSpace(axesViewSpace3);
         const rightClipSpace3 = axesClipSpace3[0];
         const upClipSpace3 = axesClipSpace3[1];
@@ -284,6 +304,7 @@
         return {
             R_ORIGIN: ORIGIN,
             R_BWD: BWD,
+            R_ChangeViewMode: R_ChangeViewMode,
             R_InitCamera: R_InitCamera,
             R_UpdateCamera: R_UpdateCamera,
             R_GetCameraState: R_GetCameraState,

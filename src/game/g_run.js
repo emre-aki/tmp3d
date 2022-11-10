@@ -29,6 +29,7 @@
     const R_Camera = __import__R_Camera();
     const R_UpdateCamera = R_Camera.R_UpdateCamera;
     const R_DebugStats = R_Camera.R_DebugStats;
+    const R_ChangeViewMode = R_Camera.R_ChangeViewMode;
 
     const R_Draw = __import__R_Draw();
     const R_ResetFrameBuffer = R_Draw.R_ResetFrameBuffer;
@@ -56,6 +57,7 @@
         R_ResetFrameBuffer();
         R_ResetZBuffer();
         R_ChangeRenderMode();
+        R_ChangeViewMode();
         R_RenderGeometries(nTrisOnScreen);
         R_FlushFrame();
         if (DEBUG_MODE) R_DebugStats(deltaT, nTrisOnScreen);

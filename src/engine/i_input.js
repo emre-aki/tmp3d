@@ -20,6 +20,7 @@
             Q: "Q",
             R: "R",
             S: "S",
+            V: "V",
             W: "W",
             /* arrow keys */
             ARW_DOWN: "ARW_DOWN",
@@ -59,6 +60,7 @@
         [KEY.Q]: 0,
         [KEY.R]: 0,
         [KEY.S]: 0,
+        [KEY.V]: 0,
         [KEY.W]: 0,
         [KEY.ARW_DOWN]: 0,
         [KEY.ARW_LEFT]: 0,
@@ -98,6 +100,7 @@
             case 65: keyState.A = state ? 1 : 0; break;
             case 68: keyState.D = state ? 1 : 0; break;
             case 69: keyState.E = state ? 1 : 0; break;
+            case 86: keyState.V = state ? 1 : 0; break;
             case 87: keyState.W = state ? 1 : 0; break;
             case 81: keyState.Q = state ? 1 : 0; break;
             case 82: keyState.R = state ? 1 : 0; break;

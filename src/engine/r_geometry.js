@@ -45,6 +45,7 @@
     const R_ToViewSpace = R_Camera.R_ToViewSpace;
     const R_ToClipSpace = R_Camera.R_ToClipSpace;
     const R_GetProjectionOrigin = R_Camera.R_GetProjectionOrigin;
+    const R_GetCameraState = R_Camera.R_GetCameraState;
 
     const R_Draw = __import__R_Draw();
     const R_DrawTriangle_Wireframe = R_Draw.R_DrawTriangle_Wireframe;
@@ -78,7 +79,7 @@
         RENDER_MODE.TEXTURED_SHADED,
     ];
 
-    let renderMode = 0;
+    let renderMode = 1;
     let lastRenderModeChange = new Date().getTime();
     let renderModeChangeDebounce = 250;
 
@@ -351,12 +352,16 @@
                 const aw = triFrustum[0][2];
                 const bw = triFrustum[1][2];
                 const cw = triFrustum[2][2];
-                const triNormal = M_TriNormal3(triFrustum);
+                const triNormal = M_TriNormal3(triWorld);
                 // calculate the dot product of the directional light and the
                 // unit normal of the triangle in view space to determine the
                 // level of illumination on the surface
-                const faceLuminance =
-                    (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
+                const cameraState = R_GetCameraState();
+                const fwdX = cameraState.fwdX;
+                const fwdY = cameraState.fwdY;
+                const fwdZ = cameraState.fwdZ;
+                const camFwd = M_Scale3(Vec3(fwdX, fwdY, fwdZ), -1);
+                const faceLuminance = (M_Dot3(camFwd, triNormal) + 1) * 0.5;
                 R_FillTriangle_Flat(ax, ay, aw,
                                     bx, by, bw,
                                     cx, cy, cw,
