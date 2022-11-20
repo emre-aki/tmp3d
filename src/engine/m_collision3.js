@@ -44,11 +44,22 @@
         return M_Add3(lineSrc, M_Scale3(M_Sub3(lineDest, lineSrc), scale));
     }
 
+    function M_BoundingBoxVsBoundingBoxCollision3 (aabb0, aabb1) {
+        return aabb0[0] + aabb0[3] > aabb1[0] &&
+               aabb1[0] + aabb1[3] >= aabb0[0] &&
+               aabb0[1] + aabb0[4] > aabb1[1] &&
+               aabb1[1] + aabb1[4] >= aabb0[1] &&
+               aabb0[2] + aabb0[5] > aabb1[2] &&
+               aabb1[2] + aabb1[5] >= aabb0[2];
+    }
+
     window.__import__M_Collision3 = function ()
     {
         return {
             M_TimeBeforePlaneCollision3: M_TimeBeforePlaneCollision3,
             M_LineSegmentVsPlaneCollision3: M_LineSegmentVsPlaneCollision3,
+            M_BoundingBoxVsBoundingBoxCollision3:
+                M_BoundingBoxVsBoundingBoxCollision3,
         };
     };
 })();
