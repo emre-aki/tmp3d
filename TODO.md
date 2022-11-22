@@ -53,7 +53,7 @@
 
 ### release: 0.0.6
 - [x] Clipping geometries against the view frustum (Against the near-plane
-      spefically for the time being)
+      specifically for the time being)
 
 ### release: 0.0.7
 - [x] Crude frustum-culling
