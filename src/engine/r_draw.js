@@ -345,17 +345,17 @@
             topX = midX; topY = midY; topC = midC;
             midX = auxX; midY = auxY; midC = auxC;
         }
-        const deltaUpper = midY - topY, _deltaUpper = 1 / deltaUpper;
-        const deltaLower = bottomY - midY, _deltaLower = 1 / deltaLower;
-        const deltaMajor = bottomY - topY, _deltaMajor = 1 / deltaMajor;
+        const deltaUpper = midY - topY, deltaUpper_ = 1 / deltaUpper;
+        const deltaLower = bottomY - midY, deltaLower_ = 1 / deltaLower;
+        const deltaMajor = bottomY - topY, deltaMajor_ = 1 / deltaMajor;
         /* 1 step in `+y` equals how many steps in `x` */
-        const stepXAlongUpper = (midX - topX) * _deltaUpper;
-        const stepXAlongLower = (bottomX - midX) * _deltaLower;
-        const stepXAlongMajor = (bottomX - topX) * _deltaMajor;
+        const stepXAlongUpper = (midX - topX) * deltaUpper_;
+        const stepXAlongLower = (bottomX - midX) * deltaLower_;
+        const stepXAlongMajor = (bottomX - topX) * deltaMajor_;
         /* 1 step in `+y` equals how many steps in `c` */
-        const stepCAlongUpper = (midC - topC) * _deltaUpper;
-        const stepCAlongLower = (bottomC - midC) * _deltaLower;
-        const stepCAlongMajor = (bottomC - topC) * _deltaMajor;
+        const stepCAlongUpper = (midC - topC) * deltaUpper_;
+        const stepCAlongLower = (bottomC - midC) * deltaLower_;
+        const stepCAlongMajor = (bottomC - topC) * deltaMajor_;
         // raster clipping: clip the triangle if it goes out of bounds of screen
         // coordinates
         const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
@@ -474,14 +474,14 @@
         // bias the start and end endpoints in screen-space by -0.5 horizontally
         // as per the coverage rules
         const dX0 = Math.ceil(dx0 + clipLeft - 0.5), dX1 = Math.ceil(dx1 - 0.5);
-        const deltaX = dx1 - dx0, _deltaX = 1 / deltaX;
+        const deltaX = dx1 - dx0, deltaX_ = 1 / deltaX;
         // pre-step from start by 0.5 as pixel centers are the actual sampling
         // points
         const preStepX = dX0 + 0.5 - dx0;
         /* 1 step in `+x` equals how many steps in `u`, `v`, and `c` */
-        const gradU = (u1 - u0) * _deltaX;
-        const gradV = (v1 - v0) * _deltaX;
-        const gradC = (c1 - c0) * _deltaX;
+        const gradU = (u1 - u0) * deltaX_;
+        const gradV = (v1 - v0) * deltaX_;
+        const gradC = (c1 - c0) * deltaX_;
         let u = preStepX * gradU + u0;
         let v = preStepX * gradV + v0;
         let c = preStepX * gradC + c0;
@@ -593,25 +593,25 @@
             topU = midU; topV = midV; topC = midC;
             midU = auxU; midV = auxV; midC = auxC;
         }
-        const deltaUpper = midY - topY, _deltaUpper = 1 / deltaUpper;
-        const deltaLower = bottomY - midY, _deltaLower = 1 / deltaLower;
-        const deltaMajor = bottomY - topY, _deltaMajor = 1 / deltaMajor;
+        const deltaUpper = midY - topY, deltaUpper_ = 1 / deltaUpper;
+        const deltaLower = bottomY - midY, deltaLower_ = 1 / deltaLower;
+        const deltaMajor = bottomY - topY, deltaMajor_ = 1 / deltaMajor;
         /* 1 step in `+y` equals how many steps in `x` */
-        const stepXAlongUpper = (midX - topX) * _deltaUpper;
-        const stepXAlongLower = (bottomX - midX) * _deltaLower;
-        const stepXAlongMajor = (bottomX - topX) * _deltaMajor;
+        const stepXAlongUpper = (midX - topX) * deltaUpper_;
+        const stepXAlongLower = (bottomX - midX) * deltaLower_;
+        const stepXAlongMajor = (bottomX - topX) * deltaMajor_;
         /* 1 step in `+y` equals how many steps in `u` */
-        const stepUAlongUpper = (midU - topU) * _deltaUpper;
-        const stepUAlongLower = (bottomU - midU) * _deltaLower;
-        const stepUAlongMajor = (bottomU - topU) * _deltaMajor;
+        const stepUAlongUpper = (midU - topU) * deltaUpper_;
+        const stepUAlongLower = (bottomU - midU) * deltaLower_;
+        const stepUAlongMajor = (bottomU - topU) * deltaMajor_;
         /* 1 step in `+y` equals how many steps in `v` */
-        const stepVAlongUpper = (midV - topV) * _deltaUpper;
-        const stepVAlongLower = (bottomV - midV) * _deltaLower;
-        const stepVAlongMajor = (bottomV - topV) * _deltaMajor;
+        const stepVAlongUpper = (midV - topV) * deltaUpper_;
+        const stepVAlongLower = (bottomV - midV) * deltaLower_;
+        const stepVAlongMajor = (bottomV - topV) * deltaMajor_;
         /* 1 step in `+y` equals how many steps in `c` */
-        const stepCAlongUpper = (midC - topC) * _deltaUpper;
-        const stepCAlongLower = (bottomC - midC) * _deltaLower;
-        const stepCAlongMajor = (bottomC - topC) * _deltaMajor;
+        const stepCAlongUpper = (midC - topC) * deltaUpper_;
+        const stepCAlongLower = (bottomC - midC) * deltaLower_;
+        const stepCAlongMajor = (bottomC - topC) * deltaMajor_;
         // raster clipping: clip the triangle if it goes out of bounds of screen
         // coordinates
         const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
