@@ -54,8 +54,8 @@
 
     function M_Norm3 (u)
     {
-        const mag = M_Mag3(u);
-        return M_Vec3(u[0] / mag, u[1] / mag, u[2] / mag);
+        const mag_ = 1 / M_Mag3(u);
+        return M_Vec3(u[0] * mag_, u[1] * mag_, u[2] * mag_);
     }
 
     function M_Base3 (vec, base)
