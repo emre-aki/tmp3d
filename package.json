@@ -6,6 +6,8 @@
     "scripts": {
         "start": "node ./src/server.js",
         "start:debug": "DEBUG=1 node ./src/server.js",
+        "build": "node ./src/build.js -v",
+        "build:debug": "node ./src/build.js -d -v",
         "load-obj": "node ./tools/obj.js convert"
     },
     "repository": {

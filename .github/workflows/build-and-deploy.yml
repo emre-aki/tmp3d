@@ -1,0 +1,56 @@
+# this workflow will do a clean installation of node dependencies, cache/restore
+# them and build the source code.
+#
+# for more info:
+#    https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#creating-a-custom-github-actions-workflow-to-publish-your-site
+
+name: Build & Deploy CI
+on:
+    push:
+        branches: [master]
+jobs:
+    build-and-upload:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                node-version: [16.x]
+        steps:
+            # checkout the repository over at GitHub
+            - uses: actions/checkout@v3
+            # setup a Node.js environment with the given configuration
+            - name: 'Use Node.js ${{ matrix.node-version }}'
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '${{ matrix.node-version }}'
+                  cache: npm
+            # install dependencies
+            - run: npm ci
+            # build the site
+            - run: npm run build
+            # setup and configure GitHub Pages
+            - name: Setup Pages
+              uses: actions/configure-pages@v2
+            # a composite action for packaging and uploading an artifact that
+            # can be deployed at GitHub Pages
+            - name: Upload artifact
+              uses: actions/upload-pages-artifact@v1
+              with:
+                  path: dist/ # path to serve/deploy at GitHub Pages
+    deploy:
+        runs-on: ubuntu-latest
+        # configure the environment for GitHub Pages
+        environment:
+            name: github-pages
+            url: '${{ steps.deployment.outputs.page_url }}'
+        # grant GITHUB_TOKEN the permissions required to make a Pages deployment
+        permissions:
+            # to deploy to GitHub Pages
+            pages: write
+            # to verify that the deployment originates from an appropriate
+            # source
+            id-token: write
+        needs: build-and-upload # add a dependency to the build job
+        steps:
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v1

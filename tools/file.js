@@ -22,5 +22,47 @@ function WriteFile (path, data, options)
     catch (error) { throw new Error(`WriteFile: ${error}`); }
 }
 
+function CopyFile (src, dest)
+{
+    try { fs.copyFileSync(src, dest); }
+    catch (error) { throw new Error(`CopyFile: ${error}`); }
+}
+
+function IsDir (path)
+{
+    try
+    {
+        if (!fs.existsSync(path)) return false;
+        return fs.lstatSync(path).isDirectory();
+    }
+    catch (error)
+    {
+        throw new Error(`IsDir: ${error}`);
+    }
+}
+
+function Mkdir (path, recursive)
+{
+    try { fs.mkdirSync(path, { recursive }); }
+    catch (error) { throw new Error(`Mkdir: ${error}`); }
+}
+
+function ReadDir (path)
+{
+    try { return fs.readdirSync(path); }
+    catch (error) { throw new Error(`ReadDir: ${error}`); }
+}
+
+function RemovePath (path, recursive)
+{
+    try { fs.rmSync(path, { recursive }); }
+    catch (error) { throw new Error(`RemovePath: ${error}`); }
+}
+
 exports.ReadFile = ReadFile;
 exports.WriteFile = WriteFile;
+exports.CopyFile = CopyFile;
+exports.IsDir = IsDir;
+exports.Mkdir = Mkdir;
+exports.ReadDir = ReadDir;
+exports.RemovePath = RemovePath;

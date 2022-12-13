@@ -4,7 +4,7 @@
     <br>
     <a href="https://undefbehav.itch.io/tmp3d" target="_blank">itch.io</a>
     •
-    <a href="https://tmp3d.herokuapp.com" target="_blank">
+    <a href="https://emre-aki.github.io/tmp3d/" target="_blank">
         Play in the browser
     </a>
     •
@@ -156,7 +156,7 @@ will reject it otherwise.*
 
 ### Live Demo
 
-You can check out the live demo [here](https://tmp3d.herokuapp.com)!
+You can check out the live demo [here](https://emre-aki.github.io/tmp3d/)!
 
 ### Trivia
 

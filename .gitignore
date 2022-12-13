@@ -1,6 +1,7 @@
 # directories
 node_modules
 screenshots
+dist
 
 # dotfiles
 .DS_Store
