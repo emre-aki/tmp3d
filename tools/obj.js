@@ -233,9 +233,8 @@ function ReplaceModelPathInView (modelFilename)
 function HandleCommand (pathToObj, args)
 {
     /* read optional arguments */
-    const pathToMtl = args.material;
+    const { material: pathToMtl, verbose } = args;
     const zOffset = parseFloat(args.zOffset);
-    const verbose = args.verbose;
     /* throw an error if the input is not an `.obj` file */
     const objFilename = path.basename(pathToObj).match(/(.+)\.obj$/)[1];
     if (!objFilename)
