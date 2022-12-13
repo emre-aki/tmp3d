@@ -18,7 +18,7 @@ function ReadFile (path, options)
 
 function WriteFile (path, data, options)
 {
-    try { fs.writeFileSync(path, data, options) }
+    try { fs.writeFileSync(path, data, options); }
     catch (error) { throw new Error(`WriteFile: ${error}`); }
 }
 
