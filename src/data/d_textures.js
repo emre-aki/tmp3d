@@ -19,7 +19,7 @@
 
     function D_GlobTextureFilenameTable ()
     {
-        return { [TEXTURE_ID_TABLE.TITLE_TMP3D]: "/textures/tmp3d_2x.png" };
+        return { [TEXTURE_ID_TABLE.TITLE_TMP3D]: "textures/tmp3d_2x.png" };
     }
 
     window.__import__D_GlobTextures = function ()

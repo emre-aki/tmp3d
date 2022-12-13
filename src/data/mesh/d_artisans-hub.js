@@ -42668,7 +42668,7 @@
     function D_TextureAtlas ()
     {
         return {
-            "Material.001": "/models/spyro/High.png"
+            "Material.001": "models/spyro/High.png"
         };
     }
 

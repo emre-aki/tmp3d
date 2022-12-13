@@ -4380,17 +4380,17 @@
     function D_TextureAtlas ()
     {
         return {
-            "material3489_Imag.016_Cloth.png": "/models/daxter/Textures/Cloth.png",
-            "material3489_Imag.017_Fur2.png": "/models/daxter/Textures/Fur2.png",
-            "material3666_Imag_Fur1.png": "/models/daxter/Textures/Fur1.png",
-            "material3489_Imag.014_Eyes.png": "/models/daxter/Textures/Eyes.png",
-            "material3489_Imag.012_Eyes.png": "/models/daxter/Textures/Eyes.png",
-            "material3489_Imag.009_Eyes.png": "/models/daxter/Textures/Eyes.png",
-            "material3489_Imag.013_Buckle.png": "/models/daxter/Textures/Buckle.png",
-            "material3489_Imag.015_Metal.png": "/models/daxter/Textures/Metal.png",
-            "material3489_Imag.010_Fur1.png": "/models/daxter/Textures/Fur1.png",
-            "material3489_Imag_Met_Metal.png": "/models/daxter/Textures/Metal.png",
-            "material3489_Imag.011_Fur3.png": "/models/daxter/Textures/Fur3.png"
+            "material3489_Imag.016_Cloth.png": "models/daxter/Textures/Cloth.png",
+            "material3489_Imag.017_Fur2.png": "models/daxter/Textures/Fur2.png",
+            "material3666_Imag_Fur1.png": "models/daxter/Textures/Fur1.png",
+            "material3489_Imag.014_Eyes.png": "models/daxter/Textures/Eyes.png",
+            "material3489_Imag.012_Eyes.png": "models/daxter/Textures/Eyes.png",
+            "material3489_Imag.009_Eyes.png": "models/daxter/Textures/Eyes.png",
+            "material3489_Imag.013_Buckle.png": "models/daxter/Textures/Buckle.png",
+            "material3489_Imag.015_Metal.png": "models/daxter/Textures/Metal.png",
+            "material3489_Imag.010_Fur1.png": "models/daxter/Textures/Fur1.png",
+            "material3489_Imag_Met_Metal.png": "models/daxter/Textures/Metal.png",
+            "material3489_Imag.011_Fur3.png": "models/daxter/Textures/Fur3.png"
         };
     }
 

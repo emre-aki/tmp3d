@@ -5829,8 +5829,8 @@
     function D_TextureAtlas ()
     {
         return {
-            "tile0": "/models/lara/Lara.png",
-            "tile0.001": "/models/lara/ponytail.png"
+            "tile0": "models/lara/Lara.png",
+            "tile0.001": "models/lara/ponytail.png"
         };
     }
 

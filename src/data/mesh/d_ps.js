@@ -1452,10 +1452,10 @@
     function D_TextureAtlas ()
     {
         return {
-            "Material__26": "/models/pslogo/green.png",
-            "Material__27": "/models/pslogo/red.png",
-            "Material__28": "/models/pslogo/yellow.png",
-            "Material__25": "/models/pslogo/blue.png"
+            "Material__26": "models/pslogo/green.png",
+            "Material__27": "models/pslogo/red.png",
+            "Material__28": "models/pslogo/yellow.png",
+            "Material__25": "models/pslogo/blue.png"
         };
     }
 

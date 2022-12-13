@@ -2690,9 +2690,9 @@
     function D_TextureAtlas ()
     {
         return {
-            "shoes": "/models/crash/shoes.png",
-            "back": "/models/crash/back.png",
-            "color_pallete": "/models/crash/color_pallete.png"
+            "shoes": "models/crash/shoes.png",
+            "back": "models/crash/back.png",
+            "color_pallete": "models/crash/color_pallete.png"
         };
     }
 

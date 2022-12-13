@@ -2919,18 +2919,18 @@
     function D_TextureAtlas ()
     {
         return {
-            "face": "/models/spiderman/848f5e3b.png",
-            "front": "/models/spiderman/606228de.png",
-            "back": "/models/spiderman/dafccfaa.png",
-            "leg": "/models/spiderman/f99ea9d9.png",
-            "crotch": "/models/spiderman/0474ba03.png",
-            "hand": "/models/spiderman/492b2fc7.png",
-            "ass": "/models/spiderman/19292d60.png",
-            "red": "/models/spiderman/58a5e3de.png",
-            "shoulder": "/models/spiderman/cd057eda.png",
-            "arma": "/models/spiderman/150d18e8.png",
-            "armb": "/models/spiderman/a1454207.png",
-            "foot": "/models/spiderman/150d18e8.png"
+            "face": "models/spiderman/848f5e3b.png",
+            "front": "models/spiderman/606228de.png",
+            "back": "models/spiderman/dafccfaa.png",
+            "leg": "models/spiderman/f99ea9d9.png",
+            "crotch": "models/spiderman/0474ba03.png",
+            "hand": "models/spiderman/492b2fc7.png",
+            "ass": "models/spiderman/19292d60.png",
+            "red": "models/spiderman/58a5e3de.png",
+            "shoulder": "models/spiderman/cd057eda.png",
+            "arma": "models/spiderman/150d18e8.png",
+            "armb": "models/spiderman/a1454207.png",
+            "foot": "models/spiderman/150d18e8.png"
         };
     }
 

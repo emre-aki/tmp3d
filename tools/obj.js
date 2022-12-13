@@ -108,8 +108,7 @@ function TextureAtlas (pathToMtl)
         {
             const pathToTexture = `${path.join(path.dirname(pathToMtl),
                                                tokens[1])}`;
-            textureAtlas[mtlId] =
-                path.join("/", path.relative(ASSETS_PATH, pathToTexture));
+            textureAtlas[mtlId] = path.relative(ASSETS_PATH, pathToTexture);
         }
     }
     return textureAtlas;
@@ -225,8 +224,8 @@ function ObjToTmp3D (pathToObj, pathToMtl, outputFilename, zOffset)
 function ReplaceModelPathInView (modelFilename)
 {
     const indexEjs = ReadFile(VIEW_PATH, { encoding: "utf8" });
-    const replaced = indexEjs.replace(/\/data\/mesh\/.+\.js/,
-                                      `/data/mesh/${modelFilename}`);
+    const replaced = indexEjs.replace(/data\/mesh\/.+\.js/,
+                                      `data/mesh/${modelFilename}`);
     WriteFile(VIEW_PATH, replaced, { encoding: "utf8" });
 }
 

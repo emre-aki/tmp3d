@@ -73,7 +73,7 @@
     function D_TextureAtlas ()
     {
         return {
-            "wood": "/models/tmp3dcube/wood.png"
+            "wood": "models/tmp3dcube/wood.png"
         };
     }
 

@@ -10749,8 +10749,8 @@
     function D_TextureAtlas ()
     {
         return {
-            "None.002": "/models/vader/Vaderbody.png",
-            "None_Vader.png.001": "/models/vader/Vader.png"
+            "None.002": "models/vader/Vaderbody.png",
+            "None_Vader.png.001": "models/vader/Vader.png"
         };
     }
 
