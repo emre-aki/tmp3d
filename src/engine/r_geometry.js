@@ -345,6 +345,8 @@
             const nClipResult = R_ClipGeometryAgainstNearPlane(triView,
                                                                clippedTriQueue);
             // TODO: clip against far-plane
+            let triNormal;
+            if (nClipResult) triNormal = M_TriNormal3(clippedTriQueue[0]);
             for (let j = 0; j < nClipResult; ++j)
             {
                 const triFrustum = clippedTriQueue[j];
@@ -365,7 +367,6 @@
                 const aw = triFrustum[0][2];
                 const bw = triFrustum[1][2];
                 const cw = triFrustum[2][2];
-                const triNormal = M_TriNormal3(triFrustum);
                 // calculate the dot product of the directional light and the
                 // unit normal of the triangle in view space to determine the
                 // level of illumination on the surface
@@ -406,6 +407,10 @@
                 clippedUvMapQueue
             );
             // TODO: clip against far-plane
+            let triNormal;
+            if (RENDER_MODES[renderMode] === RENDER_MODE.TEXTURED_SHADED &&
+                nClipResult)
+                triNormal = M_TriNormal3(clippedTriQueue[0]);
             for (let j = 0; j < nClipResult; ++j)
             {
                 const triFrustum = clippedTriQueue[j];
@@ -434,15 +439,12 @@
                 const bu = bUV[0], bv = bUV[1], bc = bUV[2];
                 const cu = cUV[0], cv = cUV[1], cc = cUV[2];
                 let faceLuminance = 1;
-                if (RENDER_MODES[renderMode] === RENDER_MODE.TEXTURED_SHADED)
-                {
-                    const triNormal = M_TriNormal3(triFrustum);
+                if (triNormal)
                     // calculate the dot product of the directional light and
                     // the unit normal of the triangle in view space to
                     // determine the level of illumination on the surface
                     faceLuminance =
                         (M_Dot3(DIRECTIONAL_LIGHT, triNormal) + 1) * 0.5;
-                }
                 R_FillTriangle_Textured_Perspective(
                     A_Texture(textureTable[triIndex]),
                     ax, ay, aw,
