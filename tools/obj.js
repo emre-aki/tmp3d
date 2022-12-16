@@ -248,7 +248,7 @@ function HandleCommand (pathToObj, args)
     if (verbose) console.log(tmp3Data);
     WriteFile(outputPath, tmp3Data, { encoding: "utf8" });
     ReplaceModelPathInView(outputFilename);
-    console.log(`Mesh saved at ${path.relative(ROOT, outputPath)}`);
+    console.log(`Mesh saved at ${path.relative(ROOT, outputPath)}.`);
 }
 
 function main ()
