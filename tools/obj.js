@@ -261,7 +261,7 @@ function main ()
         .alias("c")
         .description("Convert a Wavefront .obj file into a format that Tmp3D could operate on")
         .option("-m, --material [value]", "Material library file")
-        .option("-z, --z-offset [value]", "Offset the model along z-axis", "0.001")
+        .option("-z, --z-offset [value]", "Offset the model along z-axis", "0")
         .option("-v, --verbose", "Verbose mode")
         .action(HandleCommand);
     cli.parse(process.argv);
