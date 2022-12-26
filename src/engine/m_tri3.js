@@ -17,6 +17,7 @@
     const M_Sub3 = M_Vec3.M_Sub3;
     const M_Cross3 = M_Vec3.M_Cross3;
     const M_Norm3 = M_Vec3.M_Norm3;
+    const M_RotateAroundAxis3 = M_Vec3.M_RotateAroundAxis3;
     const M_Vec3FromVec4 = M_Vec3.M_Vec3FromVec4;
     const Vec3 = M_Vec3.M_Vec3;
 
@@ -67,6 +68,14 @@
         return AABB3(origin3, dimensions3);
     }
 
+    function M_RotateTriAroundAxis3 (tri3, axis3, angle)
+    {
+        const triRotatedA3 = M_RotateAroundAxis3(tri3[0], axis3, angle);
+        const triRotatedB3 = M_RotateAroundAxis3(tri3[1], axis3, angle);
+        const triRotatedC3 = M_RotateAroundAxis3(tri3[2], axis3, angle);
+        return M_Tri3(triRotatedA3, triRotatedB3, triRotatedC3);
+    }
+
     window.__import__M_Tri3 = function ()
     {
         return {
@@ -74,6 +83,7 @@
             M_TriNormal3: M_TriNormal3,
             M_TransformTri3: M_TransformTri3,
             M_AABB3FromTri3: M_AABB3FromTri3,
+            M_RotateTriAroundAxis3: M_RotateTriAroundAxis3,
         };
     };
 })();

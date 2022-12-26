@@ -34,6 +34,7 @@
     const M_Tri3 = __import__M_Tri3();
     const M_TriNormal3 = M_Tri3.M_TriNormal3;
     const M_AABB3FromTri3 = M_Tri3.M_AABB3FromTri3;
+    const M_RotateTriAroundAxis3 = M_Tri3.M_RotateTriAroundAxis3;
     const Tri3 = M_Tri3.M_Tri3;
 
     const M_Vec3 = __import__M_Vec3();
@@ -63,10 +64,21 @@
     // TODO: make a separate lighting controller module, maybe??
     const DIRECTIONAL_LIGHT = BWD;
 
-    let triPool3; // a pool of raw triangle data
+    let nTris; // total number of triangles in the model
+    let tris3; // a pool of raw triangle data
+    let transformedTris3; // triangles after transformation
     let uvTable3; // respective uv-coordinates of each triangle in the pool
     let textureTable; // respective texture ids of each triangle in the pool
     let cullBuffer, nCullBuffer; // buffer culled triangles
+
+    /* TODO: find a more suitable spot for managing global transformations?
+     * a separate tranform controller, maybe???
+     */
+    const globalRotationAxis = Vec3(0, -1, 0);
+    const globalRotationSwitchDebounce = 250;
+    let lastGlobalRotationSwitch = Date.now();
+    let doGlobalRotation = false;
+    let globalRotation = 0;
 
     const RENDER_MODE = {
         FLAT: "FLAT",
@@ -86,6 +98,17 @@
     let renderMode = 3;
     let lastRenderModeChange = Date.now();
 
+    function R_ToggleGlobalRotation ()
+    {
+        const now = Date.now();
+        if (I_GetKeyState(I_Keys.G) &&
+            now - lastGlobalRotationSwitch > globalRotationSwitchDebounce)
+        {
+            doGlobalRotation = !doGlobalRotation;
+            lastGlobalRotationSwitch = now;
+        }
+    }
+
     function R_ChangeRenderMode ()
     {
         const now = Date.now();
@@ -101,7 +124,9 @@
     function R_LoadGeometry (vertices, triangles, nTriangles)
     {
         projectionOrigin = R_GetProjectionOrigin();
-        triPool3 = Array(nTriangles);
+        nTris = nTriangles;
+        tris3 = Array(nTriangles);
+        transformedTris3 = Array(nTriangles);
         cullBuffer = new Uint32Array(nTriangles); // TODO: maybe 16??
         for (let i = 0; i < nTriangles; ++i)
         {
@@ -109,9 +134,9 @@
             const triA3 = vertices[tri3Data[0]];
             const triB3 = vertices[tri3Data[1]];
             const triC3 = vertices[tri3Data[2]];
-            triPool3[i] = Tri3(Vec3(triA3[0], triA3[1], triA3[2]),
-                               Vec3(triB3[0], triB3[1], triB3[2]),
-                               Vec3(triC3[0], triC3[1], triC3[2]));
+            tris3[i] = Tri3(Vec3(triA3[0], triA3[1], triA3[2]),
+                            Vec3(triB3[0], triB3[1], triB3[2]),
+                            Vec3(triC3[0], triC3[1], triC3[2]));
         }
     }
 
@@ -132,9 +157,24 @@
         }
     }
 
+    /* TODO: add functionality here to allow updating parts of the geometry as
+     * opposed to the entire model
+     */
     function R_UpdateGeometry ()
     {
-        // TODO: implement
+        if (doGlobalRotation)
+        {
+            globalRotation += 0.1;
+            for (let i = 0; i < nTris; ++i)
+                transformedTris3[i] = M_RotateTriAroundAxis3(tris3[i],
+                                                             globalRotationAxis,
+                                                             globalRotation);
+        }
+        else
+        {
+            globalRotation = 0;
+            for (let i = 0; i < nTris; ++i) transformedTris3[i] = tris3[i];
+        }
     }
 
     /* TODO: improve the crude frustum-culling technique used here */
@@ -144,12 +184,12 @@
         return M_BoundingBoxVsBoundingBoxCollision3(FRUSTUM_AABB3, triAABB3);
     }
 
-    function R_CullGeometry (triangles, nTriangles)
+    function R_CullGeometry ()
     {
         let nTrianglesAfterCulling = 0;
-        for (let i = 0; i < nTriangles; ++i)
+        for (let i = 0; i < nTris; ++i)
         {
-            const triView = R_ToViewSpace(triangles[i]);
+            const triView = R_ToViewSpace(transformedTris3[i]);
             const aView = triView[0];
             if (
                 // frustum-culling: is the triangle at least partially within
@@ -278,8 +318,8 @@
 
     function R_SortTwoTrianglesInCullBuffer (tri0, tri1)
     {
-        const tri0View = R_ToViewSpace(triPool3[tri0]);
-        const tri1View = R_ToViewSpace(triPool3[tri1]);
+        const tri0View = R_ToViewSpace(transformedTris3[tri0]);
+        const tri1View = R_ToViewSpace(transformedTris3[tri1]);
         return tri1View[0][2] + tri1View[1][2] + tri1View[2][2] -
                tri0View[0][2] - tri0View[1][2] - tri0View[2][2];
     }
@@ -287,13 +327,13 @@
     /* TODO: unused for the time being, going to be useful once more advanced
      * features like translucency are implemented
      */
-    function R_SortGeometry (nTriangles)
+    function R_SortGeometry ()
     {
         const sorted = cullBuffer
             .slice(0, nCullBuffer)
             .sort(R_SortTwoTrianglesInCullBuffer);
         cullBuffer = new Uint32Array(
-            Array.from(sorted).concat(Array(nTriangles - nCullBuffer).fill(0))
+            Array.from(sorted).concat(Array(nTris - nCullBuffer).fill(0))
         );
     }
 
@@ -303,7 +343,7 @@
         for (let i = 0; i < nCullBuffer; ++i)
         {
             const triIndex = cullBuffer[i];
-            const triWorld = triPool3[triIndex];
+            const triWorld = transformedTris3[triIndex];
             const triView = R_ToViewSpace(triWorld);
             // keep a buffer of clipped triangles for drawing
             const clippedTriQueue = Array(2);
@@ -338,7 +378,7 @@
         for (let i = 0; i < nCullBuffer; ++i)
         {
             const triIndex = cullBuffer[i];
-            const triWorld = triPool3[triIndex];
+            const triWorld = transformedTris3[triIndex];
             const triView = R_ToViewSpace(triWorld);
             // keep a buffer of clipped triangles for drawing
             const clippedTriQueue = Array(2);
@@ -394,7 +434,7 @@
         for (let i = 0; i < nCullBuffer; ++i)
         {
             const triIndex = cullBuffer[i];
-            const triWorld = triPool3[triIndex];
+            const triWorld = transformedTris3[triIndex];
             const uvMap = uvTable3[triIndex];
             const triView = R_ToViewSpace(triWorld);
             /* keep buffers of clipped triangles for drawing */
@@ -467,8 +507,7 @@
 
     function R_RenderGeometries (nTrisOnScreen)
     {
-        const nTriangles = triPool3.length; // FIXME: make into a global const.
-        R_CullGeometry(triPool3, nTriangles);
+        R_CullGeometry();
         switch (RENDER_MODES[renderMode])
         {
             case RENDER_MODE.WIREFRAME:
@@ -487,20 +526,21 @@
         if (DEBUG_MODE) R_DebugAxes();
     }
 
-    function R_TriPool ()
+    function R_Tris ()
     {
-        return triPool3;
+        return tris3;
     }
 
     window.__import__R_Geometry = function ()
     {
         return {
+            R_ToggleGlobalRotation: R_ToggleGlobalRotation,
             R_ChangeRenderMode: R_ChangeRenderMode,
             R_LoadGeometry: R_LoadGeometry,
             R_InitUVTable: R_InitUVTable,
             R_UpdateGeometry: R_UpdateGeometry,
             R_RenderGeometries: R_RenderGeometries,
-            R_TriPool: R_TriPool,
+            R_Tris: R_Tris,
         };
     };
 })();

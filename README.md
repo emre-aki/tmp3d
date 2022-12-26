@@ -149,6 +149,7 @@ will reject it otherwise.*
 | Movement                       | <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>                               |
 | Free-look                      | <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd> <kbd>←</kbd>, or the mouse<sup>__*__</sup> |
 | Change elevation               | <kbd>Q</kbd> <kbd>E</kbd>, or <kbd>![MSW]</kbd><sup>__*__</sup>                   |
+| Toggle model rotation on/off   | <kbd>G</kbd>                                                                      |
 | Switch between rendering modes | <kbd>R</kbd>                                                                      |
 
 > ⚠️ *<sup>__\*__</sup> You should first click <kbd>![LMB]</kbd> on the `canvas` to

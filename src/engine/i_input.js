@@ -17,6 +17,7 @@
             A: "A",
             D: "D",
             E: "E",
+            G: "G",
             Q: "Q",
             R: "R",
             S: "S",
@@ -56,6 +57,7 @@
         [KEY.A]: 0,
         [KEY.D]: 0,
         [KEY.E]: 0,
+        [KEY.G]: 0,
         [KEY.Q]: 0,
         [KEY.R]: 0,
         [KEY.S]: 0,
@@ -98,6 +100,7 @@
             case 65: keyState.A = state ? 1 : 0; break;
             case 68: keyState.D = state ? 1 : 0; break;
             case 69: keyState.E = state ? 1 : 0; break;
+            case 71: keyState.G = state ? 1 : 0; break;
             case 87: keyState.W = state ? 1 : 0; break;
             case 81: keyState.Q = state ? 1 : 0; break;
             case 82: keyState.R = state ? 1 : 0; break;

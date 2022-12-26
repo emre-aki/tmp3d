@@ -41,7 +41,9 @@
     const R_Geometry = __import__R_Geometry();
     const R_ChangeRenderMode = R_Geometry.R_ChangeRenderMode;
     const R_RenderGeometries = R_Geometry.R_RenderGeometries;
-    const R_TriPool = R_Geometry.R_TriPool;
+    const R_ToggleGlobalRotation = R_Geometry.R_ToggleGlobalRotation;
+    const R_Tris = R_Geometry.R_Tris;
+    const R_UpdateGeometry = R_Geometry.R_UpdateGeometry;
 
     const TICK_DELAY = 1000 / FPS;
 
@@ -64,12 +66,13 @@
     function G_UpdateGame (deltaT, tris)
     {
         R_UpdateCamera(1); // TODO: take `deltaT` into account
-        // TODO: update world geometry
+        R_ToggleGlobalRotation();
+        R_UpdateGeometry();
     }
 
     function G_Tick (deltaT)
     {
-        const tris = R_TriPool();
+        const tris = R_Tris();
         G_UpdateGame(deltaT, tris); // update actors & game state
         G_UpdateScreen(deltaT, tris); // update screen buffer
     }

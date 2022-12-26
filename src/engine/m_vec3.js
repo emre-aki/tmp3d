@@ -66,11 +66,11 @@
     /* NOTE: Rodrigues' axis-angle rotations */
     function M_RotateAroundAxis3 (point, axis, angle)
     {
-        const vY = M_Scale3(axis, M_Dot3(axis, point));
-        const vX = M_Scale3(M_Sub3(point, vY), Math.cos(angle));
-        const vZ = M_Scale3(M_Cross3(axis, point), Math.sin(angle));
-        const rot = M_Add3(vX, vZ);
-        return M_Add3(vY, rot);
+        const cos = Math.cos(angle), sin = Math.sin(angle);
+        const a = M_Scale3(axis, M_Dot3(axis, point) * (1 - cos));
+        const b = M_Scale3(point, cos);
+        const c = M_Scale3(M_Cross3(axis, point), sin);
+        return M_Add3(M_Add3(a, b), c);
     }
 
     function M_DistToPlane3 (vec, ref, normal, isAbs)
