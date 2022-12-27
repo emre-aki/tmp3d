@@ -82,19 +82,19 @@
         RENDER_MODE.TEXTURED_SHADED,
     ];
 
+    const renderModeChangeDebounce = 250;
     let renderMode = 3;
-    let lastRenderModeChange = new Date().getTime();
-    let renderModeChangeDebounce = 250;
+    let lastRenderModeChange = Date.now();
 
     function R_ChangeRenderMode ()
     {
-        const now = new Date().getTime();
+        const now = Date.now();
         if (I_GetKeyState(I_Keys.R) &&
             now - lastRenderModeChange > renderModeChangeDebounce)
         {
             ++renderMode;
             if (renderMode === RENDER_MODES.length) renderMode = 0;
-            lastRenderModeChange = new Date().getTime();
+            lastRenderModeChange = now;
         }
     }
 
