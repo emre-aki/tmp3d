@@ -54,8 +54,8 @@
     const R_Draw = __import__R_Draw();
     const R_DrawTriangle_Wireframe = R_Draw.R_DrawTriangle_Wireframe;
     const R_FillTriangle_Flat = R_Draw.R_FillTriangle_Flat;
-    const R_FillTriangle_Textured_Perspective =
-        R_Draw.R_FillTriangle_Textured_Perspective;
+    const R_DrawTriangle_Textured_Perspective =
+        R_Draw.R_DrawTriangle_Textured_Perspective;
 
     // the center of the projection (near-clipping) plane
     let projectionOrigin: vec3_t;
@@ -509,6 +509,14 @@
         let trisRendered = 0;
         // early return if the mesh does not have texture-mapping
         if (!uvTable3) return;
+        /* the directional light falling on the triangle */
+        let lightX: number | undefined;
+        let lightY: number | undefined;
+        let lightZ: number | undefined;
+        if (RENDER_MODES[renderMode] === RENDER_MODE.TEXTURED_SHADED)
+        {
+            lightX = 0; lightY = 0; lightZ = 1;
+        }
         for (let i = 0; i < nCulledBuffer; ++i)
         {
             const triIndex = culledBuffer[i];
@@ -530,19 +538,10 @@
                 clippedUvMapQueue
             );
             // TODO: clip against far-plane
-            let faceLuminance = 1;
-            if (RENDER_MODES[renderMode] === RENDER_MODE.TEXTURED_SHADED &&
-                nClipResult)
-                // calculate the dot product of the directional light and the
-                // unit normal of the triangle in view space to determine the
-                // level of illumination on the surface
-                faceLuminance = (
-                    M_Dot3(DIRECTIONAL_LIGHT,
-                           M_TriNormal3(clippedTriQueue[0])) + 1
-                ) * 0.5;
             for (let j = 0; j < nClipResult; ++j)
             {
                 const triFrustum = clippedTriQueue[j];
+                const triVertexNormals = clippedTriVertexNormalQueue[j];
                 const uvFrustum = clippedUvMapQueue[j];
                 const triClip = R_ToClipSpace(triFrustum);
                 const aClip3 = triClip[0];
@@ -567,7 +566,17 @@
                 const au = aUV[0], av = aUV[1], ac = aUV[2];
                 const bu = bUV[0], bv = bUV[1], bc = bUV[2];
                 const cu = cUV[0], cv = cUV[1], cc = cUV[2];
-                R_FillTriangle_Textured_Perspective(
+                /* vertex normals used in smooth shading */
+                const nax = triVertexNormals[0][0];
+                const nay = triVertexNormals[0][1];
+                const naz = triVertexNormals[0][2];
+                const nbx = triVertexNormals[1][0];
+                const nby = triVertexNormals[1][1];
+                const nbz = triVertexNormals[1][2];
+                const ncx = triVertexNormals[2][0];
+                const ncy = triVertexNormals[2][1];
+                const ncz = triVertexNormals[2][2];
+                R_DrawTriangle_Textured_Perspective(
                     A_Texture(textureTable[triIndex]),
                     ax, ay, aw,
                     bx, by, bw,
@@ -575,7 +584,11 @@
                     au, av, ac,
                     bu, bv, bc,
                     cu, cv, cc,
-                    1, faceLuminance
+                    nax, nay, naz,
+                    nbx, nby, nbz,
+                    ncx, ncy, ncz,
+                    1,
+                    lightX, lightY, lightZ
                 );
                 if (DEBUG_MODE)
                     R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,

@@ -60,9 +60,12 @@
 
 ### release: 0.0.7
 - [x] Crude frustum-culling
-- [ ] Diffuse-shading
+- [x] Smooth-shading
 
-### release: 0.0.8
+### release 0.0.9
+- [ ] Point-lighting
+
+### release: 0.0.10
 - [ ] Fix the oscillation in the frametimes
 
 ### release: 0.0.x
