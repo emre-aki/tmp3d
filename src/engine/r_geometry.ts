@@ -48,6 +48,7 @@
     const Vec3 = M_Vec3.M_Vec3;
 
     const R_Camera = __import__R_Camera();
+    const R_TriToWorldSpace = R_Camera.R_TriToWorldSpace;
     const R_TriToViewSpace = R_Camera.R_TriToViewSpace;
     const R_TriToClipSpace = R_Camera.R_TriToClipSpace;
     const R_VecToViewSpace = R_Camera.R_VecToViewSpace;
@@ -535,7 +536,7 @@
         let trisRendered = 0;
         // early return if the mesh does not have texture-mapping
         if (!uvTable3) return;
-        /* the directional light falling on the triangle */
+        /* the position of the point light in world space */
         let lightX: number | undefined;
         let lightY: number | undefined;
         let lightZ: number | undefined;
@@ -569,6 +570,7 @@
             for (let j = 0; j < nClipResult; ++j)
             {
                 const triFrustum = clippedTriQueue[j];
+                const triFrustumWorld = R_TriToWorldSpace(triFrustum);
                 const triVertexNormals = clippedTriVertexNormalQueue[j];
                 const uvFrustum = clippedUvMapQueue[j];
                 const triClip = R_TriToClipSpace(triFrustum);
@@ -604,6 +606,16 @@
                 const ncx = triVertexNormals[2][0];
                 const ncy = triVertexNormals[2][1];
                 const ncz = triVertexNormals[2][2];
+                /* world space vertex coordinates used in point lighting */
+                const wax = triFrustumWorld[0][0];
+                const way = triFrustumWorld[0][1];
+                const waz = triFrustumWorld[0][2];
+                const wbx = triFrustumWorld[1][0];
+                const wby = triFrustumWorld[1][1];
+                const wbz = triFrustumWorld[1][2];
+                const wcx = triFrustumWorld[2][0];
+                const wcy = triFrustumWorld[2][1];
+                const wcz = triFrustumWorld[2][2];
                 R_DrawTriangle_Textured_Perspective(
                     A_Texture(textureTable[triIndex]),
                     ax, ay, aw,
@@ -615,6 +627,9 @@
                     nax, nay, naz,
                     nbx, nby, nbz,
                     ncx, ncy, ncz,
+                    wax, way, waz,
+                    wbx, wby, wbz,
+                    wcx, wcy, wcz,
                     1,
                     lightX, lightY, lightZ
                 );

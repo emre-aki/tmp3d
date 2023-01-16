@@ -403,6 +403,7 @@ type R_InitCamera = (
 type R_UpdateCamera = (mult: number) => void;
 type R_GetCameraState = () => cam3_t;
 type R_GetProjectionOrigin = () => vec3_t;
+type R_TriToWorldSpace = (triangle: tri3_t) => tri3_t;
 type R_TriToViewSpace = (triangle: tri3_t) => tri3_t;
 type R_TriToClipSpace = (triangle: tri3_t) => tri3_t;
 type R_VecToViewSpace = (vec: vec3_t) => vec3_t;
@@ -422,6 +423,7 @@ type __Mod__R_Camera = {
     R_UpdateCamera: R_UpdateCamera,
     R_GetCameraState: R_GetCameraState,
     R_GetProjectionOrigin: R_GetProjectionOrigin,
+    R_TriToWorldSpace: R_TriToWorldSpace,
     R_TriToViewSpace: R_TriToViewSpace,
     R_TriToClipSpace: R_TriToClipSpace,
     R_VecToViewSpace: R_VecToViewSpace,
@@ -511,6 +513,9 @@ type R_DrawTriangle_Textured_Perspective = (
     nax: number, nay: number, naz: number,
     nbx: number, nby: number, nbz: number,
     ncx: number, ncy: number, ncz: number,
+    wax: number, way: number, waz: number,
+    wbx: number, wby: number, wbz: number,
+    wcx: number, wcy: number, wcz: number,
     alpha: number,
     lightX?: number, lightY?: number, lightZ?: number
 ) => void;
