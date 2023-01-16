@@ -227,6 +227,11 @@
         matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camDown);
     }
 
+    function R_TriToWorldSpace (triangle: tri3_t): tri3_t
+    {
+        return M_TransformTri3(M_QuickInv4(matLookAt), triangle);
+    }
+
     function R_TriToViewSpace (triangle: tri3_t): tri3_t
     {
         return M_TransformTri3(matLookAt, triangle);
@@ -317,6 +322,7 @@
             R_UpdateCamera,
             R_GetCameraState,
             R_GetProjectionOrigin,
+            R_TriToWorldSpace,
             R_TriToViewSpace,
             R_TriToClipSpace,
             R_VecToViewSpace,

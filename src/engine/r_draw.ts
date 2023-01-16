@@ -590,6 +590,8 @@
       u1: number, v1: number, c1: number,
       nx0: number, ny0: number, nz0: number, nw0: number,
       nx1: number, ny1: number, nz1: number, nw1: number,
+      wx0: number, wy0: number, wz0: number, ww0: number,
+      wx1: number, wy1: number, wz1: number, ww1: number,
       alpha: number,
       lx?: number, ly?: number, lz?: number ): void
     {
@@ -613,6 +615,11 @@
         const gradNY = (ny1 - ny0) * deltaX_;
         const gradNZ = (nz1 - nz0) * deltaX_;
         const gradNW = (nw1 - nw0) * deltaX_;
+        /* 1 step in `+x` equals how many in the world space coordinates */
+        const gradWX = (wx1 - wx0) * deltaX_;
+        const gradWY = (wy1 - wy0) * deltaX_;
+        const gradWZ = (wz1 - wz0) * deltaX_;
+        const gradWW = (ww1 - ww0) * deltaX_;
         /* current `u`, `v`, and `c` coordinates in the perspective-correct
          * space
          */
@@ -624,6 +631,11 @@
         let ny = preStepX * gradNY + ny0;
         let nz = preStepX * gradNZ + nz0;
         let nw = preStepX * gradNW + nw0;
+        /* current world space coordinates in the perspective-correct space */
+        let wx = preStepX * gradWX + wx0;
+        let wy = preStepX * gradWY + wy0;
+        let wz = preStepX * gradWZ + wz0;
+        let ww = preStepX * gradWW + ww0;
         /* rasterize current scanline */
         for (let x = dX0; x < dX1 && x < SCREEN_W; ++x)
         {
@@ -636,6 +648,7 @@
             {
                 u += gradU; v += gradV; c += gradC;
                 nx += gradNX; ny += gradNY; nz += gradNZ; nw += gradNW;
+                wx += gradWX; wy += gradWY; wz += gradWZ; ww += gradWW;
 
                 continue;
             }
@@ -653,9 +666,22 @@
             /* TODO: maybe use `Q_rsqrt` here??? */
             const magN_ = 1 / Math.sqrt(NX * NX + NY * NY + NZ * NZ);
             const nXUnit = NX * magN_, nYUnit = NY * magN_, nZUnit = NZ * magN_;
+            /* get the original world space coordinates back from the
+             * perspective-correct space by dehomogenizing
+             */
+            const ww_ = 1 / ww;
+            const WX = wx * ww_, WY = wy * ww_, WZ = wz * ww_;
             let lightLevel = 1;
             if (lx !== undefined && ly !== undefined && lz !== undefined)
-                lightLevel = lx * nXUnit + ly * nYUnit + lz * nZUnit;
+            {
+                const lX = lx - WX, lY = ly - WY, lZ = lz - WZ;
+                const magL_ = 1 / Math.sqrt(lX * lX + lY * lY + lZ * lZ);
+                const lXUnit = lX * magL_;
+                const lYUnit = lY * magL_;
+                const lZUnit = lZ * magL_;
+                lightLevel =
+                    lXUnit * nXUnit + lYUnit * nYUnit + lZUnit * nZUnit;
+            }
             /* draw a single pixel in screen-space sampled from the
              * perspective-corrected texture space
              */
@@ -684,6 +710,7 @@
             frameBuffer.data[paintIndex + 3] = 255;
             u += gradU; v += gradV; c += gradC;
             nx += gradNX; ny += gradNY; nz += gradNZ; nw += gradNW;
+            wx += gradWX; wy += gradWY; wz += gradWZ; ww += gradWW;
         }
     }
 
@@ -703,6 +730,9 @@
       nax: number, nay: number, naz: number,
       nbx: number, nby: number, nbz: number,
       ncx: number, ncy: number, ncz: number,
+      wax: number, way: number, waz: number,
+      wbx: number, wby: number, wbz: number,
+      wcx: number, wcy: number, wcz: number,
       alpha: number,
       lightX?: number, lightY?: number, lightZ?: number ): void
     {
@@ -710,18 +740,29 @@
         let topX = ax, topY = ay;
         let midX = bx, midY = by;
         let bottomX = cx, bottomY = cy;
-        /* coordinates of the triangle in perspective-corrected texture space */
+        /* coordinates of the triangle in perspective-corrected texture (UV)
+         * space
+         */
         let topC = ac / aw, midC = bc / bw, bottomC = cc / cw;
         let topU = au * topC, topV = av * topC;
         let midU = bu * midC, midV = bv * midC;
         let bottomU = cu * bottomC, bottomV = cv * bottomC;
-        /* vertex normals in the perpective-corrected space */
+        /* vertex normals in the perspective-corrected space */
         let topNW = 1 / aw, midNW = 1 / bw, bottomNW = 1 / cw;
         let topNX = nax * topNW, topNY = nay * topNW, topNZ = naz * topNW;
         let midNX = nbx * midNW, midNY = nby * midNW, midNZ = nbz * midNW;
         let bottomNX = ncx * bottomNW;
         let bottomNY = ncy * bottomNW;
         let bottomNZ = ncz * bottomNW;
+        /* world space coordinates of the triangle vertices in the
+         * perspective-corrected space
+         */
+        let topWW = 1 / aw, midWW = 1 / bw, bottomWW = 1 / cw;
+        let topWX = wax * topWW, topWY = way * topWW, topWZ = waz * topWW;
+        let midWX = wbx * midWW, midWY = wby * midWW, midWZ = wbz * midWW;
+        let bottomWX = wcx * bottomWW;
+        let bottomWY = wcy * bottomWW;
+        let bottomWZ = wcz * bottomWW;
         /* sort vertices of the triangle so that their y-coordinates are in
          * ascending order
          */
@@ -739,6 +780,10 @@
             const auxNX = topNX, auxNY = topNY, auxNZ = topNZ, auxNW = topNW;
             topNX = midNX; topNY = midNY; topNZ = midNZ; topNW = midNW;
             midNX = auxNX; midNY = auxNY; midNZ = auxNZ; midNW = auxNW;
+            /* swap world space coordinates */
+            const auxWX = topWX, auxWY = topWY, auxWZ = topWZ, auxWW = topWW;
+            topWX = midWX; topWY = midWY; topWZ = midWZ; topWW = midWW;
+            midWX = auxWX; midWY = auxWY; midWZ = auxWZ; midWW = auxWW;
         }
         if (midY > bottomY)
         {
@@ -763,6 +808,16 @@
             bottomNY = auxNY;
             bottomNZ = auxNZ;
             bottomNW = auxNW;
+            /* swap world space coordinates */
+            const auxWX = midWX, auxWY = midWY, auxWZ = midWZ, auxWW = midWW;
+            midWX = bottomWX;
+            midWY = bottomWY;
+            midWZ = bottomWZ;
+            midWW = bottomWW;
+            bottomWX = auxWX;
+            bottomWY = auxWY;
+            bottomWZ = auxWZ;
+            bottomWW = auxWW;
         }
         if (topY > midY)
         {
@@ -778,6 +833,10 @@
             const auxNX = topNX, auxNY = topNY, auxNZ = topNZ, auxNW = topNW;
             topNX = midNX; topNY = midNY; topNZ = midNZ; topNW = midNW;
             midNX = auxNX; midNY = auxNY; midNZ = auxNZ; midNW = auxNW;
+            /* swap world space coordinates */
+            const auxWX = topWX, auxWY = topWY, auxWZ = topWZ, auxWW = topWW;
+            topWX = midWX; topWY = midWY; topWZ = midWZ; topWW = midWW;
+            midWX = auxWX; midWY = auxWY; midWZ = auxWZ; midWW = auxWW;
         }
         const deltaUpper = midY - topY, deltaUpper_ = 1 / deltaUpper;
         const deltaLower = bottomY - midY, deltaLower_ = 1 / deltaLower;
@@ -814,6 +873,22 @@
         const stepNWAlongUpper = (midNW - topNW) * deltaUpper_;
         const stepNWAlongLower = (bottomNW - midNW) * deltaLower_;
         const stepNWAlongMajor = (bottomNW - topNW) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `wx` */
+        const stepWXAlongUpper = (midWX - topWX) * deltaUpper_;
+        const stepWXAlongLower = (bottomWX - midWX) * deltaLower_;
+        const stepWXAlongMajor = (bottomWX - topWX) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `wy` */
+        const stepWYAlongUpper = (midWY - topWY) * deltaUpper_;
+        const stepWYAlongLower = (bottomWY - midWY) * deltaLower_;
+        const stepWYAlongMajor = (bottomWY - topWY) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `wz` */
+        const stepWZAlongUpper = (midWZ - topWZ) * deltaUpper_;
+        const stepWZAlongLower = (bottomWZ - midWZ) * deltaLower_;
+        const stepWZAlongMajor = (bottomWZ - topWZ) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `ww` */
+        const stepWWAlongUpper = (midWW - topWW) * deltaUpper_;
+        const stepWWAlongLower = (bottomWW - midWW) * deltaLower_;
+        const stepWWAlongMajor = (bottomWW - topWW) * deltaMajor_;
         // raster clipping: clip the triangle if it goes out-of-bounds of screen
         // coordinates
         const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
@@ -860,6 +935,22 @@
         let nWUpper = preStepFromTop * stepNWAlongUpper + topNW;
         let nWLower = preStepFromMid * stepNWAlongLower + midNW;
         let nWMajor = preStepFromTop * stepNWAlongMajor + topNW;
+        /* current `wx` coordinates in perspective-correct world space */
+        let wXUpper = preStepFromTop * stepWXAlongUpper + topWX;
+        let wXLower = preStepFromMid * stepWXAlongLower + midWX;
+        let wXMajor = preStepFromTop * stepWXAlongMajor + topWX;
+        /* current `wy` coordinates in perspective-correct world space */
+        let wYUpper = preStepFromTop * stepWYAlongUpper + topWY;
+        let wYLower = preStepFromMid * stepWYAlongLower + midWY;
+        let wYMajor = preStepFromTop * stepWYAlongMajor + topWY;
+        /* current `wz` coordinates in perspective-correct world space */
+        let wZUpper = preStepFromTop * stepWZAlongUpper + topWZ;
+        let wZLower = preStepFromMid * stepWZAlongLower + midWZ;
+        let wZMajor = preStepFromTop * stepWZAlongMajor + topWZ;
+        /* current `ww` coordinates in perspective-correct world space */
+        let wWUpper = preStepFromTop * stepWWAlongUpper + topWW;
+        let wWLower = preStepFromMid * stepWWAlongLower + midWW;
+        let wWMajor = preStepFromTop * stepWWAlongMajor + topWW;
         // whether the lefmost edge of the raster triangle is the longest
         const isLeftMajor = stepXAlongMajor < stepXAlongUpper;
         if (isLeftMajor)
@@ -881,6 +972,14 @@
                                                    nYUpper,
                                                    nZUpper,
                                                    nWUpper,
+                                                   wXMajor,
+                                                   wYMajor,
+                                                   wZMajor,
+                                                   wWMajor,
+                                                   wXUpper,
+                                                   wYUpper,
+                                                   wZUpper,
+                                                   wWUpper,
                                                    alpha,
                                                    lightX, lightY, lightZ);
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
@@ -891,6 +990,10 @@
                 nYUpper += stepNYAlongUpper; nYMajor += stepNYAlongMajor;
                 nZUpper += stepNZAlongUpper; nZMajor += stepNZAlongMajor;
                 nWUpper += stepNWAlongUpper; nWMajor += stepNWAlongMajor;
+                wXUpper += stepWXAlongUpper; wXMajor += stepWXAlongMajor;
+                wYUpper += stepWYAlongUpper; wYMajor += stepWYAlongMajor;
+                wZUpper += stepWZAlongUpper; wZMajor += stepWZAlongMajor;
+                wWUpper += stepWWAlongUpper; wWMajor += stepWWAlongMajor;
             }
             /* lerp based on `y` in screen-space for the lower half of the
              * triangle
@@ -909,6 +1012,14 @@
                                                    nYLower,
                                                    nZLower,
                                                    nWLower,
+                                                   wXMajor,
+                                                   wYMajor,
+                                                   wZMajor,
+                                                   wWMajor,
+                                                   wXLower,
+                                                   wYLower,
+                                                   wZLower,
+                                                   wWLower,
                                                    alpha,
                                                    lightX, lightY, lightZ);
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
@@ -919,6 +1030,10 @@
                 nYLower += stepNYAlongLower; nYMajor += stepNYAlongMajor;
                 nZLower += stepNZAlongLower; nZMajor += stepNZAlongMajor;
                 nWLower += stepNWAlongLower; nWMajor += stepNWAlongMajor;
+                wXLower += stepWXAlongLower; wXMajor += stepWXAlongMajor;
+                wYLower += stepWYAlongLower; wYMajor += stepWYAlongMajor;
+                wZLower += stepWZAlongLower; wZMajor += stepWZAlongMajor;
+                wWLower += stepWWAlongLower; wWMajor += stepWWAlongMajor;
             }
         }
         else
@@ -940,6 +1055,14 @@
                                                    nYMajor,
                                                    nZMajor,
                                                    nWMajor,
+                                                   wXUpper,
+                                                   wYUpper,
+                                                   wZUpper,
+                                                   wWUpper,
+                                                   wXMajor,
+                                                   wYMajor,
+                                                   wZMajor,
+                                                   wWMajor,
                                                    alpha,
                                                    lightX, lightY, lightZ);
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
@@ -950,6 +1073,10 @@
                 nYUpper += stepNYAlongUpper; nYMajor += stepNYAlongMajor;
                 nZUpper += stepNZAlongUpper; nZMajor += stepNZAlongMajor;
                 nWUpper += stepNWAlongUpper; nWMajor += stepNWAlongMajor;
+                wXUpper += stepWXAlongUpper; wXMajor += stepWXAlongMajor;
+                wYUpper += stepWYAlongUpper; wYMajor += stepWYAlongMajor;
+                wZUpper += stepWZAlongUpper; wZMajor += stepWZAlongMajor;
+                wWUpper += stepWWAlongUpper; wWMajor += stepWWAlongMajor;
             }
             /* lerp based on `y` in screen-space for the lower half of the
              * triangle
@@ -968,6 +1095,14 @@
                                                    nYMajor,
                                                    nZMajor,
                                                    nWMajor,
+                                                   wXLower,
+                                                   wYLower,
+                                                   wZLower,
+                                                   wWLower,
+                                                   wXMajor,
+                                                   wYMajor,
+                                                   wZMajor,
+                                                   wWMajor,
                                                    alpha,
                                                    lightX, lightY, lightZ);
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
@@ -978,6 +1113,10 @@
                 nYLower += stepNYAlongLower; nYMajor += stepNYAlongMajor;
                 nZLower += stepNZAlongLower; nZMajor += stepNZAlongMajor;
                 nWLower += stepNWAlongLower; nWMajor += stepNWAlongMajor;
+                wXLower += stepWXAlongLower; wXMajor += stepWXAlongMajor;
+                wYLower += stepWYAlongLower; wYMajor += stepWYAlongMajor;
+                wZLower += stepWZAlongLower; wZMajor += stepWZAlongMajor;
+                wWLower += stepWWAlongLower; wWMajor += stepWWAlongMajor;
             }
         }
     }
