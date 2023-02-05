@@ -62,6 +62,11 @@
     const R_DrawTriangle_Textured_Perspective =
         R_Draw.R_DrawTriangle_Textured_Perspective;
 
+    const R_Shader = __import__R_Shader();
+    const R_ShaderMode = R_Shader.R_ShaderMode;
+    const vso = R_Shader.R_VertexShaderObj;
+    const pso = R_Shader.R_PixelShaderObj;
+
     // the center of the projection (near-clipping) plane
     let projectionOrigin: vec3_t;
     /* base vectors in world space */
@@ -97,24 +102,6 @@
     let doGlobalRotation = false;
     let globalRotation = 0;
 
-    const RENDER_MODE = {
-        FLAT: "FLAT",
-        TEXTURED: "TEXTURED",
-        TEXTURED_SHADED: "TEXTURED_SHADED",
-        WIREFRAME: "WIREFRAME",
-    };
-
-    const RENDER_MODES = [
-        RENDER_MODE.WIREFRAME,
-        RENDER_MODE.FLAT,
-        RENDER_MODE.TEXTURED,
-        RENDER_MODE.TEXTURED_SHADED,
-    ];
-
-    const renderModeChangeDebounce = 250;
-    let renderMode = 3;
-    let lastRenderModeChange = Date.now();
-
     function R_ToggleGlobalRotation (): void
     {
         const now = Date.now();
@@ -123,18 +110,6 @@
         {
             doGlobalRotation = !doGlobalRotation;
             lastGlobalRotationSwitch = now;
-        }
-    }
-
-    function R_ChangeRenderMode (): void
-    {
-        const now = Date.now();
-        if (I_GetKeyState(I_Keys.R) &&
-            now - lastRenderModeChange > renderModeChangeDebounce)
-        {
-            ++renderMode;
-            if (renderMode === RENDER_MODES.length) renderMode = 0;
-            lastRenderModeChange = now;
         }
     }
 
@@ -206,6 +181,7 @@
             const texUVA2 = vertices[uvFaceData[0]];
             const texUVB2 = vertices[uvFaceData[1]];
             const texUVC2 = vertices[uvFaceData[2]];
+            /* FIXME: add `Tri2` & `Vec2` */
             uvTable3[i] = Tri3(Vec3(texUVA2[0], texUVA2[1], 1),
                                Vec3(texUVB2[0], texUVB2[1], 1),
                                Vec3(texUVC2[0], texUVC2[1], 1));
@@ -514,9 +490,9 @@
                  * `triClip[i][2]`, i.e., the `z` in `gl_FragCoord`, in the
                  * depth-buffering instead
                  */
-                const aw = triFrustum[0][2];
-                const bw = triFrustum[1][2];
-                const cw = triFrustum[2][2];
+                const aw = 1 / triFrustum[0][2];
+                const bw = 1 / triFrustum[1][2];
+                const cw = 1 / triFrustum[2][2];
                 R_FillTriangle_Flat(ax, ay, aw,
                                     bx, by, bw,
                                     cx, cy, cw,
@@ -536,16 +512,20 @@
         let trisRendered = 0;
         // early return if the mesh does not have texture-mapping
         if (!uvTable3) return;
-        /* the position of the point light in world space */
-        let lightX: number | undefined;
-        let lightY: number | undefined;
-        let lightZ: number | undefined;
-        if (RENDER_MODES[renderMode] === RENDER_MODE.TEXTURED_SHADED)
+        if (pso.mode === R_ShaderMode.TEXTURED_SHADED)
         {
-            lightX = DIRECTIONAL_LIGHT[0];
-            lightY = DIRECTIONAL_LIGHT[1];
-            lightZ = DIRECTIONAL_LIGHT[2];
+            // currently the camera also acts as a point light
+            const cam = R_Camera.R_GetCameraState();
+            /* the position of the point light in world-space */
+            pso.lightX = cam.x; pso.lightY = cam.y; pso.lightZ = cam.z;
         }
+        else
+        {
+            pso.lightX = undefined;
+            pso.lightY = undefined;
+            pso.lightZ = undefined;
+        }
+        /* go over and render all of the triangles that survived culling */
         for (let i = 0; i < nCulledBuffer; ++i)
         {
             const triIndex = culledBuffer[i];
@@ -566,6 +546,8 @@
                 uvMap,
                 clippedUvMapQueue
             );
+            // grab the texture and pass it along to the pixel shader object
+            pso.tex = A_Texture(textureTable[triIndex]);
             // TODO: clip against far-plane
             for (let j = 0; j < nClipResult; ++j)
             {
@@ -585,54 +567,47 @@
                 const cy = cClip3[1] * SCREEN_H_2 + SCREEN_H_2;
                 /* TODO: consider using the actual non-linear depth values,
                  * `triClip[i][2]`, i.e., the `z` in `gl_FragCoord`, in the
-                 * depth-buffering instead
+                 * depth-buffering (and in depth-buffering only, not in
+                 * perspective-correction) instead
                  */
-                const aw = triFrustum[0][2];
-                const bw = triFrustum[1][2];
-                const cw = triFrustum[2][2];
+                const aw = 1 / triFrustum[0][2];
+                const bw = 1 / triFrustum[1][2];
+                const cw = 1 / triFrustum[2][2];
+                /* configure the vertex shader object for the draw call */
+                vso.ax = ax; vso.ay = ay; vso.aw = aw;
+                vso.bx = bx; vso.by = by; vso.bw = bw;
+                vso.cx = cx; vso.cy = cy; vso.cw = cw;
+                /* UV coordinates for texture-mapping */
                 const aUV = uvFrustum[0];
                 const bUV = uvFrustum[1];
                 const cUV = uvFrustum[2];
-                const au = aUV[0], av = aUV[1], ac = aUV[2];
-                const bu = bUV[0], bv = bUV[1], bc = bUV[2];
-                const cu = cUV[0], cv = cUV[1], cc = cUV[2];
+                const au = aUV[0], av = aUV[1];
+                const bu = bUV[0], bv = bUV[1];
+                const cu = cUV[0], cv = cUV[1];
+                vso.au = au; vso.av = av;
+                vso.bu = bu; vso.bv = bv;
+                vso.cu = cu; vso.cv = cv;
                 /* vertex normals used in smooth shading */
-                const nax = triVertexNormals[0][0];
-                const nay = triVertexNormals[0][1];
-                const naz = triVertexNormals[0][2];
-                const nbx = triVertexNormals[1][0];
-                const nby = triVertexNormals[1][1];
-                const nbz = triVertexNormals[1][2];
-                const ncx = triVertexNormals[2][0];
-                const ncy = triVertexNormals[2][1];
-                const ncz = triVertexNormals[2][2];
+                const aNormal3 = triVertexNormals[0];
+                const bNormal3 = triVertexNormals[1];
+                const cNormal3 = triVertexNormals[2];
+                const nAX = aNormal3[0], nAY = aNormal3[1], nAZ = aNormal3[2];
+                const nBX = bNormal3[0], nBY = bNormal3[1], nBZ = bNormal3[2];
+                const nCX = cNormal3[0], nCY = cNormal3[1], nCZ = cNormal3[2];
+                vso.nax = nAX; vso.nay = nAY; vso.naz = nAZ;
+                vso.nbx = nBX; vso.nby = nBY; vso.nbz = nBZ;
+                vso.ncx = nCX; vso.ncy = nCY; vso.ncz = nCZ;
                 /* world space vertex coordinates used in point lighting */
-                const wax = triFrustumWorld[0][0];
-                const way = triFrustumWorld[0][1];
-                const waz = triFrustumWorld[0][2];
-                const wbx = triFrustumWorld[1][0];
-                const wby = triFrustumWorld[1][1];
-                const wbz = triFrustumWorld[1][2];
-                const wcx = triFrustumWorld[2][0];
-                const wcy = triFrustumWorld[2][1];
-                const wcz = triFrustumWorld[2][2];
-                R_DrawTriangle_Textured_Perspective(
-                    A_Texture(textureTable[triIndex]),
-                    ax, ay, aw,
-                    bx, by, bw,
-                    cx, cy, cw,
-                    au, av, ac,
-                    bu, bv, bc,
-                    cu, cv, cc,
-                    nax, nay, naz,
-                    nbx, nby, nbz,
-                    ncx, ncy, ncz,
-                    wax, way, waz,
-                    wbx, wby, wbz,
-                    wcx, wcy, wcz,
-                    1,
-                    lightX, lightY, lightZ
-                );
+                const a3 = triFrustumWorld[0];
+                const b3 = triFrustumWorld[1];
+                const c3 = triFrustumWorld[2];
+                const wAX = a3[0], wAY = a3[1], wAZ = a3[2];
+                const wBX = b3[0], wBY = b3[1], wBZ = b3[2];
+                const wCX = c3[0], wCY = c3[1], wCZ = c3[2];
+                vso.wax = wAX; vso.way = wAY; vso.waz = wAZ;
+                vso.wbx = wBX; vso.wby = wBY; vso.wbz = wBZ;
+                vso.wcx = wCX; vso.wcy = wCY; vso.wcz = wCZ;
+                R_DrawTriangle_Textured_Perspective(vso, pso);
                 if (DEBUG_MODE)
                     R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
                                              255, 255, 255, 255, 2);
@@ -712,18 +687,18 @@
     function R_RenderGeometries (nTrisOnScreen: Uint32Array): void
     {
         R_CullGeometry();
-        switch (RENDER_MODES[renderMode])
+        switch (pso.mode)
         {
-            case RENDER_MODE.WIREFRAME:
+            case R_ShaderMode.WIREFRAME:
                 R_RenderGeomeries_Wireframe(nTrisOnScreen);
 
                 break;
-            case RENDER_MODE.FLAT:
+            case R_ShaderMode.FLAT:
                 R_RenderGeomeries_Flat(nTrisOnScreen);
 
                 break;
-            case RENDER_MODE.TEXTURED:
-            case RENDER_MODE.TEXTURED_SHADED:
+            case R_ShaderMode.TEXTURED:
+            case R_ShaderMode.TEXTURED_SHADED:
                 R_RenderGeometries_Textured(nTrisOnScreen);
 
                 break;
@@ -742,7 +717,6 @@
     {
         return {
             R_ToggleGlobalRotation,
-            R_ChangeRenderMode,
             R_LoadGeometry,
             R_InitUVTable,
             R_UpdateGeometry,

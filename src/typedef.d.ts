@@ -502,23 +502,7 @@ type R_DrawTriangle_Textured_Affine = (
     lightLevel: number
 ) => void;
 
-type R_DrawTriangle_Textured_Perspective = (
-    tex: texture_t,
-    ax: number, ay: number, aw: number,
-    bx: number, by: number, bw: number,
-    cx: number, cy: number, cw: number,
-    au: number, av: number, ac: number,
-    bu: number, bv: number, bc: number,
-    cu: number, cv: number, cc: number,
-    nax: number, nay: number, naz: number,
-    nbx: number, nby: number, nbz: number,
-    ncx: number, ncy: number, ncz: number,
-    wax: number, way: number, waz: number,
-    wbx: number, wby: number, wbz: number,
-    wcx: number, wcy: number, wcz: number,
-    alpha: number,
-    lightX?: number, lightY?: number, lightZ?: number
-) => void;
+type R_DrawTriangle_Textured_Perspective = (vso: vso_t, pso: pso_t) => void;
 
 type R_DrawImage = (
     img: texture_t,
@@ -605,7 +589,6 @@ type R_Tris = () => tri3_t[];
 
 type __Mod__R_Geometry = {
     R_ToggleGlobalRotation: R_ToggleGlobalRotation,
-    R_ChangeRenderMode: R_ChangeRenderMode,
     R_LoadGeometry: R_LoadGeometry,
     R_InitUVTable: R_InitUVTable,
     R_UpdateGeometry: R_UpdateGeometry,
@@ -630,6 +613,64 @@ type __Mod__R_Screen = {
 };
 
 declare function __import__R_Screen (): __Mod__R_Screen;
+
+// -----------------------------------------------------------------------------
+// engine/r_shader.ts
+// -----------------------------------------------------------------------------
+type vso_t = {
+    ax: number, ay: number, aw: number,
+    bx: number, by: number, bw: number,
+    cx: number, cy: number, cw: number,
+    au: number, av: number,
+    bu: number, bv: number,
+    cu: number, cv: number,
+    nax: number, nay: number, naz: number,
+    nbx: number, nby: number, nbz: number,
+    ncx: number, ncy: number, ncz: number,
+    wax: number, way: number, waz: number,
+    wbx: number, wby: number, wbz: number,
+    wcx: number, wcy: number, wcz: number,
+};
+
+type pso_t = {
+    mode: keyof SHADER_MODE,
+    tex?: texture_t,
+    dy: number,
+    dx0: number, dx1: number,
+    w0: number, w1: number,
+    u0: number, v0: number, u1: number, v1: number,
+    nx0: number, ny0: number, nz0: number,
+    nx1: number, ny1: number, nz1: number,
+    wx0: number, wy0: number, wz0: number,
+    wx1: number, wy1: number, wz1: number,
+    lightX?: number, lightY?: number, lightZ?: number,
+    alpha: number,
+};
+
+type SHADER_MODE = {
+    FLAT: "FLAT",
+    TEXTURED: "TEXTURED",
+    TEXTURED_SHADED: "TEXTURED_SHADED",
+    WIREFRAME: "WIREFRAME",
+};
+
+type SHADER_MODES = [
+    SHADER_MODE["WIREFRAME"],
+    SHADER_MODE["FLAT"],
+    SHADER_MODE["TEXTURED"],
+    SHADER_MODE["TEXTURED_SHADED"],
+];
+
+type R_ChangeShader = () => void;
+
+type __Mod__R_Shader = {
+    R_VertexShaderObj: vso_t,
+    R_PixelShaderObj: pso_t,
+    R_ShaderMode: SHADER_MODE,
+    R_ChangeShader: R_ChangeShader,
+};
+
+declare function __import__R_Shader (): __Mod__R_Shader;
 
 // -----------------------------------------------------------------------------
 // game/g_const.ts
