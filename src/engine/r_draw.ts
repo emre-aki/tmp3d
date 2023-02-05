@@ -367,7 +367,7 @@
     function
     R_LerpScanline_Flat
     ( dx0: number, dx1: number, dy: number,
-      c0: number, c1: number,
+      w0: number, w1: number,
       r: number, g: number, b: number, a: number,
       lightLevel: number ): void
     {
@@ -382,9 +382,10 @@
         // pre-step from start by 0.5 as pixel centers are the actual sampling
         // points
         const preStepX = dX0 + 0.5 - dx0;
-        // 1 step in `+x` equals how many steps in `c`
-        const gradC = (c1 - c0) / (dx1 - dx0);
-        let c = preStepX * gradC + c0;
+        // 1 step in `+x` equals how many steps in `w`
+        const gradW = (w1 - w0) / (dx1 - dx0);
+        // current z-coordinate in the perspective-correct space
+        let w = preStepX * gradW + w0;
         /* rasterize current scanline */
         for (let x = dX0; x < dX1 && x < SCREEN_W; ++x)
         {
@@ -393,8 +394,8 @@
              * triangle is closer (1 / zRaster > 1 / zBuffer) than what's
              * already in the z-buffer at the position we want to draw
              */
-            if (c <= zBuffer[bufferIndex]) { c += gradC; continue; }
-            zBuffer[bufferIndex] = c; // don't forget to update the z-buffer!
+            if (w <= zBuffer[bufferIndex]) { w += gradW; continue; }
+            zBuffer[bufferIndex] = w; // update the z-buffer
             /* fill a single pixel in screen-space with the color defined by
              * parameters `r`, `g`, `b`, and `a`.
              */
@@ -412,7 +413,7 @@
             frameBuffer.data[paintIndex + 1] = newGreen;
             frameBuffer.data[paintIndex + 2] = newBlue;
             frameBuffer.data[paintIndex + 3] = 255;
-            c += gradC;
+            w += gradW;
         }
     }
 
@@ -428,32 +429,37 @@
       r: number, g: number, b: number, a: number,
       lightLevel: number ): void
     {
-        // lerp depth values between the edges of the triangle for z-buffering
-        const ca = 1 / aw, cb = 1 / bw, cc = 1 / cw;
         /* coordinates of the triangle in screen-space */
-        let topX = ax, topY = ay, topC = ca;
-        let midX = bx, midY = by, midC = cb;
-        let bottomX = cx, bottomY = cy, bottomC = cc;
+        let topX = ax, midX = bx, bottomX = cx;
+        let topY = ay, midY = by, bottomY = cy;
+        // z-coordinates in the perspective-correct space
+        let topW = aw, midW = bw, bottomW = cw;
         /* sort vertices of the triangle so that their y-coordinates are in
          * ascending order
          */
         if (topY > midY)
         {
-            const auxX = topX, auxY = topY, auxC = topC;
-            topX = midX; topY = midY; topC = midC;
-            midX = auxX; midY = auxY; midC = auxC;
+            /* swap in screen-space */
+            const auxX = topX; topX = midX; midX = auxX;
+            const auxY = topY; topY = midY; midY = auxY;
+            // swap in perspective-correct (1/z) space
+            const auxW = topW; topW = midW; midW = auxW;
         }
         if (midY > bottomY)
         {
-            const auxX = midX, auxY = midY, auxC = midC;
-            midX = bottomX; midY = bottomY; midC = bottomC;
-            bottomX = auxX; bottomY = auxY; bottomC = auxC;
+            /* swap in screen-space */
+            const auxX = midX; midX = bottomX; bottomX = auxX;
+            const auxY = midY; midY = bottomY; bottomY = auxY;
+            // swap in perspective-correct (1/z) space
+            const auxW = midW; midW = bottomW; bottomW = auxW;
         }
         if (topY > midY)
         {
-            const auxX = topX, auxY = topY, auxC = topC;
-            topX = midX; topY = midY; topC = midC;
-            midX = auxX; midY = auxY; midC = auxC;
+            /* swap in screen-space */
+            const auxX = topX; topX = midX; midX = auxX;
+            const auxY = topY; topY = midY; midY = auxY;
+            // swap in perspective-correct (1/z) space
+            const auxW = topW; topW = midW; midW = auxW;
         }
         const deltaUpper = midY - topY, deltaUpper_ = 1 / deltaUpper;
         const deltaLower = bottomY - midY, deltaLower_ = 1 / deltaLower;
@@ -462,10 +468,10 @@
         const stepXAlongUpper = (midX - topX) * deltaUpper_;
         const stepXAlongLower = (bottomX - midX) * deltaLower_;
         const stepXAlongMajor = (bottomX - topX) * deltaMajor_;
-        /* 1 step in `+y` equals how many steps in `c` */
-        const stepCAlongUpper = (midC - topC) * deltaUpper_;
-        const stepCAlongLower = (bottomC - midC) * deltaLower_;
-        const stepCAlongMajor = (bottomC - topC) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `w` */
+        const stepWAlongUpper = (midW - topW) * deltaUpper_;
+        const stepWAlongLower = (bottomW - midW) * deltaLower_;
+        const stepWAlongMajor = (bottomW - topW) * deltaMajor_;
         // raster clipping: clip the triangle if it goes out-of-bounds of screen
         // coordinates
         const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
@@ -484,10 +490,10 @@
         let xUpper = preStepFromTop * stepXAlongUpper + topX;
         let xLower = preStepFromMid * stepXAlongLower + midX;
         let xMajor = preStepFromTop * stepXAlongMajor + topX;
-        /* current `c` coordinates in screen-space */
-        let cUpper = preStepFromTop * stepCAlongUpper + topC;
-        let cLower = preStepFromMid * stepCAlongLower + midC;
-        let cMajor = preStepFromTop * stepCAlongMajor + topC;
+        /* current `w` coordinates in perspective-correct (1/z) space */
+        let wUpper = preStepFromTop * stepWAlongUpper + topW;
+        let wLower = preStepFromMid * stepWAlongLower + midW;
+        let wMajor = preStepFromTop * stepWAlongMajor + topW;
         // whether the lefmost edge of the triangle is the longest
         const isLeftMajor = stepXAlongMajor < stepXAlongUpper;
         if (isLeftMajor)
@@ -497,20 +503,20 @@
              */
             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
             {
-                R_LerpScanline_Flat(xMajor, xUpper, y, cMajor, cUpper,
+                R_LerpScanline_Flat(xMajor, xUpper, y, wMajor, wUpper,
                                     r, g, b, a, lightLevel);
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
-                cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
+                wUpper += stepWAlongUpper; wMajor += stepWAlongMajor;
             }
             /* lerp based on `y` in screen-space for the lower half of the
              * triangle
              */
             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
             {
-                R_LerpScanline_Flat(xMajor, xLower, y, cMajor, cLower,
+                R_LerpScanline_Flat(xMajor, xLower, y, wMajor, wLower,
                                     r, g, b, a, lightLevel);
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
-                cLower += stepCAlongLower; cMajor += stepCAlongMajor;
+                wLower += stepWAlongLower; wMajor += stepWAlongMajor;
             }
         }
         else
@@ -520,20 +526,20 @@
              */
             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
             {
-                R_LerpScanline_Flat(xUpper, xMajor, y, cUpper, cMajor,
+                R_LerpScanline_Flat(xUpper, xMajor, y, wUpper, wMajor,
                                     r, g, b, a, lightLevel);
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
-                cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
+                wUpper += stepWAlongUpper; wMajor += stepWAlongMajor;
             }
             /* lerp based on `y` in screen-space for the lower half of the
              * triangle
              */
             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
             {
-                R_LerpScanline_Flat(xLower, xMajor, y, cLower, cMajor,
+                R_LerpScanline_Flat(xLower, xMajor, y, wLower, wMajor,
                                     r, g, b, a, lightLevel);
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
-                cLower += stepCAlongLower; cMajor += stepCAlongMajor;
+                wLower += stepWAlongLower; wMajor += stepWAlongMajor;
             }
         }
     }
@@ -584,17 +590,17 @@
     //
     function
     R_LerpTexturedScanline_Perspective
-    ( tex: texture_t,
-      dx0: number, dx1: number, dy: number,
-      u0: number, v0: number, c0: number,
-      u1: number, v1: number, c1: number,
-      nx0: number, ny0: number, nz0: number, nw0: number,
-      nx1: number, ny1: number, nz1: number, nw1: number,
-      wx0: number, wy0: number, wz0: number, ww0: number,
-      wx1: number, wy1: number, wz1: number, ww1: number,
-      alpha: number,
-      lx?: number, ly?: number, lz?: number ): void
+    ({ tex,
+       dy,
+       dx0, dx1,
+       w0, w1,
+       u0, v0, u1, v1,
+       nx0, ny0, nz0, nx1, ny1, nz1,
+       wx0, wy0, wz0, wx1, wy1, wz1,
+       lightX, lightY, lightZ,
+       alpha }: pso_t): void
     {
+        tex = tex!;
         const texWidth = tex.width, texHeight = tex.height, bitmap = tex.bitmap;
         // raster clipping: clip the scanline if it goes out-of-bounds of screen
         // coordinates
@@ -606,36 +612,32 @@
         // pre-step from start by 0.5 as pixel centers are the actual sampling
         // points
         const preStepX = dX0 + 0.5 - dx0;
-        /* 1 step in `+x` equals how many steps in `u`, `v`, and `c` */
+        // 1 step in `+x` equals how many steps in `w`
+        const gradW = (w1 - w0) * deltaX_;
+        /* 1 step in `+x` equals how many steps in `u` and `v` */
         const gradU = (u1 - u0) * deltaX_;
         const gradV = (v1 - v0) * deltaX_;
-        const gradC = (c1 - c0) * deltaX_;
         /* 1 step in `+x` equals how many steps along the vertex normal */
         const gradNX = (nx1 - nx0) * deltaX_;
         const gradNY = (ny1 - ny0) * deltaX_;
         const gradNZ = (nz1 - nz0) * deltaX_;
-        const gradNW = (nw1 - nw0) * deltaX_;
         /* 1 step in `+x` equals how many in the world space coordinates */
         const gradWX = (wx1 - wx0) * deltaX_;
         const gradWY = (wy1 - wy0) * deltaX_;
         const gradWZ = (wz1 - wz0) * deltaX_;
-        const gradWW = (ww1 - ww0) * deltaX_;
-        /* current `u`, `v`, and `c` coordinates in the perspective-correct
-         * space
-         */
+        // current z-coordinate in the perspective-correct space
+        let w = preStepX * gradW + w0;
+        /* current uv coordinates in the perspective-correct space */
         let u = preStepX * gradU + u0;
         let v = preStepX * gradV + v0;
-        let c = preStepX * gradC + c0;
         /* current vertex normal in the perspective-correct space */
         let nx = preStepX * gradNX + nx0;
         let ny = preStepX * gradNY + ny0;
         let nz = preStepX * gradNZ + nz0;
-        let nw = preStepX * gradNW + nw0;
         /* current world space coordinates in the perspective-correct space */
         let wx = preStepX * gradWX + wx0;
         let wy = preStepX * gradWY + wy0;
         let wz = preStepX * gradWZ + wz0;
-        let ww = preStepX * gradWW + ww0;
         /* rasterize current scanline */
         for (let x = dX0; x < dX1 && x < SCREEN_W; ++x)
         {
@@ -644,37 +646,35 @@
              * triangle is closer (1 / zRaster > 1 / zBuffer) than what's
              * already in the z-buffer at the position we want to draw
              */
-            if (c <= zBuffer[bufferIndex])
+            if (w <= zBuffer[bufferIndex])
             {
-                u += gradU; v += gradV; c += gradC;
-                nx += gradNX; ny += gradNY; nz += gradNZ; nw += gradNW;
-                wx += gradWX; wy += gradWY; wz += gradWZ; ww += gradWW;
+                w += gradW;
+                u += gradU; v += gradV;
+                nx += gradNX; ny += gradNY; nz += gradNZ;
+                wx += gradWX; wy += gradWY; wz += gradWZ;
 
                 continue;
             }
-            zBuffer[bufferIndex] = c; // don't forget to update the z-buffer!
-            const c_ = 1 / c;
-            let sX = u * c_, sY = v * c_;
+            zBuffer[bufferIndex] = w; // update the z-buffer
+            /* get the original coordinates back from the perspective-corrected
+             * space by dehomogenizing
+             */
+            const w_ = 1 / w;
+            let sX = u * w_, sY = v * w_;
             /* wrap-around the texture if the sampling point is out-of-bounds */
             sX = Math.floor((((sX % 1) + 1) % 1) * texWidth);
             sY = Math.floor((((sY % 1) + 1) % 1) * texHeight);
-            /* get the original vertex normal back from the perspective-correct
-             * space by dehomogenizing
-             */
-            const nw_ = 1 / nw;
-            const NX = nx * nw_, NY = ny * nw_, NZ = nz * nw_;
+            const NX = nx * w_, NY = ny * w_, NZ = nz * w_;
             /* TODO: maybe use `Q_rsqrt` here??? */
             const magN_ = 1 / Math.sqrt(NX * NX + NY * NY + NZ * NZ);
             const nXUnit = NX * magN_, nYUnit = NY * magN_, nZUnit = NZ * magN_;
-            /* get the original world space coordinates back from the
-             * perspective-correct space by dehomogenizing
-             */
-            const ww_ = 1 / ww;
-            const WX = wx * ww_, WY = wy * ww_, WZ = wz * ww_;
+            const WX = wx * w_, WY = wy * w_, WZ = wz * w_;
             let lightLevel = 1;
-            if (lx !== undefined && ly !== undefined && lz !== undefined)
+            if (lightX !== undefined &&
+                lightY !== undefined &&
+                lightZ !== undefined)
             {
-                const lX = lx - WX, lY = ly - WY, lZ = lz - WZ;
+                const lX = lightX - WX, lY = lightY - WY, lZ = lightZ - WZ;
                 const magL_ = 1 / Math.sqrt(lX * lX + lY * lY + lZ * lZ);
                 const lXUnit = lX * magL_;
                 const lYUnit = lY * magL_;
@@ -708,9 +708,10 @@
             frameBuffer.data[paintIndex + 1] = newGreen;
             frameBuffer.data[paintIndex + 2] = newBlue;
             frameBuffer.data[paintIndex + 3] = 255;
-            u += gradU; v += gradV; c += gradC;
-            nx += gradNX; ny += gradNY; nz += gradNZ; nw += gradNW;
-            wx += gradWX; wy += gradWY; wz += gradWZ; ww += gradWW;
+            w += gradW;
+            u += gradU; v += gradV;
+            nx += gradNX; ny += gradNY; nz += gradNZ;
+            wx += gradWX; wy += gradWY; wz += gradWZ;
         }
     }
 
@@ -720,123 +721,97 @@
     //
     function
     R_DrawTriangle_Textured_Perspective
-    ( tex: texture_t,
-      ax: number, ay: number, aw: number,
-      bx: number, by: number, bw: number,
-      cx: number, cy: number, cw: number,
-      au: number, av: number, ac: number,
-      bu: number, bv: number, bc: number,
-      cu: number, cv: number, cc: number,
-      nax: number, nay: number, naz: number,
-      nbx: number, nby: number, nbz: number,
-      ncx: number, ncy: number, ncz: number,
-      wax: number, way: number, waz: number,
-      wbx: number, wby: number, wbz: number,
-      wcx: number, wcy: number, wcz: number,
-      alpha: number,
-      lightX?: number, lightY?: number, lightZ?: number ): void
+    ({ ax, ay, aw,
+       bx, by, bw,
+       cx, cy, cw,
+       au, av,
+       bu, bv,
+       cu, cv,
+       nax, nay, naz,
+       nbx, nby, nbz,
+       ncx, ncy, ncz,
+       wax, way, waz,
+       wbx, wby, wbz,
+       wcx, wcy, wcz }: vso_t,
+     pso: pso_t): void
     {
         /* coordinates of the triangle in screen-space */
-        let topX = ax, topY = ay;
-        let midX = bx, midY = by;
-        let bottomX = cx, bottomY = cy;
-        /* coordinates of the triangle in perspective-corrected texture (UV)
-         * space
+        let topX = ax, midX = bx, bottomX = cx;
+        let topY = ay, midY = by, bottomY = cy;
+        // z-coordinates in the perspective-correct space
+        let topW = aw, midW = bw, bottomW = cw;
+        /* UV coordinates in perspective-corrected (1/z) texture space */
+        let topU = au * topW, midU = bu * midW, bottomU = cu * bottomW;
+        let topV = av * topW, midV = bv * midW, bottomV = cv * bottomW;
+        /* vertex normals in perspective-corrected (1/z) world space */
+        let topNX = nax * topW, midNX = nbx * midW, bottomNX = ncx * bottomW;
+        let topNY = nay * topW, midNY = nby * midW, bottomNY = ncy * bottomW;
+        let topNZ = naz * topW, midNZ = nbz * midW, bottomNZ = ncz * bottomW;
+        /* world space coordinates of the triangle vertices in
+         * perspective-corrected (1/z) space
          */
-        let topC = ac / aw, midC = bc / bw, bottomC = cc / cw;
-        let topU = au * topC, topV = av * topC;
-        let midU = bu * midC, midV = bv * midC;
-        let bottomU = cu * bottomC, bottomV = cv * bottomC;
-        /* vertex normals in the perspective-corrected space */
-        let topNW = 1 / aw, midNW = 1 / bw, bottomNW = 1 / cw;
-        let topNX = nax * topNW, topNY = nay * topNW, topNZ = naz * topNW;
-        let midNX = nbx * midNW, midNY = nby * midNW, midNZ = nbz * midNW;
-        let bottomNX = ncx * bottomNW;
-        let bottomNY = ncy * bottomNW;
-        let bottomNZ = ncz * bottomNW;
-        /* world space coordinates of the triangle vertices in the
-         * perspective-corrected space
-         */
-        let topWW = 1 / aw, midWW = 1 / bw, bottomWW = 1 / cw;
-        let topWX = wax * topWW, topWY = way * topWW, topWZ = waz * topWW;
-        let midWX = wbx * midWW, midWY = wby * midWW, midWZ = wbz * midWW;
-        let bottomWX = wcx * bottomWW;
-        let bottomWY = wcy * bottomWW;
-        let bottomWZ = wcz * bottomWW;
+        let topWX = wax * topW, midWX = wbx * midW, bottomWX = wcx * bottomW;
+        let topWY = way * topW, midWY = wby * midW, bottomWY = wcy * bottomW;
+        let topWZ = waz * topW, midWZ = wbz * midW, bottomWZ = wcz * bottomW;
         /* sort vertices of the triangle so that their y-coordinates are in
          * ascending order
          */
         if (topY > midY)
         {
             /* swap vertices in screen-space */
-            const auxX = topX, auxY = topY;
-            topX = midX; topY = midY;
-            midX = auxX; midY = auxY;
+            const auxX = topX; topX = midX; midX = auxX;
+            const auxY = topY; topY = midY; midY = auxY;
+            // swap in perspective-correct (1/z) space
+            const auxW = topW; topW = midW; midW = auxW;
             /* swap uv coordinates */
-            const auxU = topU, auxV = topV, auxC = topC;
-            topU = midU; topV = midV; topC = midC;
-            midU = auxU; midV = auxV; midC = auxC;
+            const auxU = topU; topU = midU; midU = auxU;
+            const auxV = topV; topV = midV; midV = auxV;
             /* swap vertex normals */
-            const auxNX = topNX, auxNY = topNY, auxNZ = topNZ, auxNW = topNW;
-            topNX = midNX; topNY = midNY; topNZ = midNZ; topNW = midNW;
-            midNX = auxNX; midNY = auxNY; midNZ = auxNZ; midNW = auxNW;
+            const auxNX = topNX; topNX = midNX; midNX = auxNX;
+            const auxNY = topNY; topNY = midNY; midNY = auxNY;
+            const auxNZ = topNZ; topNZ = midNZ; midNZ = auxNZ;
             /* swap world space coordinates */
-            const auxWX = topWX, auxWY = topWY, auxWZ = topWZ, auxWW = topWW;
-            topWX = midWX; topWY = midWY; topWZ = midWZ; topWW = midWW;
-            midWX = auxWX; midWY = auxWY; midWZ = auxWZ; midWW = auxWW;
+            const auxWX = topWX; topWX = midWX; midWX = auxWX;
+            const auxWY = topWY; topWY = midWY; midWY = auxWY;
+            const auxWZ = topWZ; topWZ = midWZ; midWZ = auxWZ;
         }
         if (midY > bottomY)
         {
             /* swap vertices in screen-space */
-            const auxX = midX, auxY = midY;
-            midX = bottomX; midY = bottomY;
-            bottomX = auxX; bottomY = auxY;
+            const auxX = midX; midX = bottomX; bottomX = auxX;
+            const auxY = midY; midY = bottomY; bottomY = auxY;
+            // swap in perspective-correct (1/z) space
+            const auxW = midW; midW = bottomW; bottomW = auxW;
             /* swap uv coordinates */
-            const auxU = midU, auxV = midV, auxC = midC;
-            midU = bottomU; midV = bottomV; midC = bottomC;
-            bottomU = auxU; bottomV = auxV; bottomC = auxC;
+            const auxU = midU; midU = bottomU; bottomU = auxU;
+            const auxV = midV; midV = bottomV; bottomV = auxV;
             /* swap vertex normals */
-            const auxNX = midNX;
-            const auxNY = midNY;
-            const auxNZ = midNZ;
-            const auxNW = midNW;
-            midNX = bottomNX;
-            midNY = bottomNY;
-            midNZ = bottomNZ;
-            midNW = bottomNW;
-            bottomNX = auxNX;
-            bottomNY = auxNY;
-            bottomNZ = auxNZ;
-            bottomNW = auxNW;
+            const auxNX = midNX; midNX = bottomNX; bottomNX = auxNX;
+            const auxNY = midNY; midNY = bottomNY; bottomNY = auxNY;
+            const auxNZ = midNZ; midNZ = bottomNZ; bottomNZ = auxNZ;
             /* swap world space coordinates */
-            const auxWX = midWX, auxWY = midWY, auxWZ = midWZ, auxWW = midWW;
-            midWX = bottomWX;
-            midWY = bottomWY;
-            midWZ = bottomWZ;
-            midWW = bottomWW;
-            bottomWX = auxWX;
-            bottomWY = auxWY;
-            bottomWZ = auxWZ;
-            bottomWW = auxWW;
+            const auxWX = midWX; midWX = bottomWX; bottomWX = auxWX;
+            const auxWY = midWY; midWY = bottomWY; bottomWY = auxWY;
+            const auxWZ = midWZ; midWZ = bottomWZ; bottomWZ = auxWZ;
         }
         if (topY > midY)
         {
             /* swap vertices in screen-space */
-            const auxX = topX, auxY = topY;
-            topX = midX; topY = midY;
-            midX = auxX; midY = auxY;
+            const auxX = topX; topX = midX; midX = auxX;
+            const auxY = topY; topY = midY; midY = auxY;
+            // swap in perspective-correct (1/z) space
+            const auxW = topW; topW = midW; midW = auxW;
             /* swap uv coordinates */
-            const auxU = topU, auxV = topV, auxC = topC;
-            topU = midU; topV = midV; topC = midC;
-            midU = auxU; midV = auxV; midC = auxC;
+            const auxU = topU; topU = midU; midU = auxU;
+            const auxV = topV; topV = midV; midV = auxV;
             /* swap vertex normals */
-            const auxNX = topNX, auxNY = topNY, auxNZ = topNZ, auxNW = topNW;
-            topNX = midNX; topNY = midNY; topNZ = midNZ; topNW = midNW;
-            midNX = auxNX; midNY = auxNY; midNZ = auxNZ; midNW = auxNW;
+            const auxNX = topNX; topNX = midNX; midNX = auxNX;
+            const auxNY = topNY; topNY = midNY; midNY = auxNY;
+            const auxNZ = topNZ; topNZ = midNZ; midNZ = auxNZ;
             /* swap world space coordinates */
-            const auxWX = topWX, auxWY = topWY, auxWZ = topWZ, auxWW = topWW;
-            topWX = midWX; topWY = midWY; topWZ = midWZ; topWW = midWW;
-            midWX = auxWX; midWY = auxWY; midWZ = auxWZ; midWW = auxWW;
+            const auxWX = topWX; topWX = midWX; midWX = auxWX;
+            const auxWY = topWY; topWY = midWY; midWY = auxWY;
+            const auxWZ = topWZ; topWZ = midWZ; midWZ = auxWZ;
         }
         const deltaUpper = midY - topY, deltaUpper_ = 1 / deltaUpper;
         const deltaLower = bottomY - midY, deltaLower_ = 1 / deltaLower;
@@ -845,6 +820,10 @@
         const stepXAlongUpper = (midX - topX) * deltaUpper_;
         const stepXAlongLower = (bottomX - midX) * deltaLower_;
         const stepXAlongMajor = (bottomX - topX) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `w` */
+        const stepWAlongUpper = (midW - topW) * deltaUpper_;
+        const stepWAlongLower = (bottomW - midW) * deltaLower_;
+        const stepWAlongMajor = (bottomW - topW) * deltaMajor_;
         /* 1 step in `+y` equals how many steps in `u` */
         const stepUAlongUpper = (midU - topU) * deltaUpper_;
         const stepUAlongLower = (bottomU - midU) * deltaLower_;
@@ -853,10 +832,6 @@
         const stepVAlongUpper = (midV - topV) * deltaUpper_;
         const stepVAlongLower = (bottomV - midV) * deltaLower_;
         const stepVAlongMajor = (bottomV - topV) * deltaMajor_;
-        /* 1 step in `+y` equals how many steps in `c` */
-        const stepCAlongUpper = (midC - topC) * deltaUpper_;
-        const stepCAlongLower = (bottomC - midC) * deltaLower_;
-        const stepCAlongMajor = (bottomC - topC) * deltaMajor_;
         /* 1 step in `+y` equals how many steps in `nx` */
         const stepNXAlongUpper = (midNX - topNX) * deltaUpper_;
         const stepNXAlongLower = (bottomNX - midNX) * deltaLower_;
@@ -869,10 +844,6 @@
         const stepNZAlongUpper = (midNZ - topNZ) * deltaUpper_;
         const stepNZAlongLower = (bottomNZ - midNZ) * deltaLower_;
         const stepNZAlongMajor = (bottomNZ - topNZ) * deltaMajor_;
-        /* 1 step in `+y` equals how many steps in `nw` */
-        const stepNWAlongUpper = (midNW - topNW) * deltaUpper_;
-        const stepNWAlongLower = (bottomNW - midNW) * deltaLower_;
-        const stepNWAlongMajor = (bottomNW - topNW) * deltaMajor_;
         /* 1 step in `+y` equals how many steps in `wx` */
         const stepWXAlongUpper = (midWX - topWX) * deltaUpper_;
         const stepWXAlongLower = (bottomWX - midWX) * deltaLower_;
@@ -885,10 +856,6 @@
         const stepWZAlongUpper = (midWZ - topWZ) * deltaUpper_;
         const stepWZAlongLower = (bottomWZ - midWZ) * deltaLower_;
         const stepWZAlongMajor = (bottomWZ - topWZ) * deltaMajor_;
-        /* 1 step in `+y` equals how many steps in `ww` */
-        const stepWWAlongUpper = (midWW - topWW) * deltaUpper_;
-        const stepWWAlongLower = (bottomWW - midWW) * deltaLower_;
-        const stepWWAlongMajor = (bottomWW - topWW) * deltaMajor_;
         // raster clipping: clip the triangle if it goes out-of-bounds of screen
         // coordinates
         const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
@@ -907,50 +874,42 @@
         let xUpper = preStepFromTop * stepXAlongUpper + topX;
         let xLower = preStepFromMid * stepXAlongLower + midX;
         let xMajor = preStepFromTop * stepXAlongMajor + topX;
-        /* current `u` coordinates in perspective-correct texture space */
+        /* current `w` coordinates in perspective-correct (1/z) space */
+        let wUpper = preStepFromTop * stepWAlongUpper + topW;
+        let wLower = preStepFromMid * stepWAlongLower + midW;
+        let wMajor = preStepFromTop * stepWAlongMajor + topW;
+        /* current `u` coordinates in perspective-correct (1/z) texture space */
         let uUpper = preStepFromTop * stepUAlongUpper + topU;
         let uLower = preStepFromMid * stepUAlongLower + midU;
         let uMajor = preStepFromTop * stepUAlongMajor + topU;
-        /* current `v` coordinates in perspective-correct texture space */
+        /* current `v` coordinates in perspective-correct (1/z) texture space */
         let vUpper = preStepFromTop * stepVAlongUpper + topV;
         let vLower = preStepFromMid * stepVAlongLower + midV;
         let vMajor = preStepFromTop * stepVAlongMajor + topV;
-        /* current `c` coordinates in perspective-correct space */
-        let cUpper = preStepFromTop * stepCAlongUpper + topC;
-        let cLower = preStepFromMid * stepCAlongLower + midC;
-        let cMajor = preStepFromTop * stepCAlongMajor + topC;
-        /* current `nx` coordinates in perspective-correct world space */
+        /* current `nx` coordinates in perspective-correct (1/z) world space */
         let nXUpper = preStepFromTop * stepNXAlongUpper + topNX;
         let nXLower = preStepFromMid * stepNXAlongLower + midNX;
         let nXMajor = preStepFromTop * stepNXAlongMajor + topNX;
-        /* current `ny` coordinates in perspective-correct world space */
+        /* current `ny` coordinates in perspective-correct (1/z) world space */
         let nYUpper = preStepFromTop * stepNYAlongUpper + topNY;
         let nYLower = preStepFromMid * stepNYAlongLower + midNY;
         let nYMajor = preStepFromTop * stepNYAlongMajor + topNY;
-        /* current `nz` coordinates in perspective-correct world space */
+        /* current `nz` coordinates in perspective-correct (1/z) world space */
         let nZUpper = preStepFromTop * stepNZAlongUpper + topNZ;
         let nZLower = preStepFromMid * stepNZAlongLower + midNZ;
         let nZMajor = preStepFromTop * stepNZAlongMajor + topNZ;
-        /* current `nw` coordinates in perspective-correct world space */
-        let nWUpper = preStepFromTop * stepNWAlongUpper + topNW;
-        let nWLower = preStepFromMid * stepNWAlongLower + midNW;
-        let nWMajor = preStepFromTop * stepNWAlongMajor + topNW;
-        /* current `wx` coordinates in perspective-correct world space */
+        /* current `wx` coordinates in perspective-correct (1/z) world space */
         let wXUpper = preStepFromTop * stepWXAlongUpper + topWX;
         let wXLower = preStepFromMid * stepWXAlongLower + midWX;
         let wXMajor = preStepFromTop * stepWXAlongMajor + topWX;
-        /* current `wy` coordinates in perspective-correct world space */
+        /* current `wy` coordinates in perspective-correct (1/z) world space */
         let wYUpper = preStepFromTop * stepWYAlongUpper + topWY;
         let wYLower = preStepFromMid * stepWYAlongLower + midWY;
         let wYMajor = preStepFromTop * stepWYAlongMajor + topWY;
-        /* current `wz` coordinates in perspective-correct world space */
+        /* current `wz` coordinates in perspective-correct (1/z) world space */
         let wZUpper = preStepFromTop * stepWZAlongUpper + topWZ;
         let wZLower = preStepFromMid * stepWZAlongLower + midWZ;
         let wZMajor = preStepFromTop * stepWZAlongMajor + topWZ;
-        /* current `ww` coordinates in perspective-correct world space */
-        let wWUpper = preStepFromTop * stepWWAlongUpper + topWW;
-        let wWLower = preStepFromMid * stepWWAlongLower + midWW;
-        let wWMajor = preStepFromTop * stepWWAlongMajor + topWW;
         // whether the lefmost edge of the raster triangle is the longest
         const isLeftMajor = stepXAlongMajor < stepXAlongUpper;
         if (isLeftMajor)
@@ -960,80 +919,60 @@
              */
             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
             {
-                R_LerpTexturedScanline_Perspective(tex,
-                                                   xMajor, xUpper, y,
-                                                   uMajor, vMajor, cMajor,
-                                                   uUpper, vUpper, cUpper,
-                                                   nXMajor,
-                                                   nYMajor,
-                                                   nZMajor,
-                                                   nWMajor,
-                                                   nXUpper,
-                                                   nYUpper,
-                                                   nZUpper,
-                                                   nWUpper,
-                                                   wXMajor,
-                                                   wYMajor,
-                                                   wZMajor,
-                                                   wWMajor,
-                                                   wXUpper,
-                                                   wYUpper,
-                                                   wZUpper,
-                                                   wWUpper,
-                                                   alpha,
-                                                   lightX, lightY, lightZ);
+                /* configure the pixel shader object for the draw call */
+                pso.dy = y;
+                pso.dx0 = xMajor; pso.dx1 = xUpper;
+                pso.w0 = wMajor; pso.w1 = wUpper;
+                pso.u0 = uMajor; pso.u1 = uUpper;
+                pso.v0 = vMajor; pso.v1 = vUpper;
+                pso.nx0 = nXMajor; pso.nx1 = nXUpper;
+                pso.ny0 = nYMajor; pso.ny1 = nYUpper;
+                pso.nz0 = nZMajor; pso.nz1 = nZUpper;
+                pso.wx0 = wXMajor; pso.wx1 = wXUpper;
+                pso.wy0 = wYMajor; pso.wy1 = wYUpper;
+                pso.wz0 = wZMajor; pso.wz1 = wZUpper;
+                R_LerpTexturedScanline_Perspective(pso);
+                /* step forward along all vectors */
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
+                wUpper += stepWAlongUpper; wMajor += stepWAlongMajor;
                 uUpper += stepUAlongUpper; uMajor += stepUAlongMajor;
                 vUpper += stepVAlongUpper; vMajor += stepVAlongMajor;
-                cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
                 nXUpper += stepNXAlongUpper; nXMajor += stepNXAlongMajor;
                 nYUpper += stepNYAlongUpper; nYMajor += stepNYAlongMajor;
                 nZUpper += stepNZAlongUpper; nZMajor += stepNZAlongMajor;
-                nWUpper += stepNWAlongUpper; nWMajor += stepNWAlongMajor;
                 wXUpper += stepWXAlongUpper; wXMajor += stepWXAlongMajor;
                 wYUpper += stepWYAlongUpper; wYMajor += stepWYAlongMajor;
                 wZUpper += stepWZAlongUpper; wZMajor += stepWZAlongMajor;
-                wWUpper += stepWWAlongUpper; wWMajor += stepWWAlongMajor;
             }
             /* lerp based on `y` in screen-space for the lower half of the
              * triangle
              */
             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
             {
-                R_LerpTexturedScanline_Perspective(tex,
-                                                   xMajor, xLower, y,
-                                                   uMajor, vMajor, cMajor,
-                                                   uLower, vLower, cLower,
-                                                   nXMajor,
-                                                   nYMajor,
-                                                   nZMajor,
-                                                   nWMajor,
-                                                   nXLower,
-                                                   nYLower,
-                                                   nZLower,
-                                                   nWLower,
-                                                   wXMajor,
-                                                   wYMajor,
-                                                   wZMajor,
-                                                   wWMajor,
-                                                   wXLower,
-                                                   wYLower,
-                                                   wZLower,
-                                                   wWLower,
-                                                   alpha,
-                                                   lightX, lightY, lightZ);
+                /* configure the pixel shader object for the draw call */
+                pso.dy = y;
+                pso.dx0 = xMajor; pso.dx1 = xLower;
+                pso.w0 = wMajor; pso.w1 = wLower;
+                pso.u0 = uMajor; pso.u1 = uLower;
+                pso.v0 = vMajor; pso.v1 = vLower;
+                pso.nx0 = nXMajor; pso.nx1 = nXLower;
+                pso.ny0 = nYMajor; pso.ny1 = nYLower;
+                pso.nz0 = nZMajor; pso.nz1 = nZLower;
+                pso.wx0 = wXMajor; pso.wx1 = wXLower;
+                pso.wy0 = wYMajor; pso.wy1 = wYLower;
+                pso.wz0 = wZMajor; pso.wz1 = wZLower;
+                R_LerpTexturedScanline_Perspective(pso);
+                /* step forward along all vectors */
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
+                wLower += stepWAlongLower; wMajor += stepWAlongMajor;
                 uLower += stepUAlongLower; uMajor += stepUAlongMajor;
                 vLower += stepVAlongLower; vMajor += stepVAlongMajor;
-                cLower += stepCAlongLower; cMajor += stepCAlongMajor;
                 nXLower += stepNXAlongLower; nXMajor += stepNXAlongMajor;
                 nYLower += stepNYAlongLower; nYMajor += stepNYAlongMajor;
                 nZLower += stepNZAlongLower; nZMajor += stepNZAlongMajor;
-                nWLower += stepNWAlongLower; nWMajor += stepNWAlongMajor;
                 wXLower += stepWXAlongLower; wXMajor += stepWXAlongMajor;
                 wYLower += stepWYAlongLower; wYMajor += stepWYAlongMajor;
                 wZLower += stepWZAlongLower; wZMajor += stepWZAlongMajor;
-                wWLower += stepWWAlongLower; wWMajor += stepWWAlongMajor;
             }
         }
         else
@@ -1043,80 +982,60 @@
              */
             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
             {
-                R_LerpTexturedScanline_Perspective(tex,
-                                                   xUpper, xMajor, y,
-                                                   uUpper, vUpper, cUpper,
-                                                   uMajor, vMajor, cMajor,
-                                                   nXUpper,
-                                                   nYUpper,
-                                                   nZUpper,
-                                                   nWUpper,
-                                                   nXMajor,
-                                                   nYMajor,
-                                                   nZMajor,
-                                                   nWMajor,
-                                                   wXUpper,
-                                                   wYUpper,
-                                                   wZUpper,
-                                                   wWUpper,
-                                                   wXMajor,
-                                                   wYMajor,
-                                                   wZMajor,
-                                                   wWMajor,
-                                                   alpha,
-                                                   lightX, lightY, lightZ);
+                /* configure the pixel shader object for the draw call */
+                pso.dy = y;
+                pso.dx0 = xUpper; pso.dx1 = xMajor;
+                pso.w0 = wUpper; pso.w1 = wMajor;
+                pso.u0 = uUpper; pso.u1 = uMajor;
+                pso.v0 = vUpper; pso.v1 = vMajor;
+                pso.nx0 = nXUpper; pso.nx1 = nXMajor;
+                pso.ny0 = nYUpper; pso.ny1 = nYMajor;
+                pso.nz0 = nZUpper; pso.nz1 = nZMajor;
+                pso.wx0 = wXUpper; pso.wx1 = wXMajor;
+                pso.wy0 = wYUpper; pso.wy1 = wYMajor;
+                pso.wz0 = wZUpper; pso.wz1 = wZMajor;
+                R_LerpTexturedScanline_Perspective(pso);
+                /* step forward along all vectors */
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
+                wUpper += stepWAlongUpper; wMajor += stepWAlongMajor;
                 uUpper += stepUAlongUpper; uMajor += stepUAlongMajor;
                 vUpper += stepVAlongUpper; vMajor += stepVAlongMajor;
-                cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
                 nXUpper += stepNXAlongUpper; nXMajor += stepNXAlongMajor;
                 nYUpper += stepNYAlongUpper; nYMajor += stepNYAlongMajor;
                 nZUpper += stepNZAlongUpper; nZMajor += stepNZAlongMajor;
-                nWUpper += stepNWAlongUpper; nWMajor += stepNWAlongMajor;
                 wXUpper += stepWXAlongUpper; wXMajor += stepWXAlongMajor;
                 wYUpper += stepWYAlongUpper; wYMajor += stepWYAlongMajor;
                 wZUpper += stepWZAlongUpper; wZMajor += stepWZAlongMajor;
-                wWUpper += stepWWAlongUpper; wWMajor += stepWWAlongMajor;
             }
             /* lerp based on `y` in screen-space for the lower half of the
              * triangle
              */
             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
             {
-                R_LerpTexturedScanline_Perspective(tex,
-                                                   xLower, xMajor, y,
-                                                   uLower, vLower, cLower,
-                                                   uMajor, vMajor, cMajor,
-                                                   nXLower,
-                                                   nYLower,
-                                                   nZLower,
-                                                   nWLower,
-                                                   nXMajor,
-                                                   nYMajor,
-                                                   nZMajor,
-                                                   nWMajor,
-                                                   wXLower,
-                                                   wYLower,
-                                                   wZLower,
-                                                   wWLower,
-                                                   wXMajor,
-                                                   wYMajor,
-                                                   wZMajor,
-                                                   wWMajor,
-                                                   alpha,
-                                                   lightX, lightY, lightZ);
+                /* configure the pixel shader object for the draw call */
+                pso.dy = y;
+                pso.dx0 = xLower; pso.dx1 = xMajor;
+                pso.w0 = wLower; pso.w1 = wMajor;
+                pso.u0 = uLower; pso.u1 = uMajor;
+                pso.v0 = vLower; pso.v1 = vMajor;
+                pso.nx0 = nXLower; pso.nx1 = nXMajor;
+                pso.ny0 = nYLower; pso.ny1 = nYMajor;
+                pso.nz0 = nZLower; pso.nz1 = nZMajor;
+                pso.wx0 = wXLower; pso.wx1 = wXMajor;
+                pso.wy0 = wYLower; pso.wy1 = wYMajor;
+                pso.wz0 = wZLower; pso.wz1 = wZMajor;
+                R_LerpTexturedScanline_Perspective(pso);
+                /* step forward along all vectors */
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
+                wLower += stepWAlongLower; wMajor += stepWAlongMajor;
                 uLower += stepUAlongLower; uMajor += stepUAlongMajor;
                 vLower += stepVAlongLower; vMajor += stepVAlongMajor;
-                cLower += stepCAlongLower; cMajor += stepCAlongMajor;
                 nXLower += stepNXAlongLower; nXMajor += stepNXAlongMajor;
                 nYLower += stepNYAlongLower; nYMajor += stepNYAlongMajor;
                 nZLower += stepNZAlongLower; nZMajor += stepNZAlongMajor;
-                nWLower += stepNWAlongLower; nWMajor += stepNWAlongMajor;
                 wXLower += stepWXAlongLower; wXMajor += stepWXAlongMajor;
                 wYLower += stepWYAlongLower; wYMajor += stepWYAlongMajor;
                 wZLower += stepWZAlongLower; wZMajor += stepWZAlongMajor;
-                wWLower += stepWWAlongLower; wWMajor += stepWWAlongMajor;
             }
         }
     }

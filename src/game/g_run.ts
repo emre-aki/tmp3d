@@ -37,10 +37,12 @@
     const R_TitleDrawer = R_Drawers.R_TitleDrawer;
 
     const R_Geometry = __import__R_Geometry();
-    const R_ChangeRenderMode = R_Geometry.R_ChangeRenderMode;
     const R_RenderGeometries = R_Geometry.R_RenderGeometries;
     const R_ToggleGlobalRotation = R_Geometry.R_ToggleGlobalRotation;
     const R_UpdateGeometry = R_Geometry.R_UpdateGeometry;
+
+    const R_Shader = __import__R_Shader();
+    const R_ChangeShader = R_Shader.R_ChangeShader;
 
     const TICK_DELAY = 1000 / FPS;
 
@@ -51,7 +53,7 @@
 
     function G_UpdateScreen (deltaT: number): void
     {
-        R_ChangeRenderMode();
+        R_ChangeShader();
         R_RenderGeometries(nTrisOnScreen);
         R_FlushFrame();
         if (DEBUG_MODE) R_DebugStats(deltaT, nTrisOnScreen);
