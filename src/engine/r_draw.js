@@ -138,7 +138,7 @@
         const pIncrementForNextRow = pIncrementForSameRow - deltaX - deltaX;
         // the initial value for the decision parameter, P0
         const p0 = pIncrementForNextRow + deltaX;
-        for (let x = sx, y = sy, pK = p0; (dx - x) * dirX >= 0; x += strokeX)
+        for (let x = sx, y = sy, pK = p0; x < dx; x += strokeX)
         {
             R_FillRect(x, y, stroke_, stroke_, r, g, b, a);
             if (pK < 0) pK += pIncrementForSameRow;
@@ -164,7 +164,7 @@
         const pIncrementForNextCol = pIncrementForSameCol - deltaY - deltaY;
         // the initial value for the decision parameter, P0
         const p0 = pIncrementForNextCol + deltaY;
-        for (let x = sx, y = sy, pK = p0; (dy - y) * dirY >= 0; y += strokeY)
+        for (let x = sx, y = sy, pK = p0; y < dy; y += strokeY)
         {
             R_FillRect(x, y, stroke_, stroke_, r, g, b, a);
             if (pK < 0) pK += pIncrementForSameCol;
