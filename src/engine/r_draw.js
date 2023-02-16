@@ -56,10 +56,10 @@
 
     function R_FillRect (x, y, w, h, r, g, b, a)
     {
-        const sX = M_Clamp(Math.floor(x), 0, SCREEN_W);
-        const sY = M_Clamp(Math.floor(y), 0, SCREEN_H);
-        const dX = M_Clamp(Math.floor(x + w), 0, SCREEN_W);
-        const dY = M_Clamp(Math.floor(y + h), 0, SCREEN_H);
+        const sX = M_Clamp(Math.ceil(x - 0.5), 0, SCREEN_W);
+        const sY = M_Clamp(Math.ceil(y - 0.5), 0, SCREEN_H);
+        const dX = M_Clamp(Math.ceil(x + w - 0.5), 0, SCREEN_W);
+        const dY = M_Clamp(Math.ceil(y + h - 0.5), 0, SCREEN_H);
         if (sX === dX || sY === dY) return; // early return if not a rectangle
         for (let brushY = sY; brushY < dY; ++brushY)
         {
