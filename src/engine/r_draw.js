@@ -268,7 +268,7 @@
     {
         // shaded color value to fill the triangle with
         const R = r * lightLevel, G = g * lightLevel, B = b * lightLevel;
-        // raster clipping: clip the scanline if it goes out of bounds of screen
+        // raster clipping: clip the scanline if it goes out-of-bounds of screen
         // coordinates
         const clipLeft = Math.max(-dx0, 0);
         // bias the start and end endpoints in screen-space by -0.5 horizontally
@@ -356,7 +356,7 @@
         const stepCAlongUpper = (midC - topC) * deltaUpper_;
         const stepCAlongLower = (bottomC - midC) * deltaLower_;
         const stepCAlongMajor = (bottomC - topC) * deltaMajor_;
-        // raster clipping: clip the triangle if it goes out of bounds of screen
+        // raster clipping: clip the triangle if it goes out-of-bounds of screen
         // coordinates
         const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
         /* vertical endpoints of the rasterization in screen-space, biased by
@@ -468,7 +468,7 @@
       alpha, lightLevel )
     {
         const texWidth = tex.width, texHeight = tex.height, bitmap = tex.bitmap;
-        // raster clipping: clip the scanline if it goes out of bounds of screen
+        // raster clipping: clip the scanline if it goes out-of-bounds of screen
         // coordinates
         const clipLeft = Math.max(-dx0, 0);
         // bias the start and end endpoints in screen-space by -0.5 horizontally
@@ -612,7 +612,7 @@
         const stepCAlongUpper = (midC - topC) * deltaUpper_;
         const stepCAlongLower = (bottomC - midC) * deltaLower_;
         const stepCAlongMajor = (bottomC - topC) * deltaMajor_;
-        // raster clipping: clip the triangle if it goes out of bounds of screen
+        // raster clipping: clip the triangle if it goes out-of-bounds of screen
         // coordinates
         const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
         /* vertical endpoints of the rasterization in screen-space, biased by
@@ -715,7 +715,7 @@
     function R_DrawImage (img, sx, sy, sw, sh, dx, dy, dw, dh, options)
     {
         const imgWidth = img.width, imgHeight = img.height, bitmap = img.bitmap;
-        /* early return if either the source or the destination is out of bounds
+        /* early return if either the source or the destination is out-of-bounds
          */
         if (sx + sw <= 0 || sy + sh <= 0 || sx >= imgWidth || sy >= imgHeight ||
             dx + dw <= 0 || dy + dh <= 0 || dx >= SCREEN_W || dy >= SCREEN_H)
