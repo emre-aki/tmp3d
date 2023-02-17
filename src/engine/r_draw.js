@@ -725,32 +725,48 @@
             ? options.lightLevel : 1;
         const alpha = options && Number.isFinite(options.alpha)
             ? options.alpha : 1;
-        /* calculate the screen coordinates and dimensions */
-        const dX = Math.floor(dx), dW = Math.ceil(dw);
-        const dY = Math.floor(dy), dH = Math.ceil(dh);
+        // 1 step in screen-space equals how many steps in texture-space
         const scaleX = sw / dw, scaleY = sh / dh;
-        /* clip the screen coordinates against the bounds of the buffer */
-        const clipLeft = Math.max(-dX, 0), clipTop = Math.max(-dY, 0);
-        const clipRight = Math.max(dX + dW - SCREEN_W, 0);
-        const clipBottom = Math.max(dY + dH - SCREEN_H, 0);
-        const clippedW = dW - clipLeft - clipRight;
-        const clippedH = dH - clipTop - clipBottom;
-        /* calculate draw endpoints */
-        const dStartX = dX + clipLeft, dEndX = dStartX + clippedW;
-        const dStartY = dY + clipTop, dEndY = dStartY + clippedH;
-        for (let y = dStartY; y < dEndY; ++y)
+        // raster clipping: clip the screen coordinates against the bounds of
+        // the buffer
+        const clipLeft = Math.max(-dx, 0), clipTop = Math.max(-dy, 0);
+        /* draw endpoints in screen-space, biased by -0.5 as per the top-left
+         * pixel coverage rules
+         */
+        const dStartX = Math.ceil(dx + clipLeft - 0.5);
+        const dStartY = Math.ceil(dy + clipTop - 0.5);
+        const dEndX = Math.ceil(dx + dw - 0.5);
+        const dEndY = Math.ceil(dy + dh - 0.5);
+        /* pre-step from left and top endpoints by 0.5 as pixel centers are the
+         * actual sampling points
+         */
+        const preStepFromLeft = dStartX + 0.5 - dx;
+        const preStepFromTop = dStartY + 0.5 - dy;
+        /* where to start sampling in the texture-space */
+        const sampleStartX = preStepFromLeft * scaleX + sx;
+        const sampleStartY = preStepFromTop * scaleY + sy;
+        let sampleY = sampleStartY; // current `y` coordinate in texture-space
+        for (let y = dStartY; y < dEndY && y < SCREEN_H; ++y)
         {
-            const sampleY = Math.floor(sy + (y - dY) * scaleY);
-            for (let x = dStartX; x < dEndX; ++x)
+            const imgY = Math.floor(sampleY);
+            // skip drawing this scanline if we're not yet within the bounds of
+            // the texture-space along the y-axis
+            if (imgY < 0) { sampleY += scaleY; continue; }
+            // stop drawing any further scanlines if we've gone out-of-bounds in
+            // the texture-space along the y-axis
+            else if (imgY >= imgHeight) break;
+            // current `x` coordinate in texture-space
+            let sampleX = sampleStartX;
+            for (let x = dStartX; x < dEndX && x < SCREEN_W; ++x)
             {
-                const sampleX = Math.floor(sx + (x - dX) * scaleX);
-                /* only draw the pixel if the sampling point is within the
-                 * bounds of the source image
-                 */
-                if (sampleX < 0 || sampleX >= imgWidth ||
-                    sampleY < 0 || sampleY >= imgHeight)
-                    continue;
-                const sampleIndex = 4 * (sampleY * imgWidth + sampleX);
+                const imgX = Math.floor(sampleX);
+                // skip drawing this pixel if we're not yet within the bounds of
+                // the texture-space along the x-axis
+                if (imgX < 0) { sampleX += scaleX; continue; }
+                // stop drawing any further pixels if we've gone out-of-bounds
+                // in the texture-space along the x-axis
+                else if (imgX >= imgWidth) break;
+                const sampleIndex = 4 * (imgY * imgWidth + imgX);
                 const sampleRed = bitmap[sampleIndex];
                 const sampleGreen = bitmap[sampleIndex + 1];
                 const sampleBlue = bitmap[sampleIndex + 2];
@@ -773,7 +789,9 @@
                 frameBuffer.data[paintIndex + 1] = newGreen;
                 frameBuffer.data[paintIndex + 2] = newBlue;
                 frameBuffer.data[paintIndex + 3] = 255;
+                sampleX += scaleX;
             }
+            sampleY += scaleY;
         }
     }
 
