@@ -272,7 +272,7 @@
         // coordinates
         const clipLeft = Math.max(-dx0, 0);
         // bias the start and end endpoints in screen-space by -0.5 horizontally
-        // as per the coverage rules
+        // as per the top-left pixel coverage rules
         const dX0 = Math.ceil(dx0 + clipLeft - 0.5), dX1 = Math.ceil(dx1 - 0.5);
         // pre-step from start by 0.5 as pixel centers are the actual sampling
         // points
@@ -360,7 +360,7 @@
         // coordinates
         const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
         /* vertical endpoints of the rasterization in screen-space, biased by
-         * -0.5 as per the coverage rules
+         * -0.5 as per the top-left pixel coverage rules
          */
         const startY = Math.ceil(topY + clipTop - 0.5);
         const midStopY = Math.ceil(midY + clipMid - 0.5);
@@ -472,7 +472,7 @@
         // coordinates
         const clipLeft = Math.max(-dx0, 0);
         // bias the start and end endpoints in screen-space by -0.5 horizontally
-        // as per the coverage rules
+        // as per the top-left pixel coverage rules
         const dX0 = Math.ceil(dx0 + clipLeft - 0.5), dX1 = Math.ceil(dx1 - 0.5);
         const deltaX = dx1 - dx0, deltaX_ = 1 / deltaX;
         // pre-step from start by 0.5 as pixel centers are the actual sampling
@@ -616,7 +616,7 @@
         // coordinates
         const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
         /* vertical endpoints of the rasterization in screen-space, biased by
-         * -0.5 as per the coverage rules
+         * -0.5 as per the top-left pixel coverage rules
          */
         const startY = Math.ceil(topY + clipTop - 0.5);
         const midStopY = Math.ceil(midY + clipMid - 0.5);
