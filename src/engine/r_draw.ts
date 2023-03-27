@@ -366,26 +366,42 @@
     //
     function
     R_LerpScanline_Flat
-    ( dx0: number, dx1: number, dy: number,
-      w0: number, w1: number,
-      r: number, g: number, b: number, a: number,
-      lightLevel: number ): void
+    ({ dy,
+       dx0, dx1,
+       w0, w1,
+       r0, g0, b0, r1, g1, b1,
+       normalX, normalY, normalZ,
+       lightX, lightY, lightZ,
+       alpha }: pso_t): void
     {
-        // shaded color value to fill the triangle with
-        const R = r * lightLevel, G = g * lightLevel, B = b * lightLevel;
         // raster clipping: clip the scanline if it goes out-of-bounds of screen
         // coordinates
         const clipLeft = Math.max(-dx0, 0);
         // bias the start and end endpoints in screen-space by -0.5 horizontally
         // as per the top-left pixel coverage rules
         const dX0 = Math.ceil(dx0 + clipLeft - 0.5), dX1 = Math.ceil(dx1 - 0.5);
+        const deltaX = dx1 - dx0, deltaX_ = 1 / deltaX;
         // pre-step from start by 0.5 as pixel centers are the actual sampling
         // points
         const preStepX = dX0 + 0.5 - dx0;
         // 1 step in `+x` equals how many steps in `w`
-        const gradW = (w1 - w0) / (dx1 - dx0);
+        const gradW = (w1 - w0) * deltaX_;
+        // 1 step in `+x` equals how many steps in `r`
+        const gradR = (r1 - r0) * deltaX_;
+        // 1 step in `+x` equals how many steps in `g`
+        const gradG = (g1 - g0) * deltaX_;
+        // 1 step in `+x` equals how many steps in `b`
+        const gradB = (b1 - b0) * deltaX_;
         // current z-coordinate in the perspective-correct space
         let w = preStepX * gradW + w0;
+        /* the coordinates in the perspective-correct RGB space of the color to
+         * fill the current pixel with
+         */
+        let r = preStepX * gradR + r0;
+        let g = preStepX * gradG + g0;
+        let b = preStepX * gradB + b0;
+        // alpha blending — how much we should sample from the new color
+        const sampleAlpha = 255 * alpha;
         /* rasterize current scanline */
         for (let x = dX0; x < dX1 && x < SCREEN_W; ++x)
         {
@@ -394,26 +410,41 @@
              * triangle is closer (1 / zRaster > 1 / zBuffer) than what's
              * already in the z-buffer at the position we want to draw
              */
-            if (w <= zBuffer[bufferIndex]) { w += gradW; continue; }
+            if (w <= zBuffer[bufferIndex])
+            {
+                w += gradW;
+                r += gradR; g += gradG; b += gradB;
+
+                continue;
+            }
             zBuffer[bufferIndex] = w; // update the z-buffer
+            const w_ = 1 / w;
+            let lightLevel = 1;
+            if (lightX !== undefined &&
+                lightY !== undefined &&
+                lightZ !== undefined)
+                lightLevel =
+                    lightX * normalX + lightY * normalY + lightZ * normalZ;
             /* fill a single pixel in screen-space with the color defined by
-             * parameters `r`, `g`, `b`, and `a`.
+             * parameters `r`, `g`, `b`, and `alpha`.
              */
             const paintIndex = bufferIndex << 2;
             const bufferRed = frameBuffer.data[paintIndex];
             const bufferGreen = frameBuffer.data[paintIndex + 1];
             const bufferBlue = frameBuffer.data[paintIndex + 2];
             const bufferAlpha = frameBuffer.data[paintIndex + 3] || 255;
-            const blendRatio = a / bufferAlpha;
+            const blendRatio = sampleAlpha / bufferAlpha;
             const blendRatio_ = 1 - blendRatio;
-            const newRed = blendRatio * R + blendRatio_ * bufferRed;
-            const newGreen = blendRatio * G + blendRatio_ * bufferGreen;
-            const newBlue = blendRatio * B + blendRatio_ * bufferBlue;
+            const newBlend = lightLevel * blendRatio * w_;
+            const newRed = newBlend * r + blendRatio_ * bufferRed;
+            const newGreen = newBlend * g + blendRatio_ * bufferGreen;
+            const newBlue = newBlend * b + blendRatio_ * bufferBlue;
             frameBuffer.data[paintIndex] = newRed;
             frameBuffer.data[paintIndex + 1] = newGreen;
             frameBuffer.data[paintIndex + 2] = newBlue;
             frameBuffer.data[paintIndex + 3] = 255;
             w += gradW;
+            r += gradR; g += gradG; b += gradB;
         }
     }
 
@@ -423,17 +454,25 @@
     //
     function
     R_FillTriangle_Flat
-    ( ax: number, ay: number, aw: number,
-      bx: number, by: number, bw: number,
-      cx: number, cy: number, cw: number,
-      r: number, g: number, b: number, a: number,
-      lightLevel: number ): void
+    ({ ax, ay, aw,
+       bx, by, bw,
+       cx, cy, cw,
+       ar, ag, ab,
+       br, bg, bb,
+       cr, cg, cb, }: vso_t,
+     pso: pso_t ): void
     {
         /* coordinates of the triangle in screen-space */
         let topX = ax, midX = bx, bottomX = cx;
         let topY = ay, midY = by, bottomY = cy;
         // z-coordinates in the perspective-correct space
         let topW = aw, midW = bw, bottomW = cw;
+        /* the color coordinates at each triangle vertex in the
+         * perspective-corrected RGB space to interpolate across the triangle
+         */
+        let topR = ar * topW, midR = br * midW, bottomR = cr * bottomW;
+        let topG = ag * topW, midG = bg * midW, bottomG = cg * bottomW;
+        let topB = ab * topW, midB = bb * midW, bottomB = cb * bottomW;
         /* sort vertices of the triangle so that their y-coordinates are in
          * ascending order
          */
@@ -444,6 +483,10 @@
             const auxY = topY; topY = midY; midY = auxY;
             // swap in perspective-correct (1/z) space
             const auxW = topW; topW = midW; midW = auxW;
+            /* swap in perspective-correct (1/z) RGB space */
+            const auxR = topR; topR = midR; midR = auxR;
+            const auxG = topG; topG = midG; midG = auxG;
+            const auxB = topB; topB = midB; midB = auxB;
         }
         if (midY > bottomY)
         {
@@ -452,6 +495,10 @@
             const auxY = midY; midY = bottomY; bottomY = auxY;
             // swap in perspective-correct (1/z) space
             const auxW = midW; midW = bottomW; bottomW = auxW;
+            /* swap in perspective-correct (1/z) RGB space */
+            const auxR = midR; midR = bottomR; bottomR = auxR;
+            const auxG = midG; midG = bottomG; bottomG = auxG;
+            const auxB = midB; midB = bottomB; bottomB = auxB;
         }
         if (topY > midY)
         {
@@ -460,6 +507,10 @@
             const auxY = topY; topY = midY; midY = auxY;
             // swap in perspective-correct (1/z) space
             const auxW = topW; topW = midW; midW = auxW;
+            /* swap in perspective-correct (1/z) RGB space */
+            const auxR = topR; topR = midR; midR = auxR;
+            const auxG = topG; topG = midG; midG = auxG;
+            const auxB = topB; topB = midB; midB = auxB;
         }
         const deltaUpper = midY - topY, deltaUpper_ = 1 / deltaUpper;
         const deltaLower = bottomY - midY, deltaLower_ = 1 / deltaLower;
@@ -472,6 +523,18 @@
         const stepWAlongUpper = (midW - topW) * deltaUpper_;
         const stepWAlongLower = (bottomW - midW) * deltaLower_;
         const stepWAlongMajor = (bottomW - topW) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `r` */
+        const stepRAlongUpper = (midR - topR) * deltaUpper_;
+        const stepRAlongLower = (bottomR - midR) * deltaLower_;
+        const stepRAlongMajor = (bottomR - topR) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `g` */
+        const stepGAlongUpper = (midG - topG) * deltaUpper_;
+        const stepGAlongLower = (bottomG - midG) * deltaLower_;
+        const stepGAlongMajor = (bottomG - topG) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `b` */
+        const stepBAlongUpper = (midB - topB) * deltaUpper_;
+        const stepBAlongLower = (bottomB - midB) * deltaLower_;
+        const stepBAlongMajor = (bottomB - topB) * deltaMajor_;
         // raster clipping: clip the triangle if it goes out-of-bounds of screen
         // coordinates
         const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
@@ -494,6 +557,21 @@
         let wUpper = preStepFromTop * stepWAlongUpper + topW;
         let wLower = preStepFromMid * stepWAlongLower + midW;
         let wMajor = preStepFromTop * stepWAlongMajor + topW;
+        /* current `r` channels of the color in perspective-correct (1/z) space
+         */
+        let rUpper = preStepFromTop * stepRAlongUpper + topR;
+        let rLower = preStepFromMid * stepRAlongLower + midR;
+        let rMajor = preStepFromTop * stepRAlongMajor + topR;
+        /* current `g` channels of the color in perspective-correct (1/z) space
+         */
+        let gUpper = preStepFromTop * stepGAlongUpper + topG;
+        let gLower = preStepFromMid * stepGAlongLower + midG;
+        let gMajor = preStepFromTop * stepGAlongMajor + topG;
+        /* current `b` channels of the color in perspective-correct (1/z) space
+         */
+        let bUpper = preStepFromTop * stepBAlongUpper + topB;
+        let bLower = preStepFromMid * stepBAlongLower + midB;
+        let bMajor = preStepFromTop * stepBAlongMajor + topB;
         // whether the lefmost edge of the triangle is the longest
         const isLeftMajor = stepXAlongMajor < stepXAlongUpper;
         if (isLeftMajor)
@@ -503,20 +581,40 @@
              */
             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
             {
-                R_LerpScanline_Flat(xMajor, xUpper, y, wMajor, wUpper,
-                                    r, g, b, a, lightLevel);
+                /* configure the pixel shader object for the draw call */
+                pso.dy = y;
+                pso.dx0 = xMajor; pso.dx1 = xUpper;
+                pso.w0 = wMajor; pso.w1 = wUpper;
+                pso.r0 = rMajor; pso.r1 = rUpper;
+                pso.g0 = gMajor; pso.g1 = gUpper;
+                pso.b0 = bMajor; pso.b1 = bUpper;
+                R_LerpScanline_Flat(pso);
+                /* step forward along all vectors */
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
                 wUpper += stepWAlongUpper; wMajor += stepWAlongMajor;
+                rUpper += stepRAlongUpper; rMajor += stepRAlongMajor;
+                gUpper += stepGAlongUpper; gMajor += stepGAlongMajor;
+                bUpper += stepBAlongUpper; bMajor += stepBAlongMajor;
             }
             /* lerp based on `y` in screen-space for the lower half of the
              * triangle
              */
             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
             {
-                R_LerpScanline_Flat(xMajor, xLower, y, wMajor, wLower,
-                                    r, g, b, a, lightLevel);
+                /* configure the pixel shader object for the draw call */
+                pso.dy = y;
+                pso.dx0 = xMajor; pso.dx1 = xLower;
+                pso.w0 = wMajor; pso.w1 = wLower;
+                pso.r0 = rMajor; pso.r1 = rLower;
+                pso.g0 = gMajor; pso.g1 = gLower;
+                pso.b0 = bMajor; pso.b1 = bLower;
+                R_LerpScanline_Flat(pso);
+                /* step forward along all vectors */
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
                 wLower += stepWAlongLower; wMajor += stepWAlongMajor;
+                rLower += stepRAlongLower; rMajor += stepRAlongMajor;
+                gLower += stepGAlongLower; gMajor += stepGAlongMajor;
+                bLower += stepBAlongLower; bMajor += stepBAlongMajor;
             }
         }
         else
@@ -526,20 +624,40 @@
              */
             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
             {
-                R_LerpScanline_Flat(xUpper, xMajor, y, wUpper, wMajor,
-                                    r, g, b, a, lightLevel);
+                /* configure the pixel shader object for the draw call */
+                pso.dy = y;
+                pso.dx0 = xUpper; pso.dx1 = xMajor;
+                pso.w0 = wUpper; pso.w1 = wMajor;
+                pso.r0 = rUpper; pso.r1 = rMajor;
+                pso.g0 = gUpper; pso.g1 = gMajor;
+                pso.b0 = bUpper; pso.b1 = bMajor;
+                R_LerpScanline_Flat(pso);
+                /* step forward along all vectors */
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
                 wUpper += stepWAlongUpper; wMajor += stepWAlongMajor;
+                rUpper += stepRAlongUpper; rMajor += stepRAlongMajor;
+                gUpper += stepGAlongUpper; gMajor += stepGAlongMajor;
+                bUpper += stepBAlongUpper; bMajor += stepBAlongMajor;
             }
             /* lerp based on `y` in screen-space for the lower half of the
              * triangle
              */
             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
             {
-                R_LerpScanline_Flat(xLower, xMajor, y, wLower, wMajor,
-                                    r, g, b, a, lightLevel);
+                /* configure the pixel shader object for the draw call */
+                pso.dy = y;
+                pso.dx0 = xLower; pso.dx1 = xMajor;
+                pso.w0 = wLower; pso.w1 = wMajor;
+                pso.r0 = rLower; pso.r1 = rMajor;
+                pso.g0 = gLower; pso.g1 = gMajor;
+                pso.b0 = bLower; pso.b1 = bMajor;
+                R_LerpScanline_Flat(pso);
+                /* step forward along all vectors */
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
                 wLower += stepWAlongLower; wMajor += stepWAlongMajor;
+                rLower += stepRAlongLower; rMajor += stepRAlongMajor;
+                gLower += stepGAlongLower; gMajor += stepGAlongMajor;
+                bLower += stepBAlongLower; bMajor += stepBAlongMajor;
             }
         }
     }
@@ -697,13 +815,10 @@
             const bufferAlpha = frameBuffer.data[paintIndex + 3] || 255;
             const blendRatio = sampleAlpha / bufferAlpha;
             const blendRatio_ = 1 - blendRatio;
-            const blendWithLightLevel = lightLevel * blendRatio;
-            const newRed =
-                blendWithLightLevel * sampleRed + blendRatio_ * bufferRed;
-            const newGreen =
-                blendWithLightLevel * sampleGreen + blendRatio_ * bufferGreen;
-            const newBlue =
-                blendWithLightLevel * sampleBlue + blendRatio_ * bufferBlue;
+            const newBlend = lightLevel * blendRatio;
+            const newRed = newBlend * sampleRed + blendRatio_ * bufferRed;
+            const newGreen = newBlend * sampleGreen + blendRatio_ * bufferGreen;
+            const newBlue = newBlend * sampleBlue + blendRatio_ * bufferBlue;
             frameBuffer.data[paintIndex] = newRed;
             frameBuffer.data[paintIndex + 1] = newGreen;
             frameBuffer.data[paintIndex + 2] = newBlue;

@@ -475,13 +475,7 @@ type R_DrawTriangle_Wireframe = (
     stroke: number
 ) => void;
 
-type R_FillTriangle_Flat = (
-    ax: number, ay: number, aw: number,
-    bx: number, by: number, bw: number,
-    cx: number, cy: number, cw: number,
-    r: number, g: number, b: number, a: number,
-    lightLevel: number
-) => void;
+type R_FillTriangle_Flat = (vso: vso_t, pso: pso_t) => void;
 
 type R_FillTriangle_Flat_Bresenham = (
     ax: number, ay: number,
@@ -621,6 +615,9 @@ type vso_t = {
     ax: number, ay: number, aw: number,
     bx: number, by: number, bw: number,
     cx: number, cy: number, cw: number,
+    ar: number, ag: number, ab: number,
+    br: number, bg: number, bb: number,
+    cr: number, cg: number, cb: number,
     au: number, av: number,
     bu: number, bv: number,
     cu: number, cv: number,
@@ -638,11 +635,13 @@ type pso_t = {
     dy: number,
     dx0: number, dx1: number,
     w0: number, w1: number,
+    r0: number, g0: number, b0: number, r1: number, g1: number, b1: number,
     u0: number, v0: number, u1: number, v1: number,
     nx0: number, ny0: number, nz0: number,
     nx1: number, ny1: number, nz1: number,
     wx0: number, wy0: number, wz0: number,
     wx1: number, wy1: number, wz1: number,
+    normalX: number, normalY: number, normalZ: number,
     lightX?: number, lightY?: number, lightZ?: number,
     alpha: number,
 };
