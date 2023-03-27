@@ -264,7 +264,7 @@
     R_LerpShadedScanline_Flat
     ( dx0, dx1, dy,
       c0, c1,
-      r, g, b, a, lightLevel)
+      r, g, b, a, lightLevel )
     {
         // shaded color value to fill the triangle with
         const R = r * lightLevel, G = g * lightLevel, B = b * lightLevel;
@@ -405,26 +405,26 @@
         }
         else
         {
-             /* lerp based on `y` in screen-space for the upper half of the
+            /* lerp based on `y` in screen-space for the upper half of the
              * triangle
              */
-             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
-             {
-                 R_LerpShadedScanline_Flat(xUpper, xMajor, y, cUpper, cMajor,
-                                           r, g, b, a, lightLevel);
-                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
-                 cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
-             }
-             /* lerp based on `y` in screen-space for the lower half of the
-              * triangle
-              */
-             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
-             {
-                 R_LerpShadedScanline_Flat(xLower, xMajor, y, cLower, cMajor,
-                                           r, g, b, a, lightLevel);
-                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
-                 cLower += stepCAlongLower; cMajor += stepCAlongMajor;
-             }
+            for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
+            {
+                R_LerpShadedScanline_Flat(xUpper, xMajor, y, cUpper, cMajor,
+                                          r, g, b, a, lightLevel);
+                xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
+                cUpper += stepCAlongUpper; cMajor += stepCAlongMajor;
+            }
+            /* lerp based on `y` in screen-space for the lower half of the
+             * triangle
+             */
+            for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
+            {
+                R_LerpShadedScanline_Flat(xLower, xMajor, y, cLower, cMajor,
+                                          r, g, b, a, lightLevel);
+                xLower += stepXAlongLower; xMajor += stepXAlongMajor;
+                cLower += stepCAlongLower; cMajor += stepCAlongMajor;
+            }
         }
     }
 
