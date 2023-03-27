@@ -41,7 +41,6 @@
     const M_Vec3 = __import__M_Vec3();
     const M_IsInFrontOfPlane3 = M_Vec3.M_IsInFrontOfPlane3;
     const M_Add3 = M_Vec3.M_Add3;
-    const M_Dot3 = M_Vec3.M_Dot3;
     const M_Norm3 = M_Vec3.M_Norm3;
     const M_Sub3 = M_Vec3.M_Sub3;
     const M_Scale3 = M_Vec3.M_Scale3;
@@ -453,6 +452,10 @@
 
     function R_RenderGeomeries_Flat (nTrisOnScreen: Uint32Array): void
     {
+        /* directional light that falls on the triangle */
+        pso.lightX = DIRECTIONAL_LIGHT[0];
+        pso.lightY = DIRECTIONAL_LIGHT[1];
+        pso.lightZ = DIRECTIONAL_LIGHT[2];
         let trisRendered = 0;
         for (let i = 0; i < nCulledBuffer; ++i)
         {
@@ -464,15 +467,14 @@
             const nClipResult = R_ClipGeometryAgainstNearPlane(triView,
                                                                clippedTriQueue);
             // TODO: clip against far-plane
-            let faceLuminance = 1;
+            /* calculate the surface normal */
             if (nClipResult)
-                // calculate the dot product of the directional light and the
-                // unit normal of the triangle in view space to determine the
-                // level of illumination on the surface
-                faceLuminance = (
-                    M_Dot3(DIRECTIONAL_LIGHT,
-                           M_TriNormal3(clippedTriQueue[0])) + 1
-                ) * 0.5;
+            {
+                const triNormal = M_TriNormal3(triWorld);
+                pso.normalX = triNormal[0];
+                pso.normalY = triNormal[1];
+                pso.normalZ = triNormal[2];
+            }
             for (let j = 0; j < nClipResult; ++j)
             {
                 const triFrustum = clippedTriQueue[j];
@@ -493,10 +495,19 @@
                 const aw = 1 / triFrustum[0][2];
                 const bw = 1 / triFrustum[1][2];
                 const cw = 1 / triFrustum[2][2];
-                R_FillTriangle_Flat(ax, ay, aw,
-                                    bx, by, bw,
-                                    cx, cy, cw,
-                                    255, 255, 255, 255, faceLuminance);
+                /* configure the vertex shader object for the draw call */
+                vso.ax = ax; vso.ay = ay; vso.aw = aw;
+                vso.bx = bx; vso.by = by; vso.bw = bw;
+                vso.cx = cx; vso.cy = cy; vso.cw = cw;
+                /* FIXME: clip these color coordinates as well, along with the
+                 * vertices of the triangle, maybe??
+                 */
+                // assign each vertex a specific color to be interpolated across
+                // the entire triangle
+                vso.ar = 255; vso.ag = 0; vso.ab = 0;
+                vso.br = 0; vso.bg = 255; vso.bb = 0;
+                vso.cr = 0; vso.cg = 0; vso.cb = 255;
+                R_FillTriangle_Flat(vso, pso);
                 if (DEBUG_MODE)
                     R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
                                              0, 0, 0, 255, 2);

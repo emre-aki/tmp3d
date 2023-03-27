@@ -60,6 +60,12 @@
         ax: 0, ay: 0, aw: 0,
         bx: 0, by: 0, bw: 0,
         cx: 0, cy: 0, cw: 0,
+        /* color coordinates at each vertex in the RGB space to be interpolated
+         * across the entire triangle
+         */
+        ar: 0, ag: 0, ab: 0,
+        br: 0, bg: 0, bb: 0,
+        cr: 0, cg: 0, cb: 0,
         /* UV coordinates to map onto the triangle */
         au: 0, av: 0,
         bu: 0, bv: 0,
@@ -97,10 +103,15 @@
         // perspective-corrected world space coordinates of the triangle to lerp
         // across the current scanline
         wx0: 0, wy0: 0, wz0: 0, wx1: 0, wy1: 0, wz1: 0,
+        // perspective-corrected color coordinates to lerp across the current
+        // scanline
+        r0: 0, g0: 0, b0: 0, r1: 0, g1: 0, b1: 0,
         // FIXME: should lighting-related attributes really be here? maybe they
         // should be in their own separate object instead — how about adding a
         // "light objects buffer" to support multiple point/directional lights
         // in a scene?
+        // surface normal of the triangle used in flat-shading
+        normalX: 0, normalY: 0, normalZ: 0,
         // the position of the point light in world space, or the direction of
         // the directional light, both of which affect the entire scene
         lightX: undefined, lightY: undefined, lightZ: undefined,
