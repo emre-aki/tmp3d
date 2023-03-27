@@ -630,15 +630,15 @@
         let xUpper = preStepFromTop * stepXAlongUpper + topX;
         let xLower = preStepFromMid * stepXAlongLower + midX;
         let xMajor = preStepFromTop * stepXAlongMajor + topX;
-        /* current `u` coordinates in texture-space */
+        /* current `u` coordinates in perspective-correct texture-space */
         let uUpper = preStepFromTop * stepUAlongUpper + topU;
         let uLower = preStepFromMid * stepUAlongLower + midU;
         let uMajor = preStepFromTop * stepUAlongMajor + topU;
-        /* current `v` coordinates in texture-space */
+        /* current `v` coordinates in perspective-correct texture-space */
         let vUpper = preStepFromTop * stepVAlongUpper + topV;
         let vLower = preStepFromMid * stepVAlongLower + midV;
         let vMajor = preStepFromTop * stepVAlongMajor + topV;
-        /* current `c` coordinates in texture-space */
+        /* current `c` coordinates in perspective-correct space */
         let cUpper = preStepFromTop * stepCAlongUpper + topC;
         let cLower = preStepFromMid * stepCAlongLower + midC;
         let cMajor = preStepFromTop * stepCAlongMajor + topC;
