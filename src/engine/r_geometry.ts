@@ -1,5 +1,5 @@
 /*
- *  r_geometry.js
+ *  r_geometry.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-02-20.
@@ -9,7 +9,7 @@
  *      memory.
  */
 
-(function ()
+(function (): void
 {
     const DEBUG_MODE = window.__DEBUG_MODE__;
 
@@ -57,19 +57,23 @@
     const R_FillTriangle_Textured_Perspective =
         R_Draw.R_FillTriangle_Textured_Perspective;
 
-    let projectionOrigin; // the center of the projection (near-clipping) plane
+    // the center of the projection (near-clipping) plane
+    let projectionOrigin: vec3_t;
     const ORIGIN = R_Camera.R_ORIGIN;
     const BWD = R_Camera.R_BWD, FWD = M_Scale3(BWD, -1);
 
     // TODO: make a separate lighting controller module, maybe??
     const DIRECTIONAL_LIGHT = BWD;
 
-    let nTris; // total number of triangles in the model
-    let tris3; // a pool of raw triangle data
-    let transformedTris3; // triangles after transformation
-    let uvTable3; // respective uv-coordinates of each triangle in the pool
-    let textureTable; // respective texture ids of each triangle in the pool
-    let culledBuffer, nCulledBuffer; // buffer triangles who survived culling
+    let nTris: number; // total number of triangles in the model
+    let tris3: tri3_t[]; // a pool of raw triangle data
+    let transformedTris3: tri3_t[]; // triangles after transformation
+    // respective uv-coordinates of each triangle in the pool
+    let uvTable3: tri3_t[];
+    // respective texture ids of each triangle in the pool
+    let textureTable: string[];
+    let culledBuffer: Uint32Array; // buffer of triangles who survived culling
+    let nCulledBuffer: number; // number of triangles who survived culling
 
     /* TODO: find a more suitable spot for managing global transformations?
      * a separate tranform controller, maybe???
@@ -98,7 +102,7 @@
     let renderMode = 3;
     let lastRenderModeChange = Date.now();
 
-    function R_ToggleGlobalRotation ()
+    function R_ToggleGlobalRotation (): void
     {
         const now = Date.now();
         if (I_GetKeyState(I_Keys.G) &&
@@ -109,7 +113,7 @@
         }
     }
 
-    function R_ChangeRenderMode ()
+    function R_ChangeRenderMode (): void
     {
         const now = Date.now();
         if (I_GetKeyState(I_Keys.R) &&
@@ -121,7 +125,11 @@
         }
     }
 
-    function R_LoadGeometry (vertices, triangles, nTriangles)
+    function
+    R_LoadGeometry
+    ( vertices: pvec3_t[],
+      triangles: pvec3_t[],
+      nTriangles: number ): void
     {
         projectionOrigin = R_GetProjectionOrigin();
         nTris = nTriangles;
@@ -140,7 +148,11 @@
         }
     }
 
-    function R_InitUVTable (vertices, triangles, nTriangles)
+    function
+    R_InitUVTable
+    ( vertices: pvec2_t[],
+      triangles: uvface_t[],
+      nTriangles: number ): void
     {
         uvTable3 = Array(nTriangles);
         textureTable = Array(nTriangles);
@@ -160,7 +172,7 @@
     /* TODO: add functionality here to allow updating parts of the geometry as
      * opposed to the entire model
      */
-    function R_UpdateGeometry ()
+    function R_UpdateGeometry (): void
     {
         if (doGlobalRotation)
         {
@@ -178,13 +190,14 @@
     }
 
     /* TODO: improve the crude frustum-culling technique used here */
-    function R_FrustumCull (triView)
+    function R_FrustumCull (triView: tri3_t): boolean
     {
         const triAABB3 = M_AABB3FromTri3(triView);
+
         return M_BoundingBoxVsBoundingBoxCollision3(FRUSTUM_AABB3, triAABB3);
     }
 
-    function R_CullGeometry ()
+    function R_CullGeometry (): void
     {
         let nTrianglesAfterCulling = 0;
         for (let i = 0; i < nTris; ++i)
@@ -199,10 +212,7 @@
                 M_IsInFrontOfPlane3(ORIGIN, aView, M_TriNormal3(triView))
                 // TODO: implement occlusion-culling
             )
-            {
-                culledBuffer[nTrianglesAfterCulling] = i;
-                ++nTrianglesAfterCulling;
-            }
+                culledBuffer[nTrianglesAfterCulling++] = i;
         }
         nCulledBuffer = nTrianglesAfterCulling;
     }
@@ -210,10 +220,13 @@
     /* TODO: make a generic function that takes in as arguments the `planeRef` &
      * `planeNormal` to clip the geometry against, possibly, maybe??
      */
-    function R_ClipGeometryAgainstNearPlane (triView, clippedTriQueue)
+    function
+    R_ClipGeometryAgainstNearPlane
+    ( triView: tri3_t,
+      clippedTriQueue: [tri3_t, tri3_t] ): number
     {
         let nVerticesInside = 0;
-        const inside = Array(4);
+        const inside: vec3_t[] = Array(4);
         /* test each vertex in the original triangle against the near-clipping
          * plane to see whether they fall inside of the plane or not
          */
@@ -221,22 +234,18 @@
         {
             const v = triView[i], vNext = triView[i === 2 ? 0 : i + 1];
             const vInside = v[2] >= Z_NEAR, vNextInside = vNext[2] >= Z_NEAR;
-            if (vInside)
-            {
-                inside[nVerticesInside] = v;
-                ++nVerticesInside;
-            }
+            if (vInside) inside[nVerticesInside++] = v;
             /* if the edge of the triangle formed by vertices `v` & `vNext`
              * intersects the near-clipping plane, store the point of
              * intersection as an "inside" vertex
              */
+            // @ts-ignore >:[
             if (vInside ^ vNextInside)
             {
                 const t = M_TimeBeforePlaneCollision3(v, vNext,
-                                                      projectionOrigin, FWD);
+                                                      projectionOrigin, FWD)!;
                 const intersect = M_Add3(M_Scale3(M_Sub3(vNext, v), t), v);
-                inside[nVerticesInside] = intersect;
-                ++nVerticesInside;
+                inside[nVerticesInside++] = intersect;
             }
         }
         // early return: no vertices lie inside/in front of the near-clipping
@@ -252,6 +261,7 @@
          */
         if (nVerticesInside === 4)
             clippedTriQueue[1] = Tri3(inside[2], inside[3], inside[0]);
+
         return nVerticesInside - 2; // triangulation of an n-gon
      }
 
@@ -260,11 +270,11 @@
      */
     function
     R_ClipGeometryAgainstNearPlane_Textured
-    ( triView, clippedTriQueue,
-      uvMap, clippedUvMapQueue )
+    ( triView: tri3_t, clippedTriQueue: [tri3_t, tri3_t],
+      uvMap: tri3_t, clippedUvMapQueue: [tri3_t, tri3_t] ): number
     {
         let nVerticesInside = 0;
-        const inside = Array(4), uvInside = Array(4);
+        const inside: vec3_t[] = Array(4), uvInside: vec3_t[] = Array(4);
         /* test each vertex in the original triangle against the near-clipping
          * plane to see whether they fall inside of the plane or not
          */
@@ -276,22 +286,21 @@
             if (vInside)
             {
                 inside[nVerticesInside] = v;
-                uvInside[nVerticesInside] = uv;
-                ++nVerticesInside;
+                uvInside[nVerticesInside++] = uv;
             }
             /* if the edge of the triangle formed by vertices `v` & `vNext`
              * intersects the near-clipping plane, store the point of
              * intersection as an "inside" vertex
              */
+            // @ts-ignore >:[
             if (vInside ^ vNextInside)
             {
                 const t = M_TimeBeforePlaneCollision3(v, vNext,
-                                                      projectionOrigin, FWD);
+                                                      projectionOrigin, FWD)!;
                 const intersect = M_Add3(M_Scale3(M_Sub3(vNext, v), t), v);
                 const intersectUV = M_Add3(M_Scale3(M_Sub3(uvNext, uv), t), uv);
                 inside[nVerticesInside] = intersect;
-                uvInside[nVerticesInside] = intersectUV;
-                ++nVerticesInside;
+                uvInside[nVerticesInside++] = intersectUV;
             }
         }
         // early return: no vertices lie inside/in front of the near-clipping
@@ -313,13 +322,18 @@
             // ...the same goes for the vertices in the texture-space
             clippedUvMapQueue[1] = Tri3(uvInside[2], uvInside[3], uvInside[0]);
         }
+
         return nVerticesInside - 2; // triangulation of an n-gon
     }
 
-    function R_SortTwoTrianglesInCulledBuffer (tri0, tri1)
+    function
+    R_SortTwoTrianglesInCulledBuffer
+    ( tri0: number,
+      tri1: number ): number
     {
         const tri0View = R_ToViewSpace(transformedTris3[tri0]);
         const tri1View = R_ToViewSpace(transformedTris3[tri1]);
+
         return tri1View[0][2] + tri1View[1][2] + tri1View[2][2] -
                tri0View[0][2] - tri0View[1][2] - tri0View[2][2];
     }
@@ -327,7 +341,8 @@
     /* TODO: unused for the time being, going to be useful once more advanced
      * features like translucency are implemented
      */
-    function R_SortGeometry ()
+    // @ts-ignore
+    function R_SortGeometry (): void
     {
         const sorted = culledBuffer
             .slice(0, nCulledBuffer)
@@ -337,7 +352,7 @@
         );
     }
 
-    function R_RenderGeomeries_Wireframe (nTrisOnScreen)
+    function R_RenderGeomeries_Wireframe (nTrisOnScreen: Uint32Array): void
     {
         let trisRendered = 0;
         for (let i = 0; i < nCulledBuffer; ++i)
@@ -346,7 +361,7 @@
             const triWorld = transformedTris3[triIndex];
             const triView = R_ToViewSpace(triWorld);
             // keep a buffer of clipped triangles for drawing
-            const clippedTriQueue = Array(2);
+            const clippedTriQueue = Array(2) as [tri3_t, tri3_t];
             const nClipResult = R_ClipGeometryAgainstNearPlane(triView,
                                                                clippedTriQueue);
             // TODO: clip against far-plane
@@ -372,7 +387,7 @@
         nTrisOnScreen[1] = nCulledBuffer;
     }
 
-    function R_RenderGeomeries_Flat (nTrisOnScreen)
+    function R_RenderGeomeries_Flat (nTrisOnScreen: Uint32Array): void
     {
         let trisRendered = 0;
         for (let i = 0; i < nCulledBuffer; ++i)
@@ -381,7 +396,7 @@
             const triWorld = transformedTris3[triIndex];
             const triView = R_ToViewSpace(triWorld);
             // keep a buffer of clipped triangles for drawing
-            const clippedTriQueue = Array(2);
+            const clippedTriQueue = Array(2) as [tri3_t, tri3_t];
             const nClipResult = R_ClipGeometryAgainstNearPlane(triView,
                                                                clippedTriQueue);
             // TODO: clip against far-plane
@@ -428,7 +443,7 @@
         nTrisOnScreen[1] = nCulledBuffer;
     }
 
-    function R_RenderGeometries_Textured (nTrisOnScreen)
+    function R_RenderGeometries_Textured (nTrisOnScreen: Uint32Array): void
     {
         let trisRendered = 0;
         // early return if the mesh does not have texture-mapping
@@ -440,8 +455,8 @@
             const uvMap = uvTable3[triIndex];
             const triView = R_ToViewSpace(triWorld);
             /* keep buffers of clipped triangles for drawing */
-            const clippedTriQueue = Array(2);
-            const clippedUvMapQueue = Array(2);
+            const clippedTriQueue = Array(2) as [tri3_t, tri3_t];
+            const clippedUvMapQueue = Array(2) as [tri3_t, tri3_t];
             const nClipResult = R_ClipGeometryAgainstNearPlane_Textured(
                 triView,
                 clippedTriQueue,
@@ -506,7 +521,7 @@
         nTrisOnScreen[1] = nCulledBuffer;
     }
 
-    function R_RenderGeometries (nTrisOnScreen)
+    function R_RenderGeometries (nTrisOnScreen: Uint32Array): void
     {
         R_CullGeometry();
         switch (RENDER_MODES[renderMode])
@@ -527,7 +542,7 @@
         if (DEBUG_MODE) R_DebugAxes();
     }
 
-    function R_Tris ()
+    function R_Tris (): tri3_t[]
     {
         return tris3;
     }

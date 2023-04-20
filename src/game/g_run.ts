@@ -1,5 +1,5 @@
 /*
- *  g_run.js
+ *  g_run.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-02-13.
@@ -10,7 +10,7 @@
  *      frame.
  */
 
-(function ()
+(function (): void
 {
     const DEBUG_MODE = window.__DEBUG_MODE__;
 
@@ -42,17 +42,16 @@
     const R_ChangeRenderMode = R_Geometry.R_ChangeRenderMode;
     const R_RenderGeometries = R_Geometry.R_RenderGeometries;
     const R_ToggleGlobalRotation = R_Geometry.R_ToggleGlobalRotation;
-    const R_Tris = R_Geometry.R_Tris;
     const R_UpdateGeometry = R_Geometry.R_UpdateGeometry;
 
     const TICK_DELAY = 1000 / FPS;
 
-    let lastTickId; // an id that uniquely identifies the latest game tick
-    let lastTick; // the unix timestamp of the latest game tick
+    // the unix timestamp of the latest game tick
+    let lastTick: number | undefined;
 
     const nTrisOnScreen = new Uint32Array(2);
 
-    function G_UpdateScreen (deltaT, tris)
+    function G_UpdateScreen (deltaT: number): void
     {
         // clear the frame buffer so that the frame can start fresh
         R_ResetFrameBuffer();
@@ -63,21 +62,20 @@
         if (DEBUG_MODE) R_DebugStats(deltaT, nTrisOnScreen);
     }
 
-    function G_UpdateGame (deltaT, tris)
+    function G_UpdateGame (_deltaT: number): void
     {
         R_UpdateCamera(1); // TODO: take `deltaT` into account
         R_ToggleGlobalRotation();
         R_UpdateGeometry();
     }
 
-    function G_Tick (deltaT)
+    function G_Tick (deltaT: number): void
     {
-        const tris = R_Tris();
-        G_UpdateGame(deltaT, tris); // update actors & game state
-        G_UpdateScreen(deltaT, tris); // update screen buffer
+        G_UpdateGame(deltaT); // update actors & game state
+        G_UpdateScreen(deltaT); // update screen buffer
     }
 
-    function G_AdvanceTick (currentTick)
+    function G_AdvanceTick (currentTick: number): void
     {
         if (lastTick === undefined) lastTick = currentTick;
         const deltaT = currentTick - lastTick;
@@ -88,17 +86,17 @@
             G_Tick(deltaT);
             lastTick = currentTick;
         }
-        lastTickId = requestAnimationFrame(G_AdvanceTick);
+        requestAnimationFrame(G_AdvanceTick);
     }
 
-    function G_StartGame (titleId)
+    function G_StartGame (titleId: string): void
     {
         // first, clear the title screen animation that is running
         AN_CancelAnimation(titleId);
         requestAnimationFrame(G_AdvanceTick); // then, kickstart the game ticks
     }
 
-    function G_Run (setupResolution)
+    function G_Run (setupResolution?: setup_resolution_t): void
     {
         if (!setupResolution) return; // exit with error
         // first, clear the frame buffer for any further drawing to take place
@@ -109,8 +107,8 @@
         const titleId =
             R_TitleDrawer(A_Texture(D_GlobTextureIdTable.TITLE_TMP3D));
         document.addEventListener("keydown",
-                                  G_StartGame.bind(this, titleId),
-                                  { once: 1 });
+                                  G_StartGame.bind(undefined, titleId),
+                                  { once: true });
     }
 
     window.__import__G_Run = function ()

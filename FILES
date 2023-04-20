@@ -1,48 +1,48 @@
 --------------------------------------------------------------------------------
 A        (Game) Assets
 --------------------------------------------------------------------------------
-a_assets.js     - load game assets into memory and read them on-the-fly
+a_assets.ts     - load game assets into memory and read them on-the-fly
 
 --------------------------------------------------------------------------------
 AN       ANimation
 --------------------------------------------------------------------------------
-an_animation.js - animate in-engine objects
+an_animation.ts - animate in-engine objects
 
 --------------------------------------------------------------------------------
 G        Game loops and top-level stuff
 --------------------------------------------------------------------------------
-g_const.js      - constants
-g_main.js       - the main program
-g_run.js        - game loops
-g_setup.js      - setup routines
+g_const.ts      - constants
+g_main.ts       - the main program
+g_run.ts        - game loops
+g_setup.ts      - setup routines
 
 --------------------------------------------------------------------------------
 I        Interfaces, I/O controllers
 --------------------------------------------------------------------------------
-i_input.js      - mouse & keyboard controller
+i_input.ts      - mouse & keyboard controller
 
 --------------------------------------------------------------------------------
 M        Math
 --------------------------------------------------------------------------------
-m_math.js       - math utilities
-m_mat4.js       - 4x4 matrix
-m_tri3.js       - 3-D triangle
-m_vec3.js       - 3-D vector
-m_aabb3.js      - 3-D axis-aligned bounding-box
-m_collision3.js - 3-D collisions
+m_math.ts       - math utilities
+m_mat4.ts       - 4x4 matrix
+m_tri3.ts       - 3-D triangle
+m_vec3.ts       - 3-D vector
+m_aabb3.ts      - 3-D axis-aligned bounding-box
+m_collision3.ts - 3-D collisions
 
 --------------------------------------------------------------------------------
 R        Rendering
 --------------------------------------------------------------------------------
-r_camera.js     - camera controller, and view & perspective transformations
-r_draw.js       - rendering back-end--drawing routines
-r_drawers.js    - render various menus, screens, etc.
-r_geometry.js   - load, update & render 3-D geometry data
-r_screen.js     - rendering front-end--access to framebuffer APIs
+r_camera.ts     - camera controller, and view & perspective transformations
+r_draw.ts       - rendering back-end--drawing routines
+r_drawers.ts    - render various menus, screens, etc.
+r_geometry.ts   - load, update & render 3-D geometry data
+r_screen.ts     - rendering front-end--access to framebuffer APIs
 
 --------------------------------------------------------------------------------
 D        Data
 --------------------------------------------------------------------------------
 mesh/d_*.js     - initial mesh data
-d_player.js     - initial player data
-d_textures.js   - texture lookup tables
+d_player.ts     - initial player data
+d_textures.ts   - texture lookup tables

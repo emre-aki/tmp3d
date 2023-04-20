@@ -1,5 +1,5 @@
 /*
- *  a_assets.js
+ *  a_assets.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-05-03.
@@ -9,21 +9,26 @@
  *      them on-the-fly.
  */
 
-(function ()
+(function (): void
 {
-    const TEXTURES_LUT = {};
+    const TEXTURES_LUT: { [id: string]: texture_t } = {};
 
-    function A_ToBitmap (texture)
+    function A_ToBitmap (texture: HTMLImageElement): bitmap_t
     {
         const textureWidth = texture.width, textureHeight = texture.height;
         const tmpCanvas = document.createElement("canvas");
-        const tmpCtx = tmpCanvas.getContext("2d");
+        const tmpCtx = tmpCanvas.getContext("2d")!;
         tmpCanvas.width = textureWidth; tmpCanvas.height = textureHeight;
         tmpCtx.drawImage(texture, 0, 0);
+
         return tmpCtx.getImageData(0, 0, textureWidth, textureHeight).data;
     }
 
-    function A_OnTextureLoad (resolve, texture, id)
+    function
+    A_OnTextureLoad
+    ( resolve: () => void,
+      texture: HTMLImageElement,
+      id: string ): void
     {
         TEXTURES_LUT[id] = {
             id: id,
@@ -34,7 +39,7 @@
         resolve();
     }
 
-    function A_TexturePromise (id, filename)
+    function A_TexturePromise (id: string, filename: string): Promise<void>
     {
         return new Promise(function A_TexturePromiseExecutor (resolve, reject)
         {
@@ -46,17 +51,22 @@
         });
     }
 
-    function A_LoadTextures (ids, filenames, numTextures)
+    function
+    A_LoadTextures
+    ( ids: string[],
+      filenames: string[],
+      numTextures: number ): Promise<void[]>
     {
         // TODO: throw an error should the `filenames` and `ids` have different
         // lengths, maybe??
-        const texturePromises = Array(numTextures);
+        const texturePromises: Promise<void>[] = Array(numTextures);
         for (let i = 0; i < numTextures; ++i)
             texturePromises[i] = A_TexturePromise(ids[i], filenames[i]);
+
         return Promise.all(texturePromises);
     }
 
-    function A_Texture (id)
+    function A_Texture (id: string): texture_t
     {
         return TEXTURES_LUT[id];
     }

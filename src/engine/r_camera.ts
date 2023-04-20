@@ -1,5 +1,5 @@
 /*
- *  r_camera.js
+ *  r_camera.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-02-13.
@@ -15,7 +15,7 @@
  *      in 3-D with user input.
  */
 
-(function ()
+(function (): void
 {
     const I_Input = __import__I_Input();
     const I_GetKeyState = I_Input.I_GetKeyState;
@@ -64,18 +64,21 @@
     const RIGHT = Vec3(1, 0 ,0), UP = Vec3(0, 1, 0), FWD = Vec3(0, 0, 1);
     const BWD = Vec3(0, 0, -1);
 
-    let veloc; // camera velocity
-    let camPitch, camYaw; // the elementary rotations for the camera
-    let camPos; // the position of the camera, i.e., the eye
+    let veloc: number; // camera velocity
+    // the elementary rotations for the camera
+    let camPitch: number, camYaw: number;
+    let camPos: vec3_t; // the position of the camera, i.e., the eye
     // the orthonormal basis vectors defining the camera
-    let camRight, camUp, camFwd;
-    let matPerspective; // the viewing frustum used for perspective projection
-    let matLookAt; // the look-at matrix used for view transformation
-    let projectionOrigin; // the center of the projection (near-clipping) plane
+    let camRight: vec3_t, camUp: vec3_t, camFwd: vec3_t;
+    // the viewing frustum used for perspective projection
+    let matPerspective: mat4_t;
+    let matLookAt: mat4_t; // the look-at matrix used for view transformation
+    // the center of the projection (near-clipping) plane
+    let projectionOrigin: vec3_t;
 
     // TODO: instead of having `eye`, `center`, and `up` as arguments to the
     // function, directly read the camera basis vectors off of the global scope
-    function R_PointAt (eye, center, up)
+    function R_PointAt (eye: vec3_t, center: vec3_t, up: vec3_t): mat4_t
     {
         // calculate the `z` axis for the camera, normalized
         const vecCamZ3 = M_Norm3(M_Sub3(center, eye));
@@ -93,15 +96,21 @@
         const vecCamY4 = M_Vec4FromVec3(vecCamY3, 0);
         const vecCamZ4 = M_Vec4FromVec3(vecCamZ3, 0);
         const vecTranslateCam4 = M_Vec4FromVec3(eye, 1);
+
         return Mat4(vecCamX4, vecCamY4, vecCamZ4, vecTranslateCam4);
     }
 
-    function R_LookAt (eye, center, up)
+    function R_LookAt (eye: vec3_t, center: vec3_t, up: vec3_t): mat4_t
     {
         return M_QuickInv4(R_PointAt(eye, center, up));
     }
 
-    function R_Perspective (fovy, aspect, zNear, zFar)
+    function
+    R_Perspective
+    ( fovy: number,
+      aspect: number,
+      zNear: number,
+      zFar: number ): mat4_t
     {
         const tanFovy_ = 1 / Math.tan(fovy * 0.5);
         const A = zFar / (zFar - zNear);
@@ -111,10 +120,11 @@
         const vecPersY4 = M_Vec4FromVec3([0, tanFovy_, 0], 0);
         const vecPersZ4 = M_Vec4FromVec3([0, 0, A], 1);
         const vecPersW4 = M_Vec4FromVec3([0, 0, B], 0);
+
         return Mat4(vecPersX4, vecPersY4, vecPersZ4, vecPersW4);
     }
 
-    function R_OrientCamera (yaw, pitch)
+    function R_OrientCamera (yaw: number, pitch: number): void
     {
         camFwd = M_RotateAroundAxis3(FWD, UP, yaw);
         camRight = M_RotateAroundAxis3(RIGHT, UP, yaw);
@@ -122,7 +132,7 @@
         camUp = M_RotateAroundAxis3(UP, camRight, pitch);
     }
 
-    function R_UpdateCamera (mult)
+    function R_UpdateCamera (mult: number): void
     {
         /* update the orientation of the camera in world-space */
         const rotationVelocity = 0.075 * mult;
@@ -182,17 +192,17 @@
         matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camUp);
     }
 
-    function R_ToViewSpace (triangle)
+    function R_ToViewSpace (triangle: tri3_t): tri3_t
     {
         return M_TransformTri3(matLookAt, triangle);
     }
 
-    function R_ToClipSpace (triangle)
+    function R_ToClipSpace (triangle: tri3_t): tri3_t
     {
         return M_TransformTri3(matPerspective, triangle);
     }
 
-    function R_GetCameraState ()
+    function R_GetCameraState (): cam3_t
     {
         return {
             x: camPos[0],
@@ -204,12 +214,19 @@
         };
     }
 
-    function R_GetProjectionOrigin ()
+    function R_GetProjectionOrigin (): vec3_t
     {
         return projectionOrigin;
     }
 
-    function R_InitCamera (fovy, aspect, zNear, zFar, eye, velocity)
+    function
+    R_InitCamera
+    ( fovy: number,
+      aspect: number,
+      zNear: number,
+      zFar: number,
+      eye: pvec3_t,
+      velocity: number ): void
     {
         projectionOrigin = Vec3(0, 0, zNear);
         veloc = velocity;
@@ -220,7 +237,7 @@
         matPerspective = R_Perspective(fovy, aspect, zNear, zFar);
     }
 
-    function R_DebugStats (deltaT, nTrisOnScreen)
+    function R_DebugStats (deltaT: number, nTrisOnScreen: Uint32Array): void
     {
         /* print the position of the camera */
         R_Print("pos: <" + M_ToFixedDigits(camPos[0], 2) + ", " +
@@ -244,7 +261,7 @@
     }
 
     /* FIXME: move this function to a more sensible file/module */
-    function R_DebugAxes ()
+    function R_DebugAxes (): void
     {
         const originViewSpace4 = M_Transform4(matLookAt,
                                               M_Vec4FromVec3(ORIGIN, 1));
@@ -263,15 +280,15 @@
                            upClipSpace3[1] * SCREEN_H_2 + SCREEN_H_2];
         const fwdScreen2 = [fwdClipSpace3[0] * SCREEN_W_2 + SCREEN_W_2,
                             fwdClipSpace3[1] * SCREEN_H_2 + SCREEN_H_2];
-        if (originViewSpace4[2] > 0 || axesViewSpace3[0][0][2] > 0)
+        if (originViewSpace4[2] > 0 || axesViewSpace3[0][2] > 0)
             R_DrawLine_Bresenham(originScreen2[0], originScreen2[1],
                                  rightScreen2[0], rightScreen2[1],
                                  255, 0, 0, 255, 2);
-        if (originViewSpace4[2] > 0 || axesViewSpace3[0][1][2] > 0)
+        if (originViewSpace4[2] > 0 || axesViewSpace3[1][2] > 0)
             R_DrawLine_Bresenham(originScreen2[0], originScreen2[1],
                                  upScreen2[0], upScreen2[1],
                                  0, 255, 0, 255, 2);
-        if (originViewSpace4[2] > 0 || axesViewSpace3[0][2][2] > 0)
+        if (originViewSpace4[2] > 0 || axesViewSpace3[2][2] > 0)
             R_DrawLine_Bresenham(originScreen2[0], originScreen2[1],
                                  fwdScreen2[0], fwdScreen2[1],
                                  0, 0, 255, 255, 2);

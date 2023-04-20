@@ -40,6 +40,7 @@
 - [x] `README.md`
 - [x] File descriptions
 - [x] `CONVENTIONS`
+- [x] Migrate to TypeScript
 - [ ] Decoupling? Inspiration from `OLC_PixelGameEngine`, or
       `OLC_ConsoleGameEngine`?
 
@@ -54,6 +55,8 @@
 ### release: 0.0.6
 - [x] Clipping geometries against the view frustum (Against the near-plane
       specifically for the time being)
+- #### release 0.0.6.1
+    - [x] Migrate the engine to TypeScript 🎉
 
 ### release: 0.0.7
 - [x] Crude frustum-culling

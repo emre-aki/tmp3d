@@ -1,5 +1,5 @@
 /*
- *  g_const.js
+ *  g_const.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-02-13.
@@ -31,11 +31,8 @@
 
     const FPS = 30;
 
-    function G_ViewFrustumBoundingBox ()
-    {
-        return AABB3(Vec3(-FAR_W_2, -FAR_H_2, Z_NEAR),
-                     Vec3(FAR_W, FAR_H, Z_FAR - Z_NEAR));
-    }
+    const FRUSTUM_AABB3 = AABB3(Vec3(-FAR_W_2, -FAR_H_2, Z_NEAR),
+                                Vec3(FAR_W, FAR_H, Z_FAR - Z_NEAR));
 
     window.__import__G_Const = function ()
     {
@@ -50,7 +47,7 @@
             ASPECT: ASPECT,
             Z_NEAR: Z_NEAR,
             Z_FAR: Z_FAR,
-            FRUSTUM_AABB3: G_ViewFrustumBoundingBox(),
+            FRUSTUM_AABB3: FRUSTUM_AABB3,
         };
     };
 })();

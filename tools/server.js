@@ -16,7 +16,7 @@ const { LogInfo } = require("./log");
 
 const ENV = process.env;
 const PORT = ENV.PORT || 3000;
-const ROOT = path.join(__dirname, "..", "src");
+const ROOT = path.join(__dirname, "..", "dist");
 const CLIENT_ENV = { debugMode: ENV.DEBUG, version: packageJson.version };
 const LOG_OPTIONS = { context: "server" };
 
@@ -33,7 +33,7 @@ function main ()
         .use("/game", express.static(path.join(ROOT, "game")))
         .use("/data", express.static(path.join(ROOT, "data")))
         .set("view engine", "ejs")
-        .set("views", path.join(ROOT, "view"))
+        .set("views", path.join(ROOT, "..", "src", "view"))
         .get("/", (_, res) => res.render("index", { env: CLIENT_ENV }))
         .listen(PORT, serve);
 }

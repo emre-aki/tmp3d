@@ -11,8 +11,10 @@
 const cli = require("commander");
 const path = require("path");
 const ejs = require("ejs");
+const { transpileModule } = require("typescript");
 
 const packageJson = require("../package.json");
+const tsConfig = require("../tsconfig.json");
 const {
     ReadFile,
     WriteFile,
@@ -45,7 +47,25 @@ function BuildView (debug)
     return ejs.render(template, { env: clientEnv });
 }
 
-function CopyStatic (sourceDir, outputDir)
+function TranspileTs (filepath, outputPath)
+{
+    /* if the input file is not of typescript source, copy it directly without
+     * transpiling
+     */
+    if (path.extname(filepath) !== ".ts")
+    {
+        CopyFile(filepath, path.join(outputPath, path.basename(filepath)));
+        return;
+    }
+    const transpiledFilename = path.basename(filepath).replace(/\.ts$/, ".js");
+    const transpiledPath = path.join(outputPath, transpiledFilename);
+    LogInfo(`Transpiling ${filepath}...`, LOG_OPTIONS);
+    WriteFile(transpiledPath,
+              transpileModule(ReadFile(filepath).toString(),
+                              tsConfig.compilerOptions).outputText);
+}
+
+function CopyStatic (sourceDir, outputDir, onFile)
 {
     // queue the directory entries to copy from `sourceDir` to `outputDir`
     const copyQueue = [];
@@ -87,6 +107,9 @@ function CopyStatic (sourceDir, outputDir)
             /* ...and push the sub-entry to the queue if it's a sub-directory */
             if (IsDir(copySrcAbspath))
                 copyQueue.push(path.join(entry, subEntry));
+            /* ...or run a custom callback, if specified */
+            else if (onFile)
+                onFile(copySrcAbspath, copyDest);
             /* ...or copy it over to the `copyDest` if it's a file */
             else
                 CopyFile(copySrcAbspath, path.join(copyDest, subEntry));
@@ -115,7 +138,7 @@ function Build (outputPath, debug, verbose)
     /* copy the static files, i.e, scripts, assets, and anything that is static,
      * over to the output directory
      */
-    CopyStatic(SRC, outputDir);
+    CopyStatic(SRC, outputDir, TranspileTs);
     LogInfo(`Contents of ${SRC} copied to ${outputDir}.`, LOG_OPTIONS);
     LogInfo(`Copying ${ASSETS}...`, LOG_OPTIONS);
     CopyStatic(ASSETS, outputDir);
@@ -145,3 +168,5 @@ function main ()
 }
 
 main();
+
+exports.Build = Build;

@@ -1,5 +1,5 @@
 /*
- *  g_setup.js
+ *  g_setup.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-02-13.
@@ -9,7 +9,7 @@
  *      game data, and 3-D meshes for the engine to run off of.
  */
 
-(function ()
+(function (): void
 {
     const A_Assets = __import__A_Assets();
     const A_LoadTextures = A_Assets.A_LoadTextures;
@@ -60,7 +60,7 @@
     const R_Screen = __import__R_Screen();
     const R_ScreenElement = R_Screen.R_ScreenElement;
 
-    function G_LoadTextures ()
+    function G_LoadTextures (): Promise<void[]>
     {
         const meshTextureIds = Object.keys(D_TextureAtlas);
         const globTextureIds = Object.keys(D_GlobTextureIdTable);
@@ -70,16 +70,17 @@
         const textureFilenames = meshTextureFilenames
             .concat(globTextureFilenames);
         const numTextures = textureFilenames.length;
+
         return A_LoadTextures(textureIds, textureFilenames, numTextures);
     }
 
-    function G_SetupPromise ()
+    function G_SetupPromise (): Promise<void[]>
     {
         return G_LoadTextures();
         // TODO: other async operations will go here, chained by `.then`s
     }
 
-    function G_Setup ()
+    function G_Setup (): Promise<setup_resolution_t | undefined>
     {
         // initialize the frame buffer first, before anything could be drawn on
         // the screen
@@ -114,6 +115,8 @@
             {
                 AN_CancelAnimation(resolution.loadingId);
                 R_ErrorDrawer("setup error");
+
+                return undefined;
             });
     }
 

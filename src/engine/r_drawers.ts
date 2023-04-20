@@ -1,5 +1,5 @@
 /*
- *  r_drawers.js
+ *  r_drawers.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-05-03.
@@ -9,7 +9,7 @@
  *     menus, screens, etc.
  */
 
-(function ()
+(function (): void
 {
     const AN_Animation = __import__AN_Animation();
     const AN_StartAnimation = AN_Animation.AN_StartAnimation;
@@ -39,7 +39,7 @@
     const ERROR_FONT_COLOR = "#FF0000";
     const ERROR_FONT_SIZE = 16;
 
-    function R_DrawLoadingFrame (index)
+    function R_DrawLoadingFrame (index: number): void
     {
         const dots = Array(index % N_LOADING_STATES).fill(".").join("");
         R_Ctx.fillStyle = "#000000";
@@ -48,13 +48,13 @@
                 LOADING_FONT_COLOR, LOADING_FONT_SIZE);
     }
 
-    function R_LoadingDrawer (onEnd)
+    function R_LoadingDrawer (onEnd?: () => void): string
     {
         return AN_StartAnimation(R_DrawLoadingFrame, LOADING_INTERVAL,
                                  undefined, onEnd);
     }
 
-    function R_DrawTitleFrame (index, decor)
+    function R_DrawTitleFrame (index: number, decor: texture_t): void
     {
         R_FillRect(0, 0, SCREEN_W, SCREEN_H, 0, 0, 0, 255);
         R_DrawImage(decor,
@@ -73,7 +73,7 @@
                     TITLE_FONT_COLOR, TITLE_SECONDARY_FONT_SIZE);
     }
 
-    function R_TitleDrawer (decor, onEnd)
+    function R_TitleDrawer (decor: texture_t, onEnd?: () => void): string
     {
         return AN_StartAnimation(function R_OnTitleFrame (index)
         {
@@ -81,7 +81,7 @@
         }, TITLE_INTERVAL, undefined, onEnd);
     }
 
-    function R_ErrorDrawer (reason)
+    function R_ErrorDrawer (reason: string): void
     {
         R_Ctx.fillStyle = "#000000";
         R_Ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);

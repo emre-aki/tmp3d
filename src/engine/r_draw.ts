@@ -1,5 +1,5 @@
 /*
- *  r_draw.js
+ *  r_draw.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-02-13.
@@ -11,7 +11,7 @@
  *      more advanced visual effects, directly onto the frame buffer.
  */
 
-(function ()
+(function (): void
 {
     const G_Const = __import__G_Const();
     const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
@@ -25,36 +25,40 @@
     const R_FlushBuffer = R_Screen.R_FlushBuffer;
     const R_InitBuffer = R_Screen.R_InitBuffer;
 
-    let frameBuffer;
-    let zBuffer, cleanZBuffer;
+    let frameBuffer: ImageData;
+    let zBuffer: Float32Array, cleanZBuffer: Float32Array;
 
-    function R_InitFrameBuffer ()
+    function R_InitFrameBuffer (): void
     {
         frameBuffer = R_InitBuffer(SCREEN_W, SCREEN_H);
     }
 
-    function R_ResetFrameBuffer ()
+    function R_ResetFrameBuffer (): void
     {
         R_FillRect(0, 0, SCREEN_W, SCREEN_H, 0, 0, 0, 255);
     }
 
-    function R_FlushFrame ()
+    function R_FlushFrame (): void
     {
         R_FlushBuffer(frameBuffer);
     }
 
-    function R_InitZBuffer ()
+    function R_InitZBuffer (): void
     {
         cleanZBuffer = new Float32Array(N_PIXELS);
         zBuffer = new Float32Array(N_PIXELS);
     }
 
-    function R_ResetZBuffer ()
+    function R_ResetZBuffer (): void
     {
         zBuffer.set(cleanZBuffer);
     }
 
-    function R_FillRect (x, y, w, h, r, g, b, a)
+    function
+    R_FillRect
+    ( x: number, y: number,
+      w: number, h: number,
+      r: number, g: number, b: number, a: number ): void
     {
         const sX = M_Clamp(Math.ceil(x - 0.5), 0, SCREEN_W);
         const sY = M_Clamp(Math.ceil(y - 0.5), 0, SCREEN_H);
@@ -82,13 +86,20 @@
         }
     }
 
-    function R_ClampLine (sx, sy, dx, dy)
+    /*
+    function R_ClampLine (sx: number, sy: number, dx: number, dy: number): void
     {
         // TODO: implement 2-D line vs. rectangle intersection & utilize in all
         // line drawing routines
     }
+    */
 
-    function R_DrawLine_DDA (sx, sy, dx, dy, r, g, b, a, stroke)
+    function
+    R_DrawLine_DDA
+    ( sx: number, sy: number,
+      dx: number, dy: number,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void
     {
         const stroke_ = stroke || 1;
         const sX = Math.floor(sx), sY = Math.floor(sy);
@@ -124,7 +135,12 @@
         }
     }
 
-    function R_Bresenham_HorizontalSweep (sx, sy, dx, dy, r, g, b, a, stroke)
+    function
+    R_Bresenham_HorizontalSweep
+    ( sx: number, sy: number,
+      dx: number, dy: number,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void
     {
         const stroke_ = stroke || 1;
         const deltaX = dx - sx, deltaY = dy - sy;
@@ -150,7 +166,12 @@
         }
     }
 
-    function R_Bresenham_VerticalSweep (sx, sy, dx, dy, r, g, b, a, stroke)
+    function
+    R_Bresenham_VerticalSweep
+    ( sx: number, sy: number,
+      dx: number, dy: number,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void
     {
         const stroke_ = stroke || 1;
         const deltaX = dx - sx, deltaY = dy - sy;
@@ -176,7 +197,12 @@
         }
     }
 
-    function R_DrawLine_Bresenham (sx, sy, dx, dy, r, g, b, a, stroke)
+    function
+    R_DrawLine_Bresenham
+    ( sx: number, sy: number,
+      dx: number, dy: number,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void
     {
         const sX = Math.floor(sx), sY = Math.floor(sy);
         const dX = Math.floor(dx), dY = Math.floor(dy);
@@ -193,7 +219,12 @@
             R_Bresenham_HorizontalSweep(dX, dY, sX, sY, r, g, b, a, stroke);
     }
 
-    function R_DrawLine_RayCast (sx, sy, dx, dy, r, g, b, a, stroke)
+    function
+    R_DrawLine_RayCast
+    ( sx: number, sy: number,
+      dx: number, dy: number,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void
     {
         const stroke_ = stroke || 1;
         const sX = Math.floor(sx), sY = Math.floor(sy);
@@ -249,11 +280,11 @@
 
     function
     R_DrawTriangle_Wireframe
-    ( ax, ay,
-      bx, by,
-      cx, cy,
-      r, g, b, a,
-      stroke )
+    ( ax: number, ay: number,
+      bx: number, by: number,
+      cx: number, cy: number,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void
     {
         R_DrawLine_Bresenham(ax, ay, bx, by, r, g, b, a, stroke);
         R_DrawLine_Bresenham(ax, ay, cx, cy, r, g, b, a, stroke);
@@ -262,9 +293,10 @@
 
     function
     R_LerpShadedScanline_Flat
-    ( dx0, dx1, dy,
-      c0, c1,
-      r, g, b, a, lightLevel )
+    ( dx0: number, dx1: number, dy: number,
+      c0: number, c1: number,
+      r: number, g: number, b: number, a: number,
+      lightLevel: number ): void
     {
         // shaded color value to fill the triangle with
         const R = r * lightLevel, G = g * lightLevel, B = b * lightLevel;
@@ -313,10 +345,11 @@
 
     function
     R_FillTriangle_Flat
-    ( ax, ay, aw,
-      bx, by, bw,
-      cx, cy, cw,
-      r, g, b, a, lightLevel )
+    ( ax: number, ay: number, aw: number,
+      bx: number, by: number, bw: number,
+      cx: number, cy: number, cw: number,
+      r: number, g: number, b: number, a: number,
+      lightLevel: number ): void
     {
         // lerp depth values between the edges of the triangle for z-buffering
         const ca = 1 / aw, cb = 1 / bw, cc = 1 / cw;
@@ -428,7 +461,13 @@
         }
     }
 
-    function R_FillTriangle_Flat_Bresenham (ax, ay, bx, by, cx, cy, r, g, b, a)
+    /*
+    function
+    R_FillTriangle_Flat_Bresenham
+    ( ax: number, ay: number,
+      bx: number, by: number,
+      cx: number, cy: number,
+      r: number, g: number, b: number, a: number ): void
     {
         // TODO: implement, inspired by:
         // https://mcejp.github.io/2020/11/06/bresenham.html
@@ -436,36 +475,40 @@
 
     function
     R_LerpTexturedScanline_Affine
-    ( tex,
-      dx0, dx1, dy,
-      u0, v0,
-      u1, v1,
-      alpha, lightLevel )
+    ( tex: texture_t,
+      dx0: number, dx1: number, dy: number,
+      u0: number, v0: number,
+      u1: number, v1: number,
+      alpha: number,
+      lightLevel: number ): void
     {
         // TODO: implement affine texture-mapping
     }
 
     function
     R_FillTriangle_Textured_Affine
-    ( tex,
-      ax, ay,
-      bx, by,
-      cx, cy,
-      au, av,
-      bu, bv,
-      cu, cv,
-      alpha, lightLevel )
+    ( tex: texture_t,
+      ax: number, ay: number,
+      bx: number, by: number,
+      cx: number, cy: number,
+      au: number, av: number,
+      bu: number, bv: number,
+      cu: number, cv: number,
+      alpha: number,
+      lightLevel: number ): void
     {
         // TODO: implement affine texture-mapping
     }
+    */
 
     function
     R_LerpTexturedScanline_Perspective
-    ( tex,
-      dx0, dx1, dy,
-      u0, v0, c0,
-      u1, v1, c1,
-      alpha, lightLevel )
+    ( tex: texture_t,
+      dx0: number, dx1: number, dy: number,
+      u0: number, v0: number, c0: number,
+      u1: number, v1: number, c1: number,
+      alpha: number,
+      lightLevel: number ): void
     {
         const texWidth = tex.width, texHeight = tex.height, bitmap = tex.bitmap;
         // raster clipping: clip the scanline if it goes out-of-bounds of screen
@@ -539,14 +582,15 @@
 
     function
     R_FillTriangle_Textured_Perspective
-    ( tex,
-      ax, ay, aw,
-      bx, by, bw,
-      cx, cy, cw,
-      au, av, ac,
-      bu, bv, bc,
-      cu, cv, cc,
-      alpha, lightLevel )
+    ( tex: texture_t,
+      ax: number, ay: number, aw: number,
+      bx: number, by: number, bw: number,
+      cx: number, cy: number, cw: number,
+      au: number, av: number, ac: number,
+      bu: number, bv: number, bc: number,
+      cu: number, cv: number, cc: number,
+      alpha: number,
+      lightLevel: number ): void
     {
         /* coordinates of the triangle in screen-space */
         let topX = ax, topY = ay;
@@ -712,7 +756,15 @@
         }
     }
 
-    function R_DrawImage (img, sx, sy, sw, sh, dx, dy, dw, dh, options)
+    function
+    R_DrawImage
+    ( img: texture_t,
+      sx: number, sy: number,
+      sw: number, sh: number,
+      dx: number, dy: number,
+      dw: number, dh: number,
+      alpha?: number,
+      lightLevel?: number ): void
     {
         const imgWidth = img.width, imgHeight = img.height, bitmap = img.bitmap;
         /* early return if either the source or the destination is out-of-bounds
@@ -721,10 +773,8 @@
             dx + dw <= 0 || dy + dh <= 0 || dx >= SCREEN_W || dy >= SCREEN_H)
             return;
         /* determine how bright & translucent the image is going to be drawn */
-        const lightLevel = options && Number.isFinite(options.lightLevel)
-            ? options.lightLevel : 1;
-        const alpha = options && Number.isFinite(options.alpha)
-            ? options.alpha : 1;
+        const ALPHA = alpha !== undefined ? alpha : 1;
+        const LIGHT_LEVEL = lightLevel !== undefined ? lightLevel : 1;
         // 1 step in screen-space equals how many steps in texture-space
         const scaleX = sw / dw, scaleY = sh / dh;
         // raster clipping: clip the screen coordinates against the bounds of
@@ -770,7 +820,7 @@
                 const sampleRed = bitmap[sampleIndex];
                 const sampleGreen = bitmap[sampleIndex + 1];
                 const sampleBlue = bitmap[sampleIndex + 2];
-                const sampleAlpha = bitmap[sampleIndex + 3] * alpha;
+                const sampleAlpha = bitmap[sampleIndex + 3] * ALPHA;
                 const paintIndex = 4 * (y * SCREEN_W + x);
                 const bufferRed = frameBuffer.data[paintIndex];
                 const bufferGreen = frameBuffer.data[paintIndex + 1];
@@ -778,7 +828,7 @@
                 const bufferAlpha = frameBuffer.data[paintIndex + 3] || 255;
                 const blendRatio = sampleAlpha / bufferAlpha;
                 const blendRatio_ = 1 - blendRatio;
-                const blendWithLightLevel = lightLevel * blendRatio;
+                const blendWithLightLevel = LIGHT_LEVEL * blendRatio;
                 const newRed = blendWithLightLevel * sampleRed +
                                blendRatio_ * bufferRed;
                 const newGreen = blendWithLightLevel * sampleGreen +
@@ -795,10 +845,17 @@
         }
     }
 
-    function R_Print (chars, x, y, color, size, fontFamily, style)
+    function
+    R_Print
+    ( chars: string,
+      x: number, y: number,
+      color?: string,
+      size?: number,
+      fontFamily?: string,
+      style?: string ): void
     {
         R_Ctx.font = (style ? style + " " : "") +
-                     (Number.isFinite(size) ? size : 10).toString() + "px " +
+                     (size ? size : 10).toString() + "px " +
                      (fontFamily ? fontFamily : "Courier, monospace");
         R_Ctx.fillStyle = color || "#000000";
         R_Ctx.fillText(chars, x, y);
@@ -818,8 +875,9 @@
             R_DrawLine_RayCast: R_DrawLine_RayCast,
             R_DrawTriangle_Wireframe: R_DrawTriangle_Wireframe,
             R_FillTriangle_Flat: R_FillTriangle_Flat,
-            R_FillTriangle_Flat_Bresenham: R_FillTriangle_Flat_Bresenham,
-            R_FillTriangle_Textured_Affine: R_FillTriangle_Textured_Affine,
+            /* TODO: uncomment these once implemented */
+            // R_FillTriangle_Flat_Bresenham: R_FillTriangle_Flat_Bresenham,
+            // R_FillTriangle_Textured_Affine: R_FillTriangle_Textured_Affine,
             R_FillTriangle_Textured_Perspective:
                 R_FillTriangle_Textured_Perspective,
             R_DrawImage: R_DrawImage,

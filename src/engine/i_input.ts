@@ -1,5 +1,5 @@
 /*
- *  i_input.js
+ *  i_input.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-02-13.
@@ -8,52 +8,42 @@
  *      Manage player input on keyboard and mouse.
  */
 
-(function ()
+(function (): void
 {
-    function I_Key ()
-    {
-        return {
-            /* standard keys */
-            A: "A",
-            D: "D",
-            E: "E",
-            G: "G",
-            Q: "Q",
-            R: "R",
-            S: "S",
-            W: "W",
-            /* arrow keys */
-            ARW_DOWN: "ARW_DOWN",
-            ARW_LEFT: "ARW_LEFT",
-            ARW_RIGHT: "ARW_RIGHT",
-            ARW_UP: "ARW_UP",
-            /* special keys */
-            RTN: "RTN",
-            SPC: "SPC",
-        };
-    }
+    const KEY = {
+        /* standard keys */
+        A: "A",
+        D: "D",
+        E: "E",
+        G: "G",
+        Q: "Q",
+        R: "R",
+        S: "S",
+        W: "W",
+        /* arrow keys */
+        ARW_DOWN: "ARW_DOWN",
+        ARW_LEFT: "ARW_LEFT",
+        ARW_RIGHT: "ARW_RIGHT",
+        ARW_UP: "ARW_UP",
+        /* special keys */
+        RTN: "RTN",
+        SPC: "SPC",
+    } as const;
 
-    const KEY = I_Key();
+    const MOUSE = {
+        LEFT: "LEFT",
+        MIDDLE: "MIDDLE",
+        RIGHT: "RIGHT",
+        BRWS_BWD: "BRWS_BWD",
+        BRWS_FWD: "BRWS_FWD",
+        MOVING: "MOVING",
+        MOVEMENT_X: "MOVEMENT_X",
+        MOVEMENT_Y: "MOVEMENT_Y",
+        WHEELING: "WHEELING",
+        DELTA_WHEEL: "DELTA_WHEEL",
+    } as const;
 
-    function I_Mouse ()
-    {
-        return {
-            LEFT: "LEFT",
-            MIDDLE: "MIDDLE",
-            RIGHT: "RIGHT",
-            BRWS_BWD: "BRWS_BWD",
-            BRWS_FWD: "BRWS_FWD",
-            MOVING: "MOVING",
-            MOVEMENT_X: "MOVEMENT_X",
-            MOVEMENT_Y: "MOVEMENT_Y",
-            WHEELING: "WHEELING",
-            DELTA_WHEEL: "DELTA_WHEEL",
-        };
-    }
-
-    const MOUSE = I_Mouse();
-
-    const keyState = {
+    const keyState: { [key in (keyof KEY)]: 0 | 1 } = {
         [KEY.A]: 0,
         [KEY.D]: 0,
         [KEY.E]: 0,
@@ -70,7 +60,7 @@
         [KEY.SPC]: 0,
     };
 
-    const mouseState = {
+    const mouseState: { [key in (keyof MOUSE)]: number } = {
         [MOUSE.LEFT]: 0,
         [MOUSE.MIDDLE]: 0,
         [MOUSE.RIGHT]: 0,
@@ -83,11 +73,10 @@
         [MOUSE.DELTA_WHEEL]: 0,
     };
 
-    let mouseStopTimeout, mouseWheelTimeout;
-
     const MOUSE_RESET_DELAY = 100;
+    let mouseStopTimeout: number, mouseWheelTimeout: number;
 
-    function I_UpdateKeyState (key, state)
+    function I_UpdateKeyState (key: number, state: 0 | 1): void
     {
         switch (key)
         {
@@ -109,28 +98,28 @@
         }
     }
 
-    function I_KeyDown (event)
+    function I_KeyDown (event: KeyboardEvent): void
     {
-        I_UpdateKeyState(event.which || event.keyCode, 1);
+        I_UpdateKeyState(event.keyCode, 1);
     }
 
-    function I_KeyUp (event)
+    function I_KeyUp (event: KeyboardEvent): void
     {
-        I_UpdateKeyState(event.which || event.keyCode, 0);
+        I_UpdateKeyState(event.keyCode, 0);
     }
 
-    function I_GetKeyState (key)
+    function I_GetKeyState (key: keyof typeof KEY): 0 | 1
     {
         return keyState[KEY[key]];
     }
 
-    function I_InitKeyboard (onElement)
+    function I_InitKeyboard (onElement: Document | HTMLElement): void
     {
         onElement.onkeydown = I_KeyDown;
         onElement.onkeyup = I_KeyUp;
     }
 
-    function I_UpdateMouseButtonState (button, state)
+    function I_UpdateMouseButtonState (button: number, state: 0 | 1): void
     {
         switch (button)
         {
@@ -143,23 +132,23 @@
         }
     }
 
-    function I_MouseDown (event)
+    function I_MouseDown (event: MouseEvent): void
     {
         I_UpdateMouseButtonState(event.button, 1);
     }
 
-    function I_MouseUp (event)
+    function I_MouseUp (event: MouseEvent): void
     {
         I_UpdateMouseButtonState(event.button, 0);
     }
 
-    function I_ResetMouseMovement ()
+    function I_ResetMouseMovement (): void
     {
         mouseState.MOVING = 0;
         mouseState.MOVEMENT_X = 0; mouseState.MOVEMENT_Y = 0;
     }
 
-    function I_MouseMove (event)
+    function I_MouseMove (event: MouseEvent): void
     {
         mouseState.MOVING = 1;
         mouseState.MOVEMENT_X = event.movementX;
@@ -169,12 +158,12 @@
         mouseStopTimeout = setTimeout(I_ResetMouseMovement, MOUSE_RESET_DELAY);
     }
 
-    function I_ResetMouseWheel ()
+    function I_ResetMouseWheel (): void
     {
         mouseState.WHEELING = 0; mouseState.DELTA_WHEEL = 0;
     }
 
-    function I_MouseWheel (event)
+    function I_MouseWheel (event: WheelEvent): void
     {
         event.preventDefault(); // prevent scrolling the page
         mouseState.WHEELING = 1; mouseState.DELTA_WHEEL = event.deltaY;
@@ -183,67 +172,70 @@
         mouseWheelTimeout = setTimeout(I_ResetMouseWheel, MOUSE_RESET_DELAY);
     }
 
-    function I_PointerLocked (onElement)
+    function I_PointerLocked (onElement: HTMLElement): boolean
     {
         return document.pointerLockElement === onElement ||
+               // @ts-ignore
                document.mozPointerLockElement === onElement;
     }
 
-    function I_RequestPointerLock ()
+    function I_RequestPointerLock (onElement: HTMLElement): void
     {
-        const element = this;
-        if (!I_PointerLocked(element))
+        if (!I_PointerLocked(onElement))
         {
-            element.requestPointerLock = element.requestPointerLock ||
-                                         element.mozRequestPointerLock;
-            element.requestPointerLock();
+            onElement.requestPointerLock = onElement.requestPointerLock ||
+                                           // @ts-ignore
+                                           onElement.mozRequestPointerLock;
+            onElement.requestPointerLock();
         }
     }
 
-    function I_AttachMouseEventListeners (onElement)
+    function I_AttachMouseEventListeners (onElement: HTMLElement): void
     {
-        onElement.onclick = undefined;
+        onElement.onclick = null;
         onElement.onmousedown = I_MouseDown;
         onElement.onmouseup = I_MouseUp;
         onElement.onmousemove = I_MouseMove;
         onElement.onwheel = I_MouseWheel;
     }
 
-    function I_DetachMouseEventListeners (fromElement)
+    function I_DetachMouseEventListeners (fromElement: HTMLElement): void
     {
-        fromElement.onclick = I_RequestPointerLock;
-        fromElement.onmousedown = undefined;
-        fromElement.onmouseup = undefined;
-        fromElement.onmousemove = undefined;
-        fromElement.onwheel = undefined;
+        fromElement.onclick = I_RequestPointerLock.bind(undefined, fromElement);
+        fromElement.onmousedown = null;
+        fromElement.onmouseup = null;
+        fromElement.onmousemove = null;
+        fromElement.onwheel = null;
     }
 
-    function I_PointerLockChange ()
+    function I_PointerLockChange (onElement: HTMLElement): void
     {
-      const element = this;
       // pointer locked, attach mouse listeners
-      if (I_PointerLocked(element)) I_AttachMouseEventListeners(element);
+      if (I_PointerLocked(onElement)) I_AttachMouseEventListeners(onElement);
       // pointer unlocked, detach mouse listeners
-      else I_DetachMouseEventListeners(element);
+      else I_DetachMouseEventListeners(onElement);
     }
 
-    function I_GetMouseState (state)
+    function I_GetMouseState (key: keyof typeof MOUSE): number
     {
-        return mouseState[MOUSE[state]];
+        return mouseState[MOUSE[key]];
     }
 
-    function I_InitMouse (onElement)
+    function I_InitMouse (onElement: HTMLElement): void
     {
-        onElement.onclick = I_RequestPointerLock.bind(onElement);
-        document.onpointerlockchange = I_PointerLockChange.bind(onElement);
-        document.onmozpointerlockchange = I_PointerLockChange.bind(onElement);
+        onElement.onclick = I_RequestPointerLock.bind(undefined, onElement);
+        document.onpointerlockchange = I_PointerLockChange.bind(undefined,
+                                                                onElement);
+        // @ts-ignore
+        document.onmozpointerlockchange = I_PointerLockChange.bind(undefined,
+                                                                   onElement);
     }
 
     window.__import__I_Input = function ()
     {
         return {
-            I_Keys: I_Key(),
-            I_Mouse: I_Mouse(),
+            I_Keys: KEY,
+            I_Mouse: MOUSE,
             I_GetKeyState: I_GetKeyState,
             I_InitKeyboard: I_InitKeyboard,
             I_GetMouseState: I_GetMouseState,

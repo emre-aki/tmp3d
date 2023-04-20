@@ -1,5 +1,5 @@
 /*
- *  m_mat4.js
+ *  m_mat4.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-02-13.
@@ -9,37 +9,38 @@
  *      vectors.
  */
 
-(function ()
+(function (): void
 {
     const N_COLS = 4;
     const SIZE = N_COLS * N_COLS;
 
-    function M_Vec4 (x, y, z, w)
+    function M_Vec4 (x: number, y: number, z: number, w: number): vec4_t
     {
         return Float32Array.from([x, y, z, w]);
     }
 
-    function M_Vec4FromVec3 (u, w)
+    function M_Vec4FromVec3 (u: pvec3_t | vec3_t, w: number): vec4_t
     {
         return M_Vec4(u[0], u[1], u[2], w);
     }
 
-    function M_Dot4 (u, v)
+    function M_Dot4 (u: vec4_t, v: vec4_t): number
     {
         return u[0] * v[0] + u[1] * v[1] + u[2] * v[2] + u[3] * v[3];
     }
 
-    function M_Mat4 (x, y, z, w)
+    function M_Mat4 (x: vec4_t, y: vec4_t, z: vec4_t, w: vec4_t): mat4_t
     {
         const mat = new Float32Array(SIZE);
         mat[0] = x[0]; mat[4] = x[1]; mat[8] = x[2]; mat[12] = x[3];
         mat[1] = y[0]; mat[5] = y[1]; mat[9] = y[2]; mat[13] = y[3];
         mat[2] = z[0]; mat[6] = z[1]; mat[10] = z[2]; mat[14] = z[3];
         mat[3] = w[0]; mat[7] = w[1]; mat[11] = w[2]; mat[15] = w[3];
+
         return mat;
     }
 
-    function M_QuickInv4 (mat)
+    function M_QuickInv4 (mat: mat4_t): mat4_t
     {
         /* we can hack our way here and decompose the original transform matrix
          * `m` as such:
@@ -90,20 +91,24 @@
         inv[7] = -M_Dot4(M_Vec4(inv[4], inv[5], inv[6], mat[13]), T);
         inv[11] = -M_Dot4(M_Vec4(inv[8], inv[9], inv[10], mat[14]), T);
         inv[15] = 1;
+
         return inv;
     }
 
-    function M_Inv4 (mat)
+    /*
+    function M_Inv4 (mat: mat4_t): mat4_t
     {
         // TODO: implement
     }
+    */
 
-    function M_Transform4 (mat, vec)
+    function M_Transform4 (mat: mat4_t, vec: vec4_t): vec4_t
     {
         const matRow0 = M_Vec4(mat[0], mat[1], mat[2], mat[3]);
         const matRow1 = M_Vec4(mat[4], mat[5], mat[6], mat[7]);
         const matRow2 = M_Vec4(mat[8], mat[9], mat[10], mat[11]);
         const matRow3 = M_Vec4(mat[12], mat[13], mat[14], mat[15]);
+
         return M_Vec4(M_Dot4(matRow0, vec), M_Dot4(matRow1, vec),
                       M_Dot4(matRow2, vec), M_Dot4(matRow3, vec));
     }
