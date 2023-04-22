@@ -24,10 +24,10 @@
     "author": "Emre Akı",
     "license": "GPL-3.0-or-later",
     "dependencies": {
-        "ejs": "^3.0.2",
-        "express": "^4.17.3"
+        "ejs": "^3.0.2"
     },
     "devDependencies": {
-        "commander": "^9.3.0"
+        "commander": "^9.3.0",
+        "express": "^4.17.3"
     }
 }
