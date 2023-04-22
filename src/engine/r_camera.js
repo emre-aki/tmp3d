@@ -38,7 +38,7 @@
     const M_RadToDeg = M_Math.M_RadToDeg;
     const M_Clamp = M_Math.M_Clamp;
     const M_ToFixedDigits = M_Math.M_ToFixedDigits;
-    const M_PI_2 = M_Math.M_PI_2;
+    const PI_2 = M_Math.PI_2;
 
     const M_Tri3 = __import__M_Tri3();
     const M_TransformTri3 = M_Tri3.M_TransformTri3;
@@ -141,7 +141,7 @@
         }
         // clamp camera's pitch to be a value in the range [-PI, +PI] to avoid
         // multiple headaches
-        camPitch = M_Clamp(camPitch, -M_PI_2, M_PI_2);
+        camPitch = M_Clamp(camPitch, -PI_2, PI_2);
         R_OrientCamera(camYaw, camPitch);
         /* update the position of the camera in world-space */
         /* listen for key strokes to calculate the displacement vector */
