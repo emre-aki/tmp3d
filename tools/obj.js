@@ -11,9 +11,9 @@
 const cli = require("commander");
 const path = require("path");
 
-const { ReadFile, WriteFile } = require("./file.js");
-const { LogInfo } = require("./log.js");
-const { ArrayToStr, DateToStr } = require("./misc.js");
+const { ReadFile, WriteFile } = require("./file");
+const { LogInfo } = require("./log");
+const { ArrayToStr, DateToStr } = require("./misc");
 
 const ROOT = path.join(__dirname, "..");
 const ASSETS_PATH = path.join(ROOT, "assets");
