@@ -4,10 +4,10 @@
     "description": "A 3-D software renderer written from scratch in nothing but JavaScript",
     "main": "./tools/server.js",
     "scripts": {
-        "build": "node ./src/build.js -v",
-        "build:debug": "node ./src/build.js -d -v",
         "start": "node ./tools/server.js",
         "start:debug": "DEBUG=1 node ./tools/server.js",
+        "build": "node ./tools/build.js -v",
+        "build:debug": "node ./tools/build.js -d -v",
         "load-obj": "node ./tools/obj.js convert"
     },
     "repository": {
