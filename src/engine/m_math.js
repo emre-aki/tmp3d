@@ -34,7 +34,7 @@
     {
         return {
             PI_2: PI_2,
-            M_RadToDeg,
+            M_RadToDeg: M_RadToDeg,
             M_Clamp: M_Clamp,
             M_ToFixedDigits: M_ToFixedDigits,
         };
