@@ -2,12 +2,12 @@
     "name": "tmp3d",
     "version": "0.0.6",
     "description": "A 3-D software renderer written from scratch in nothing but JavaScript",
-    "main": "./src/server.js",
+    "main": "./tools/server.js",
     "scripts": {
-        "start": "node ./src/server.js",
-        "start:debug": "DEBUG=1 node ./src/server.js",
         "build": "node ./src/build.js -v",
         "build:debug": "node ./src/build.js -d -v",
+        "start": "node ./tools/server.js",
+        "start:debug": "DEBUG=1 node ./tools/server.js",
         "load-obj": "node ./tools/obj.js convert"
     },
     "repository": {
