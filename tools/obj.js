@@ -12,6 +12,7 @@ const cli = require("commander");
 const path = require("path");
 
 const { ReadFile, WriteFile } = require("./file.js");
+const { LogInfo } = require("./log.js");
 const { ArrayToStr, DateToStr } = require("./misc.js");
 
 const ROOT = path.join(__dirname, "..");
@@ -243,10 +244,10 @@ function HandleCommand (pathToObj, args)
                                  `d_${objFilename.toLowerCase()}.js`);
     const outputFilename = path.basename(outputPath);
     const tmp3Data = ObjToTmp3D(pathToObj, pathToMtl, outputFilename, zOffset);
-    if (verbose) console.log(tmp3Data);
+    LogInfo(tmp3Data, { verbose: verbose ?? false });
     WriteFile(outputPath, tmp3Data, { encoding: "utf8" });
     ReplaceModelPathInView(outputFilename);
-    console.log(`Mesh saved at ${path.relative(ROOT, outputPath)}.`);
+    LogInfo(`Mesh saved at ${path.relative(ROOT, outputPath)}.`);
 }
 
 function main ()

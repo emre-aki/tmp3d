@@ -11,6 +11,7 @@
 const cli = require("commander");
 const path = require("path");
 const ejs = require("ejs");
+
 const packageJson = require("../package.json");
 const {
     ReadFile,
@@ -21,6 +22,7 @@ const {
     ReadDir,
     RemovePath
 } = require("../tools/file");
+const { LogInfo } = require("./log");
 
 const ROOT = path.dirname(__dirname); // the project root
 const SRC = path.join(ROOT, "src"); // the source directory
@@ -30,6 +32,7 @@ const TEMPLATE_PATH = path.join(SRC, "view", "index.ejs");
 // path to the view template directory
 const TEMPLATE_DIR = path.dirname(TEMPLATE_PATH);
 const FAVICON_PATH = path.join(ASSETS, "favicon.ico"); // path to the favicon
+const LOG_OPTIONS = { context: "build" };
 
 function BuildView (debug)
 {
@@ -93,29 +96,30 @@ function CopyStatic (sourceDir, outputDir)
 
 function Build (outputPath, debug, verbose)
 {
+    LOG_OPTIONS.verbose = verbose;
     const outputDir = path.join(ROOT, outputPath);
     /* start with a clean slate and clear any previously built artefacts */
     if (IsDir(outputDir))
     {
-        if (verbose) console.log(`Cleaning ${outputDir}...`);
+        LogInfo(`Cleaning ${outputDir}...`, LOG_OPTIONS);
         RemovePath(outputDir, true);
     }
     Mkdir(outputDir, true); // create the output directory
-    if (verbose) console.log(`Created the output directory at ${outputDir}.`);
-    if (verbose) console.log("Building view...");
+    LogInfo(`Created the output directory at ${outputDir}.`, LOG_OPTIONS);
+    LogInfo("Building view...", LOG_OPTIONS);
     const pathToView = path.join(outputDir, "index.html");
     // compile the `index.html`
     WriteFile(pathToView, BuildView(debug), { encoding: "utf8" });
-    if (verbose) console.log(`View saved at ${pathToView}.`);
-    if (verbose) console.log(`Copying ${SRC}...`);
+    LogInfo(`View saved at ${pathToView}.`, LOG_OPTIONS);
+    LogInfo(`Copying ${SRC}...`, LOG_OPTIONS);
     /* copy the static files, i.e, scripts, assets, and anything that is static,
      * over to the output directory
      */
     CopyStatic(SRC, outputDir);
-    if (verbose) console.log(`Contents of ${SRC} copied to ${outputDir}.`);
-    if (verbose) console.log(`Copying ${ASSETS}...`);
+    LogInfo(`Contents of ${SRC} copied to ${outputDir}.`, LOG_OPTIONS);
+    LogInfo(`Copying ${ASSETS}...`, LOG_OPTIONS);
     CopyStatic(ASSETS, outputDir);
-    if (verbose) console.log(`Contents of ${ASSETS} copied to ${outputDir}.`);
+    LogInfo(`Contents of ${ASSETS} copied to ${outputDir}.`, LOG_OPTIONS);
 }
 
 function HandleCommand (args)
@@ -123,7 +127,7 @@ function HandleCommand (args)
     const { outputPath, debug, verbose } = args; // read optional arguments
     // build the project to be served as a static site from the provided
     // `outputPath`
-    Build(outputPath, debug, verbose);
+    Build(outputPath, debug, verbose ?? false);
 }
 
 function main ()

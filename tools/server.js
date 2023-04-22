@@ -12,15 +12,17 @@ const express = require("express");
 const path = require("path");
 
 const packageJson = require("../package.json");
+const { LogInfo } = require("./log");
 
 const ENV = process.env;
 const PORT = ENV.PORT || 3000;
 const ROOT = path.join(__dirname, "..", "src");
 const CLIENT_ENV = { debugMode: ENV.DEBUG, version: packageJson.version };
+const LOG_OPTIONS = { context: "server" };
 
 function serve ()
 {
-    console.log(`Listening on ${PORT}\n ROOT: ${ROOT}`);
+    LogInfo(`Serving ${ROOT} through port ${PORT}`, LOG_OPTIONS);
 }
 
 function main ()
