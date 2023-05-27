@@ -69,7 +69,7 @@
     let transformedTris3; // triangles after transformation
     let uvTable3; // respective uv-coordinates of each triangle in the pool
     let textureTable; // respective texture ids of each triangle in the pool
-    let cullBuffer, nCullBuffer; // buffer culled triangles
+    let culledBuffer, nCulledBuffer; // buffer triangles who survived culling
 
     /* TODO: find a more suitable spot for managing global transformations?
      * a separate tranform controller, maybe???
@@ -127,7 +127,7 @@
         nTris = nTriangles;
         tris3 = Array(nTriangles);
         transformedTris3 = Array(nTriangles);
-        cullBuffer = new Uint32Array(nTriangles); // TODO: maybe 16??
+        culledBuffer = new Uint32Array(nTriangles); // TODO: maybe 16??
         for (let i = 0; i < nTriangles; ++i)
         {
             const tri3Data = triangles[i];
@@ -200,11 +200,11 @@
                 // TODO: implement occlusion-culling
             )
             {
-                cullBuffer[nTrianglesAfterCulling] = i;
+                culledBuffer[nTrianglesAfterCulling] = i;
                 ++nTrianglesAfterCulling;
             }
         }
-        nCullBuffer = nTrianglesAfterCulling;
+        nCulledBuffer = nTrianglesAfterCulling;
     }
 
     /* TODO: make a generic function that takes in as arguments the `planeRef` &
@@ -316,7 +316,7 @@
         return nVerticesInside - 2; // triangulation of an n-gon
     }
 
-    function R_SortTwoTrianglesInCullBuffer (tri0, tri1)
+    function R_SortTwoTrianglesInCulledBuffer (tri0, tri1)
     {
         const tri0View = R_ToViewSpace(transformedTris3[tri0]);
         const tri1View = R_ToViewSpace(transformedTris3[tri1]);
@@ -329,20 +329,20 @@
      */
     function R_SortGeometry ()
     {
-        const sorted = cullBuffer
-            .slice(0, nCullBuffer)
-            .sort(R_SortTwoTrianglesInCullBuffer);
-        cullBuffer = new Uint32Array(
-            Array.from(sorted).concat(Array(nTris - nCullBuffer).fill(0))
+        const sorted = culledBuffer
+            .slice(0, nCulledBuffer)
+            .sort(R_SortTwoTrianglesInCulledBuffer);
+        culledBuffer = new Uint32Array(
+            Array.from(sorted).concat(Array(nTris - nCulledBuffer).fill(0))
         );
     }
 
     function R_RenderGeomeries_Wireframe (nTrisOnScreen)
     {
         let trisRendered = 0;
-        for (let i = 0; i < nCullBuffer; ++i)
+        for (let i = 0; i < nCulledBuffer; ++i)
         {
-            const triIndex = cullBuffer[i];
+            const triIndex = culledBuffer[i];
             const triWorld = transformedTris3[triIndex];
             const triView = R_ToViewSpace(triWorld);
             // keep a buffer of clipped triangles for drawing
@@ -369,15 +369,15 @@
             }
         }
         nTrisOnScreen[0] = trisRendered;
-        nTrisOnScreen[1] = nCullBuffer;
+        nTrisOnScreen[1] = nCulledBuffer;
     }
 
     function R_RenderGeomeries_Flat (nTrisOnScreen)
     {
         let trisRendered = 0;
-        for (let i = 0; i < nCullBuffer; ++i)
+        for (let i = 0; i < nCulledBuffer; ++i)
         {
-            const triIndex = cullBuffer[i];
+            const triIndex = culledBuffer[i];
             const triWorld = transformedTris3[triIndex];
             const triView = R_ToViewSpace(triWorld);
             // keep a buffer of clipped triangles for drawing
@@ -423,7 +423,7 @@
             }
         }
         nTrisOnScreen[0] = trisRendered;
-        nTrisOnScreen[1] = nCullBuffer;
+        nTrisOnScreen[1] = nCulledBuffer;
     }
 
     function R_RenderGeometries_Textured (nTrisOnScreen)
@@ -431,9 +431,9 @@
         let trisRendered = 0;
         // early return if the mesh does not have texture-mapping
         if (!uvTable3) return;
-        for (let i = 0; i < nCullBuffer; ++i)
+        for (let i = 0; i < nCulledBuffer; ++i)
         {
-            const triIndex = cullBuffer[i];
+            const triIndex = culledBuffer[i];
             const triWorld = transformedTris3[triIndex];
             const uvMap = uvTable3[triIndex];
             const triView = R_ToViewSpace(triWorld);
@@ -502,7 +502,7 @@
             }
         }
         nTrisOnScreen[0] = trisRendered;
-        nTrisOnScreen[1] = nCullBuffer;
+        nTrisOnScreen[1] = nCulledBuffer;
     }
 
     function R_RenderGeometries (nTrisOnScreen)
