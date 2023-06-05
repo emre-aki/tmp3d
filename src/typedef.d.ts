@@ -545,9 +545,8 @@ type R_ToggleGlobalRotation = () => void;
 type R_ChangeRenderMode = () => void;
 
 type R_LoadGeometry = (
-    vertices: pvec3_t[],
-    triangles: pvec3_t[],
-    nTriangles: number
+    vertices: pvec3_t[], nVertices: number,
+    triangles: pvec3_t[], nTriangles: number
 ) => void;
 
 type R_InitUVTable = (

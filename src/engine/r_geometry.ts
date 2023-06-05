@@ -68,6 +68,11 @@
     let nTris: number; // total number of triangles in the model
     let tris3: tri3_t[]; // a pool of raw triangle data
     let transformedTris3: tri3_t[]; // triangles after transformation
+    // normal vectors associated with vertices of each triangle in the pool,
+    // used in smooth/diffuse shading
+    let triVertexNormals3: tri3_t[];
+    // vertex normals after transformation
+    let transformedTriVertexNormals3: tri3_t[];
     // respective uv-coordinates of each triangle in the pool
     let uvTable3: tri3_t[];
     // respective texture ids of each triangle in the pool
@@ -127,24 +132,55 @@
 
     function
     R_LoadGeometry
-    ( vertices: pvec3_t[],
-      triangles: pvec3_t[],
-      nTriangles: number ): void
+    ( vertices: pvec3_t[], nVertices: number,
+      triangles: pvec3_t[], nTriangles: number ): void
     {
         projectionOrigin = R_GetProjectionOrigin();
         nTris = nTriangles;
         tris3 = Array(nTriangles);
         transformedTris3 = Array(nTriangles);
+        triVertexNormals3 = Array(nTriangles);
+        transformedTriVertexNormals3 = Array(nTriangles);
         culledBuffer = new Uint32Array(nTriangles); // TODO: maybe 16??
+        // temporary buffer to compute vertex normals
+        const vertexNormals3: vec3_t[] = Array(nVertices);
+        /* go over each triangle to collect their vertices and vertex normals */
         for (let i = 0; i < nTriangles; ++i)
         {
             const tri3Data = triangles[i];
-            const triA3 = vertices[tri3Data[0]];
-            const triB3 = vertices[tri3Data[1]];
-            const triC3 = vertices[tri3Data[2]];
-            tris3[i] = Tri3(Vec3(triA3[0], triA3[1], triA3[2]),
-                            Vec3(triB3[0], triB3[1], triB3[2]),
-                            Vec3(triC3[0], triC3[1], triC3[2]));
+            const idxA = tri3Data[0], idxB = tri3Data[1], idxC = tri3Data[2];
+            const triA3 = vertices[idxA];
+            const triB3 = vertices[idxB];
+            const triC3 = vertices[idxC];
+            const tri = Tri3(Vec3(triA3[0], triA3[1], triA3[2]),
+                             Vec3(triB3[0], triB3[1], triB3[2]),
+                             Vec3(triC3[0], triC3[1], triC3[2]));
+            tris3[i] = tri;
+            // the surface normal of the triangle
+            const triNormal3 = M_TriNormal3(tri);
+            /* adding the surface normal to each respective vertex that makes up
+             * the triangle
+             */
+            if (vertexNormals3[idxA])
+                vertexNormals3[idxA] = M_Add3(vertexNormals3[idxA], triNormal3);
+            else
+                vertexNormals3[idxA] = triNormal3;
+            if (vertexNormals3[idxB])
+                vertexNormals3[idxB] = M_Add3(vertexNormals3[idxB], triNormal3);
+            else
+                vertexNormals3[idxB] = triNormal3;
+            if (vertexNormals3[idxC])
+                vertexNormals3[idxC] = M_Add3(vertexNormals3[idxC], triNormal3);
+            else
+                vertexNormals3[idxC] = triNormal3;
+        }
+        /* group individual vertex normals into triangles */
+        for (let i = 0; i < nTriangles; ++i)
+        {
+            const tri3Data = triangles[i];
+            triVertexNormals3[i] = Tri3(vertexNormals3[tri3Data[0]],
+                                        vertexNormals3[tri3Data[1]],
+                                        vertexNormals3[tri3Data[2]]);
         }
     }
 
@@ -178,14 +214,25 @@
         {
             globalRotation += 0.1;
             for (let i = 0; i < nTris; ++i)
+            {
                 transformedTris3[i] = M_RotateTriAroundAxis3(tris3[i],
                                                              globalRotationAxis,
                                                              globalRotation);
+                transformedTriVertexNormals3[i] = M_RotateTriAroundAxis3(
+                    triVertexNormals3[i],
+                    globalRotationAxis,
+                    globalRotation
+                );
+            }
         }
         else
         {
             globalRotation = 0;
-            for (let i = 0; i < nTris; ++i) transformedTris3[i] = tris3[i];
+            for (let i = 0; i < nTris; ++i)
+            {
+                transformedTris3[i] = tris3[i];
+                transformedTriVertexNormals3[i] = triVertexNormals3[i];
+            }
         }
     }
 
@@ -271,21 +318,27 @@
     function
     R_ClipGeometryAgainstNearPlane_Textured
     ( triView: tri3_t, clippedTriQueue: [tri3_t, tri3_t],
+      triVertexNormals: tri3_t, clippedTriVertexNormalQueue: [tri3_t, tri3_t],
       uvMap: tri3_t, clippedUvMapQueue: [tri3_t, tri3_t] ): number
     {
         let nVerticesInside = 0;
-        const inside: vec3_t[] = Array(4), uvInside: vec3_t[] = Array(4);
+        const inside: vec3_t[] = Array(4);
+        const nInside: vec3_t[] = Array(4);
+        const uvInside: vec3_t[] = Array(4);
         /* test each vertex in the original triangle against the near-clipping
          * plane to see whether they fall inside of the plane or not
          */
         for (let i = 0; i < 3; ++i)
         {
-            const v = triView[i], vNext = triView[i === 2 ? 0 : i + 1];
-            const uv = uvMap[i], uvNext = uvMap[i === 2 ? 0 : i + 1];
+            const iNext = i === 2 ? 0 : i + 1;
+            const v = triView[i], vNext = triView[iNext];
+            const n = triVertexNormals[i], nNext = triVertexNormals[iNext];
+            const uv = uvMap[i], uvNext = uvMap[iNext];
             const vInside = v[2] >= Z_NEAR, vNextInside = vNext[2] >= Z_NEAR;
             if (vInside)
             {
                 inside[nVerticesInside] = v;
+                nInside[nVerticesInside] = n;
                 uvInside[nVerticesInside++] = uv;
             }
             /* if the edge of the triangle formed by vertices `v` & `vNext`
@@ -298,8 +351,10 @@
                 const t = M_TimeBeforePlaneCollision3(v, vNext,
                                                       projectionOrigin, FWD)!;
                 const intersect = M_Add3(M_Scale3(M_Sub3(vNext, v), t), v);
+                const intersectN = M_Add3(M_Scale3(M_Sub3(nNext, n), t), n);
                 const intersectUV = M_Add3(M_Scale3(M_Sub3(uvNext, uv), t), uv);
                 inside[nVerticesInside] = intersect;
+                nInside[nVerticesInside] = intersectN;
                 uvInside[nVerticesInside++] = intersectUV;
             }
         }
@@ -310,6 +365,9 @@
          * triangle, add it to the clip-buffer...
          */
         clippedTriQueue[0] = Tri3(inside[0], inside[1], inside[2]);
+        /* ...the same goes for the vertex normals */
+        clippedTriVertexNormalQueue[0] =
+            Tri3(nInside[0], nInside[1], nInside[2]);
         // ...the same goes for the vertices in the texture-space
         clippedUvMapQueue[0] = Tri3(uvInside[0], uvInside[1], uvInside[2]);
         /* the vertices that fall inside the near-clipping plane form a quad,
@@ -319,6 +377,9 @@
         if (nVerticesInside === 4)
         {
             clippedTriQueue[1] = Tri3(inside[2], inside[3], inside[0]);
+            /* ...the same goes for the vertex normals */
+            clippedTriVertexNormalQueue[1] =
+                Tri3(nInside[2], nInside[3], nInside[0]);
             // ...the same goes for the vertices in the texture-space
             clippedUvMapQueue[1] = Tri3(uvInside[2], uvInside[3], uvInside[0]);
         }
@@ -395,7 +456,7 @@
             const triIndex = culledBuffer[i];
             const triWorld = transformedTris3[triIndex];
             const triView = R_ToViewSpace(triWorld);
-            // keep a buffer of clipped triangles for drawing
+            // the original triangle after having clipped against the near-plane
             const clippedTriQueue = Array(2) as [tri3_t, tri3_t];
             const nClipResult = R_ClipGeometryAgainstNearPlane(triView,
                                                                clippedTriQueue);
@@ -454,12 +515,17 @@
             const triWorld = transformedTris3[triIndex];
             const uvMap = uvTable3[triIndex];
             const triView = R_ToViewSpace(triWorld);
-            /* keep buffers of clipped triangles for drawing */
+            // the original triangle after having clipped against the near-plane
             const clippedTriQueue = Array(2) as [tri3_t, tri3_t];
+            // the vertex normals after having clipped against the near-plane
+            const clippedTriVertexNormalQueue = Array(2) as [tri3_t, tri3_t];
+            // the uv-map after having clipped against the near-plane
             const clippedUvMapQueue = Array(2) as [tri3_t, tri3_t];
             const nClipResult = R_ClipGeometryAgainstNearPlane_Textured(
                 triView,
                 clippedTriQueue,
+                transformedTriVertexNormals3[triIndex],
+                clippedTriVertexNormalQueue,
                 uvMap,
                 clippedUvMapQueue
             );
