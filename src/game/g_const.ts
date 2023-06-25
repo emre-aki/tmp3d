@@ -24,6 +24,8 @@
     const FOV_Y = Math.PI / 3, TAN_FOV_Y_2 = Math.tan(FOV_Y * 0.5);
     const FOV_X = 2 * Math.atan(ASPECT * TAN_FOV_Y_2);
 
+    const MAX_MOV_TILT = Math.PI / 90;
+
     const NEAR_H = 2, NEAR_W = ASPECT * NEAR_H;
     const Z_NEAR = NEAR_H / (2 * TAN_FOV_Y_2), Z_FAR = 500 * Z_NEAR;
     const FAR_W = Z_FAR / Z_NEAR * NEAR_W, FAR_W_2 = FAR_W * 0.5;
@@ -40,6 +42,7 @@
             FPS: FPS,
             FOV_X: FOV_X,
             FOV_Y: FOV_Y,
+            MAX_MOV_TILT: MAX_MOV_TILT,
             SCREEN_W: SCREEN_W,
             SCREEN_H: SCREEN_H,
             SCREEN_W_2: SCREEN_W_2,

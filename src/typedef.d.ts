@@ -592,6 +592,7 @@ type __Mod__G_Const = {
     FPS: number,
     FOV_X: number,
     FOV_Y: number,
+    MAX_MOV_TILT: number,
     SCREEN_W: number,
     SCREEN_H: number,
     SCREEN_W_2: number,

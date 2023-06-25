@@ -25,6 +25,7 @@
 
     const G_Const = __import__G_Const();
     const FOV_X = G_Const.FOV_X, FOV_Y = G_Const.FOV_Y;
+    const MAX_MOV_TILT = G_Const.MAX_MOV_TILT;
     const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
     const SCREEN_W_2 = G_Const.SCREEN_W_2, SCREEN_H_2 = G_Const.SCREEN_H_2;
 
@@ -66,7 +67,7 @@
 
     let veloc: number; // camera velocity
     // the elementary rotations for the camera
-    let camPitch: number, camYaw: number;
+    let camPitch: number, camYaw: number, camRoll: number;
     let camPos: vec3_t; // the position of the camera, i.e., the eye
     // the orthonormal basis vectors defining the camera
     let camRight: vec3_t, camDown: vec3_t, camFwd: vec3_t;
@@ -124,7 +125,7 @@
         return Mat4(vecPersX4, vecPersY4, vecPersZ4, vecPersW4);
     }
 
-    function R_OrientCamera (yaw: number, pitch: number): void
+    function R_OrientCamera (yaw: number, pitch: number, roll: number): void
     {
         // reset the camera orientation
         camFwd = FWD; camRight = RIGHT; camDown = DOWN;
@@ -140,6 +141,12 @@
             camFwd = M_RotateAroundAxis3(camFwd, camRight, pitch);
             camDown = M_RotateAroundAxis3(camDown, camRight, pitch);
         }
+        /* rotate about +z-axis */
+        if (roll)
+        {
+            camRight = M_RotateAroundAxis3(camRight, camFwd, roll);
+            camDown = M_RotateAroundAxis3(camDown, camFwd, roll);
+        }
     }
 
     //
@@ -149,6 +156,7 @@
     function R_UpdateCamera (mult: number): void
     {
         const rotationVelocity = 0.075 * mult;
+        const rollVelocity = 0.25 * rotationVelocity;
         /* listen for key strokes to update the orientation */
         if (I_GetKeyState(I_Keys.ARW_RIGHT)) camYaw += rotationVelocity;
         if (I_GetKeyState(I_Keys.ARW_LEFT)) camYaw -= rotationVelocity;
@@ -165,8 +173,10 @@
         // clamp camera's pitch to be a value in the range [-PI, +PI] to avoid
         // multiple headaches
         camPitch = M_Clamp(camPitch, -PI_2, PI_2);
-        R_OrientCamera(camYaw, camPitch);
-        /* listen for key strokes to calculate the displacement vector */
+        R_OrientCamera(camYaw, camPitch, camRoll);
+        /* listen for key strokes to calculate the displacement vector and the
+         * camera's sideways tilt (roll)
+         */
         const yawCos = Math.cos(camYaw), yawSin = Math.sin(camYaw);
         let displacement = Vec3(0, 0, 0);
         if (I_GetKeyState(I_Keys.W))
@@ -174,9 +184,26 @@
         if (I_GetKeyState(I_Keys.S))
             displacement = M_Sub3(displacement, Vec3(yawSin, 0, yawCos));
         if (I_GetKeyState(I_Keys.A))
-            displacement = M_Sub3(displacement, camRight);
+        {
+            displacement = M_Sub3(displacement, Vec3(yawCos, 0, -yawSin));
+            camRoll -= rollVelocity;
+        }
         if (I_GetKeyState(I_Keys.D))
-            displacement = M_Add3(displacement, camRight);
+        {
+            displacement = M_Add3(displacement, Vec3(yawCos, 0, -yawSin));
+            camRoll += rollVelocity;
+        }
+        // clamp camera's roll to refrain from turning the camera into a
+        // washing machine :)
+        camRoll = M_Clamp(camRoll, -MAX_MOV_TILT, MAX_MOV_TILT);
+        // reset camera's roll if not moving sideways
+        if (camRoll && !I_GetKeyState(I_Keys.A) && !I_GetKeyState(I_Keys.D))
+        {
+            const oldCamRollDir = Math.sign(camRoll);
+            camRoll -= oldCamRollDir * rollVelocity;
+            const newCamRollDir = Math.sign(camRoll);
+            camRoll *= 0.5 * oldCamRollDir * (newCamRollDir + oldCamRollDir);
+        }
         /* listen for key strokes for the ad-hoc update of camera position along
          * the y-axis
          */
@@ -241,7 +268,7 @@
     {
         projectionOrigin = Vec3(0, 0, zNear);
         veloc = velocity;
-        camPitch = 0; camYaw = Math.PI;
+        camPitch = 0; camYaw = Math.PI; camRoll = 0;
         camPos = Vec3(eye[0], eye[1], eye[2]);
         camRight = RIGHT; camDown = DOWN; camFwd = FWD;
         matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camDown);
