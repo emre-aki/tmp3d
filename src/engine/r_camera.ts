@@ -126,15 +126,28 @@
 
     function R_OrientCamera (yaw: number, pitch: number): void
     {
-        camFwd = M_RotateAroundAxis3(FWD, DOWN, yaw);
-        camRight = M_RotateAroundAxis3(RIGHT, DOWN, yaw);
-        camFwd = M_RotateAroundAxis3(camFwd, camRight, pitch);
-        camDown = M_RotateAroundAxis3(DOWN, camRight, pitch);
+        // reset the camera orientation
+        camFwd = FWD; camRight = RIGHT; camDown = DOWN;
+        /* rotate about +y-axis */
+        if (yaw)
+        {
+            camFwd = M_RotateAroundAxis3(camFwd, camDown, yaw);
+            camRight = M_RotateAroundAxis3(camRight, camDown, yaw);
+        }
+        /* rotate about +x-axis */
+        if (pitch)
+        {
+            camFwd = M_RotateAroundAxis3(camFwd, camRight, pitch);
+            camDown = M_RotateAroundAxis3(camDown, camRight, pitch);
+        }
     }
 
+    //
+    // R_UpdateCamera
+    // Update the orientation and the position of the camera in world-space
+    //
     function R_UpdateCamera (mult: number): void
     {
-        /* update the orientation of the camera in world-space */
         const rotationVelocity = 0.075 * mult;
         /* listen for key strokes to update the orientation */
         if (I_GetKeyState(I_Keys.ARW_RIGHT)) camYaw += rotationVelocity;
@@ -153,15 +166,13 @@
         // multiple headaches
         camPitch = M_Clamp(camPitch, -PI_2, PI_2);
         R_OrientCamera(camYaw, camPitch);
-        /* update the position of the camera in world-space */
         /* listen for key strokes to calculate the displacement vector */
+        const yawCos = Math.cos(camYaw), yawSin = Math.sin(camYaw);
         let displacement = Vec3(0, 0, 0);
         if (I_GetKeyState(I_Keys.W))
-            displacement = M_Add3(displacement,
-                                  Vec3(Math.sin(camYaw), 0, Math.cos(camYaw)));
+            displacement = M_Add3(displacement, Vec3(yawSin, 0, yawCos));
         if (I_GetKeyState(I_Keys.S))
-            displacement = M_Sub3(displacement,
-                                  Vec3(Math.sin(camYaw), 0, Math.cos(camYaw)));
+            displacement = M_Sub3(displacement, Vec3(yawSin, 0, yawCos));
         if (I_GetKeyState(I_Keys.A))
             displacement = M_Sub3(displacement, camRight);
         if (I_GetKeyState(I_Keys.D))
