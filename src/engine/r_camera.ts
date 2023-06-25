@@ -61,7 +61,7 @@
 
     const ORIGIN = Vec3(0, 0, 0);
     // the axes
-    const RIGHT = Vec3(1, 0 ,0), UP = Vec3(0, 1, 0), FWD = Vec3(0, 0, 1);
+    const RIGHT = Vec3(1, 0 ,0), DOWN = Vec3(0, 1, 0), FWD = Vec3(0, 0, 1);
     const BWD = Vec3(0, 0, -1);
 
     let veloc: number; // camera velocity
@@ -69,7 +69,7 @@
     let camPitch: number, camYaw: number;
     let camPos: vec3_t; // the position of the camera, i.e., the eye
     // the orthonormal basis vectors defining the camera
-    let camRight: vec3_t, camUp: vec3_t, camFwd: vec3_t;
+    let camRight: vec3_t, camDown: vec3_t, camFwd: vec3_t;
     // the viewing frustum used for perspective projection
     let matPerspective: mat4_t;
     let matLookAt: mat4_t; // the look-at matrix used for view transformation
@@ -126,10 +126,10 @@
 
     function R_OrientCamera (yaw: number, pitch: number): void
     {
-        camFwd = M_RotateAroundAxis3(FWD, UP, yaw);
-        camRight = M_RotateAroundAxis3(RIGHT, UP, yaw);
+        camFwd = M_RotateAroundAxis3(FWD, DOWN, yaw);
+        camRight = M_RotateAroundAxis3(RIGHT, DOWN, yaw);
         camFwd = M_RotateAroundAxis3(camFwd, camRight, pitch);
-        camUp = M_RotateAroundAxis3(UP, camRight, pitch);
+        camDown = M_RotateAroundAxis3(DOWN, camRight, pitch);
     }
 
     function R_UpdateCamera (mult: number): void
@@ -189,7 +189,7 @@
         // update the camera position by the movement vector
         camPos = M_Add3(camPos, step);
         // update the look-at matrix used for view transformation
-        matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camUp);
+        matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camDown);
     }
 
     function R_ToViewSpace (triangle: tri3_t): tri3_t
@@ -232,8 +232,8 @@
         veloc = velocity;
         camPitch = 0; camYaw = Math.PI;
         camPos = Vec3(eye[0], eye[1], eye[2]);
-        camRight = RIGHT; camUp = UP; camFwd = FWD;
-        matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camUp);
+        camRight = RIGHT; camDown = DOWN; camFwd = FWD;
+        matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camDown);
         matPerspective = R_Perspective(fovy, aspect, zNear, zFar);
     }
 
@@ -267,7 +267,7 @@
                                               M_Vec4FromVec3(ORIGIN, 1));
         const originClipSpace3 = M_Vec3FromVec4(M_Transform4(matPerspective,
                                                              originViewSpace4));
-        const axesViewSpace3 = R_ToViewSpace(Tri3(RIGHT, UP, FWD));
+        const axesViewSpace3 = R_ToViewSpace(Tri3(RIGHT, DOWN, FWD));
         const axesClipSpace3 = R_ToClipSpace(axesViewSpace3);
         const rightClipSpace3 = axesClipSpace3[0];
         const upClipSpace3 = axesClipSpace3[1];
