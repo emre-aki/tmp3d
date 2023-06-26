@@ -26,13 +26,11 @@
     ],
     "author": "Emre Akı",
     "license": "GPL-3.0-or-later",
-    "dependencies": {
-        "ejs": "^3.0.2"
-    },
     "devDependencies": {
-        "commander": "^9.3.0",
-        "express": "^4.17.3",
+        "commander": "^11.0.0",
+        "ejs": "^3.1.9",
+        "express": "^4.18.2",
         "nodemon": "^2.0.22",
-        "typescript": "^5.0.4"
+        "typescript": "^5.1.3"
     }
 }
