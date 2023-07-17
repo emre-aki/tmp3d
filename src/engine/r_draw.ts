@@ -374,6 +374,11 @@
        lightX, lightY, lightZ,
        alpha }: pso_t): void
     {
+        let lightLevel = 1;
+        if (lightX !== undefined &&
+            lightY !== undefined &&
+            lightZ !== undefined)
+            lightLevel = lightX * normalX + lightY * normalY + lightZ * normalZ;
         // raster clipping: clip the scanline if it goes out-of-bounds of screen
         // coordinates
         const clipLeft = Math.max(-dx0, 0);
@@ -419,12 +424,6 @@
             }
             zBuffer[bufferIndex] = w; // update the z-buffer
             const w_ = 1 / w;
-            let lightLevel = 1;
-            if (lightX !== undefined &&
-                lightY !== undefined &&
-                lightZ !== undefined)
-                lightLevel =
-                    lightX * normalX + lightY * normalY + lightZ * normalZ;
             /* fill a single pixel in screen-space with the color defined by
              * parameters `r`, `g`, `b`, and `alpha`.
              */
@@ -718,6 +717,9 @@
        lightX, lightY, lightZ,
        alpha }: pso_t): void
     {
+        const shouldShade = lightX !== undefined &&
+                            lightY !== undefined &&
+                            lightZ !== undefined;
         tex = tex!;
         const texWidth = tex.width, texHeight = tex.height, bitmap = tex.bitmap;
         // raster clipping: clip the scanline if it goes out-of-bounds of screen
@@ -788,9 +790,7 @@
             const nXUnit = NX * magN_, nYUnit = NY * magN_, nZUnit = NZ * magN_;
             const WX = wx * w_, WY = wy * w_, WZ = wz * w_;
             let lightLevel = 1;
-            if (lightX !== undefined &&
-                lightY !== undefined &&
-                lightZ !== undefined)
+            if (shouldShade)
             {
                 const lX = lightX - WX, lY = lightY - WY, lZ = lightZ - WZ;
                 const magL_ = 1 / Math.sqrt(lX * lX + lY * lY + lZ * lZ);
