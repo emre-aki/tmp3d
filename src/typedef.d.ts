@@ -467,6 +467,12 @@ type R_DrawLine_RayCast = (
     stroke: number
 ) => void;
 
+type R_DrawCircle = (
+    x: number, y: number,
+    rad: number,
+    r: number, g: number, b: number, a: number
+) => void;
+
 type R_DrawTriangle_Wireframe = (
     ax: number, ay: number,
     bx: number, by: number,
@@ -525,6 +531,7 @@ type __Mod__R_Draw = {
     R_DrawLine: R_DrawLine,
     R_DrawLine_DDA: R_DrawLine_DDA,
     R_DrawLine_RayCast: R_DrawLine_RayCast,
+    R_DrawCircle: R_DrawCircle,
     R_DrawTriangle_Wireframe: R_DrawTriangle_Wireframe,
     R_FillTriangle_Flat: R_FillTriangle_Flat,
     /* TODO: uncomment these once they are implemented */

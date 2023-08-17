@@ -347,6 +347,54 @@
         }
     }
 
+    //
+    // R_DrawCircle
+    // Employs Bresenham's algorithm for drawing circles
+    //
+    function
+    R_DrawCircle
+    ( x: number, y: number,
+      radius: number,
+      r: number, g: number, b: number, a: number ): void
+    {
+        const ox = Math.floor(x), oy = Math.floor(y); // center of the circle
+        const diam = radius + radius;
+        let px = 4 - diam - diam, py = 2, p = 1 - diam; // decision parameters
+        let cx = radius, cy = 0; // where we're currently sitting on the circle
+        /* iterate through a single octant of the circle */
+        while (cx >= cy)
+        {
+            let rx0, rx1, ry; // endpoints of the current scanline
+            /* fill in a scanline that scretches over the 1st and 4th octants */
+            rx0 = ox - cx; rx1 = ox + cx; ry = oy + cy;
+            for (let rxi = rx0; rxi <= rx1; ++rxi)
+                R_FillRect(rxi, ry, 1, 1, r, g, b, a);
+            /* fill in a scanline that scretches over the 2nd and 3rd octants */
+            rx0 = ox - cy; rx1 = ox + cy; ry = oy + cx;
+            for (let rxi = rx0; rxi <= rx1; ++rxi)
+                R_FillRect(rxi, ry, 1, 1, r, g, b, a);
+            /* fill in a scanline that scretches over the 5th and 8th octants */
+            rx0 = ox - cx; rx1 = ox + cx; ry = oy - cy;
+            for (let rxi = rx0; rxi <= rx1; ++rxi)
+                R_FillRect(rxi, ry, 1, 1, r, g, b, a);
+            /* fill in a scanline that scretches over the 6th and 7th octants */
+            rx0 = ox - cy; rx1 = ox + cy; ry = oy - cx;
+            for (let rxi = rx0; rxi <= rx1; ++rxi)
+                R_FillRect(rxi, ry, 1, 1, r, g, b, a);
+            const decision = ~(p >> 31); // should we decrement `cx` by 1?
+            /* first, update the individual deltas that contribute to the main
+             * decision parameter...
+             */
+            px += 4 & decision;
+            py += 4;
+            /* ...then, advance the point on the circle... */
+            cx += decision;
+            ++cy;
+            // ...and finally, update the main decision parameter
+            p += (px & decision) + py;
+        }
+    }
+
     function
     R_DrawTriangle_Wireframe
     ( ax: number, ay: number,
@@ -1270,6 +1318,7 @@
             R_DrawLine,
             R_DrawLine_DDA,
             R_DrawLine_RayCast,
+            R_DrawCircle,
             R_DrawTriangle_Wireframe,
             R_FillTriangle_Flat,
             /* TODO: uncomment these once implemented */

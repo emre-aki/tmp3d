@@ -37,7 +37,7 @@
 - [x] Rectangles
 - [x] Lines
 - [x] Triangles
-- [ ] Circles
+- [X] Circles
 
 ## Project Organization
 

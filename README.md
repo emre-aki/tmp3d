@@ -52,8 +52,8 @@ you may take it as it is and expect many more features to follow very soon.
 
 Tmp3D currently supports
 
-  - efficient drawing of such graphics primitives as lines, rectangles and
-    triangles
+  - efficient drawing of such graphics primitives as lines, rectangles, circles
+    and triangles
   - a first-person camera with _6_ degrees-of-freedom: translating along _x_,
     _y_ & _z_ axes, and _yaw_, _pitch_ & _roll_
   - back-face culling
