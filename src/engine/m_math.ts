@@ -31,6 +31,11 @@
         return Math.round(number * orderOfMag) / orderOfMag;
     }
 
+    function M_FastSign (number: number): number
+    {
+        return (number >> 31) - (-number >> 31);
+    }
+
     window.__import__M_Math = function ()
     {
         return {
@@ -38,6 +43,7 @@
             M_RadToDeg: M_RadToDeg,
             M_Clamp: M_Clamp,
             M_ToFixedDigits: M_ToFixedDigits,
+            M_FastSign: M_FastSign,
         };
     };
 })();

@@ -312,12 +312,14 @@ declare function __import__M_Mat4 (): __Mod__M_Mat4;
 type M_RadToDeg = (radian: number) => number;
 type M_Clamp = (number: number, lower: number, upper: number) => number;
 type M_ToFixedDigits = (number: number, nDigits: number) => number;
+type M_FastSign = (number: number) => number;
 
 type __Mod__M_Math = {
     PI_2: number,
     M_RadToDeg: M_RadToDeg,
     M_Clamp: M_Clamp,
     M_ToFixedDigits: M_ToFixedDigits,
+    M_FastSign: M_FastSign,
 };
 
 declare function __import__M_Math (): __Mod__M_Math;
@@ -411,14 +413,14 @@ type R_FillRect = (
     r: number, g: number, b: number, a: number
 ) => void;
 
-type R_DrawLine_DDA = (
+type R_DrawLine = (
     sx: number, sy: number,
     dx: number, dy: number,
     r: number, g: number, b: number, a: number,
     stroke: number
 ) => void;
 
-type R_DrawLine_Bresenham = (
+type R_DrawLine_DDA = (
     sx: number, sy: number,
     dx: number, dy: number,
     r: number, g: number, b: number, a: number,
@@ -505,8 +507,8 @@ type __Mod__R_Draw = {
     R_InitZBuffer: R_InitZBuffer,
     R_ResetZBuffer: R_ResetZBuffer,
     R_FillRect: R_FillRect,
+    R_DrawLine: R_DrawLine,
     R_DrawLine_DDA: R_DrawLine_DDA,
-    R_DrawLine_Bresenham: R_DrawLine_Bresenham,
     R_DrawLine_RayCast: R_DrawLine_RayCast,
     R_DrawTriangle_Wireframe: R_DrawTriangle_Wireframe,
     R_FillTriangle_Flat: R_FillTriangle_Flat,

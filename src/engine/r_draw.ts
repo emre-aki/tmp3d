@@ -19,6 +19,7 @@
 
     const M_Math = __import__M_Math();
     const M_Clamp = M_Math.M_Clamp;
+    const M_FastSign = M_Math.M_FastSign;
 
     const R_Screen = __import__R_Screen();
     const R_Ctx = R_Screen.R_Ctx;
@@ -95,6 +96,89 @@
     */
 
     function
+    R_Bresenham_HorizontalSweep
+    ( sx: number, sy: number,
+      dx: number, dy: number,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void
+    {
+        const stroke_ = stroke || 1;
+        const deltaX = dx - sx, deltaY = dy - sy;
+        const dirY = M_FastSign(deltaY), strokeY = dirY * stroke_;
+        // need to fix the signs in the formulae
+        const deltaYAbs = deltaY * dirY;
+        // the increment for Pk+1, if Pk < 0
+        const pIncrementForSameRow = deltaYAbs + deltaYAbs;
+        // the increment for Pk+1, if Pk >= 0
+        const pIncrementForNextRow = 0 - deltaX - deltaX;
+        // the initial value for the decision parameter, P0
+        const p0 = pIncrementForSameRow + pIncrementForNextRow + deltaX;
+        for (let x = sx, y = sy, pK = p0; x < dx; x += stroke_)
+        {
+            R_FillRect(x, y, stroke_, stroke_, r, g, b, a);
+            const decision = ~(pK >> 31);
+            pK += pIncrementForSameRow;
+            pK += pIncrementForNextRow & decision;
+            y += strokeY & decision;
+        }
+    }
+
+    function
+    R_Bresenham_VerticalSweep
+    ( sx: number, sy: number,
+      dx: number, dy: number,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void
+    {
+        const stroke_ = stroke || 1;
+        const deltaX = dx - sx, deltaY = dy - sy;
+        const dirX = M_FastSign(deltaX), strokeX = dirX * stroke_;
+        // need to fix the signs in the formulae
+        const deltaXAbs = deltaX * dirX;
+        // the increment for Pk+1, if Pk < 0
+        const pIncrementForSameCol = deltaXAbs + deltaXAbs;
+        // the increment for Pk+1, if Pk >= 0
+        const pIncrementForNextCol = 0 - deltaY - deltaY;
+        // the initial value for the decision parameter, P0
+        const p0 = pIncrementForSameCol + pIncrementForNextCol + deltaY;
+        for (let x = sx, y = sy, pK = p0; y < dy; y += stroke_)
+        {
+            R_FillRect(x, y, stroke_, stroke_, r, g, b, a);
+            const decision = ~(pK >> 31);
+            pK += pIncrementForSameCol;
+            pK += pIncrementForNextCol & decision;
+            x += strokeX & decision;
+        }
+    }
+
+    //
+    // R_DrawLine
+    // Employs Bresenham's algorithm for drawing lines
+    //
+    function
+    R_DrawLine
+    ( sx: number, sy: number,
+      dx: number, dy: number,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void
+    {
+        const sX = Math.floor(sx), sY = Math.floor(sy);
+        const dX = Math.floor(dx), dY = Math.floor(dy);
+        if (sX === dX && sY === dY) return; // early return if nothing to draw
+        const isVerticalSweep = Math.abs(dX - sX) < Math.abs(dY - sY);
+        /* the x-direction of the line should always be >= 0 */
+        if (isVerticalSweep && dY > sY)
+            R_Bresenham_VerticalSweep(sX, sY, dX, dY, r, g, b, a, stroke);
+        else if (isVerticalSweep)
+            R_Bresenham_VerticalSweep(dX, dY, sX, sY, r, g, b, a, stroke);
+        else if (dX > sX)
+            R_Bresenham_HorizontalSweep(sX, sY, dX, dY, r, g, b, a, stroke);
+        else
+            R_Bresenham_HorizontalSweep(dX, dY, sX, sY, r, g, b, a, stroke);
+    }
+
+
+    function
     R_DrawLine_DDA
     ( sx: number, sy: number,
       dx: number, dy: number,
@@ -133,90 +217,6 @@
                 x += stepInXVertical;
             }
         }
-    }
-
-    function
-    R_Bresenham_HorizontalSweep
-    ( sx: number, sy: number,
-      dx: number, dy: number,
-      r: number, g: number, b: number, a: number,
-      stroke: number ): void
-    {
-        const stroke_ = stroke || 1;
-        const deltaX = dx - sx, deltaY = dy - sy;
-        const dirX = Math.sign(deltaX), dirY = Math.sign(deltaY);
-        const strokeX = dirX * stroke_, strokeY = dirY * stroke_;
-        // need to fix the signs in the formulae
-        const deltaYAbs = deltaY * dirY;
-        // the increment for Pk+1, if Pk < 0
-        const pIncrementForSameRow = deltaYAbs + deltaYAbs;
-        // the increment for Pk+1, if Pk >= 0
-        const pIncrementForNextRow = pIncrementForSameRow - deltaX - deltaX;
-        // the initial value for the decision parameter, P0
-        const p0 = pIncrementForNextRow + deltaX;
-        for (let x = sx, y = sy, pK = p0; x < dx; x += strokeX)
-        {
-            R_FillRect(x, y, stroke_, stroke_, r, g, b, a);
-            if (pK < 0) pK += pIncrementForSameRow;
-            else
-            {
-                pK += pIncrementForNextRow;
-                y += strokeY;
-            }
-        }
-    }
-
-    function
-    R_Bresenham_VerticalSweep
-    ( sx: number, sy: number,
-      dx: number, dy: number,
-      r: number, g: number, b: number, a: number,
-      stroke: number ): void
-    {
-        const stroke_ = stroke || 1;
-        const deltaX = dx - sx, deltaY = dy - sy;
-        const dirX = Math.sign(deltaX), dirY = Math.sign(deltaY);
-        const strokeX = dirX * stroke_, strokeY = dirY * stroke_;
-        // need to fix the signs in the formulae
-        const deltaXAbs = deltaX * dirX;
-        // the increment for Pk+1, if Pk < 0
-        const pIncrementForSameCol = deltaXAbs + deltaXAbs;
-        // the increment for Pk+1, if Pk >= 0
-        const pIncrementForNextCol = pIncrementForSameCol - deltaY - deltaY;
-        // the initial value for the decision parameter, P0
-        const p0 = pIncrementForNextCol + deltaY;
-        for (let x = sx, y = sy, pK = p0; y < dy; y += strokeY)
-        {
-            R_FillRect(x, y, stroke_, stroke_, r, g, b, a);
-            if (pK < 0) pK += pIncrementForSameCol;
-            else
-            {
-                pK += pIncrementForNextCol;
-                x += strokeX;
-            }
-        }
-    }
-
-    function
-    R_DrawLine_Bresenham
-    ( sx: number, sy: number,
-      dx: number, dy: number,
-      r: number, g: number, b: number, a: number,
-      stroke: number ): void
-    {
-        const sX = Math.floor(sx), sY = Math.floor(sy);
-        const dX = Math.floor(dx), dY = Math.floor(dy);
-        if (sX === dX && sY === dY) return; // early return if nothing to draw
-        const isVerticalSweep = Math.abs(dX - sX) < Math.abs(dY - sY);
-        /* the x-direction of the line should always be >= 0 */
-        if (isVerticalSweep && dY > sY)
-            R_Bresenham_VerticalSweep(sX, sY, dX, dY, r, g, b, a, stroke);
-        else if (isVerticalSweep)
-            R_Bresenham_VerticalSweep(dX, dY, sX, sY, r, g, b, a, stroke);
-        else if (dX > sX)
-            R_Bresenham_HorizontalSweep(sX, sY, dX, dY, r, g, b, a, stroke);
-        else
-            R_Bresenham_HorizontalSweep(dX, dY, sX, sY, r, g, b, a, stroke);
     }
 
     function
@@ -286,9 +286,9 @@
       r: number, g: number, b: number, a: number,
       stroke: number ): void
     {
-        R_DrawLine_Bresenham(ax, ay, bx, by, r, g, b, a, stroke);
-        R_DrawLine_Bresenham(ax, ay, cx, cy, r, g, b, a, stroke);
-        R_DrawLine_Bresenham(bx, by, cx, cy, r, g, b, a, stroke);
+        R_DrawLine(ax, ay, bx, by, r, g, b, a, stroke);
+        R_DrawLine(ax, ay, cx, cy, r, g, b, a, stroke);
+        R_DrawLine(bx, by, cx, cy, r, g, b, a, stroke);
     }
 
     function
@@ -870,8 +870,8 @@
             R_InitZBuffer: R_InitZBuffer,
             R_ResetZBuffer: R_ResetZBuffer,
             R_FillRect: R_FillRect,
+            R_DrawLine: R_DrawLine,
             R_DrawLine_DDA: R_DrawLine_DDA,
-            R_DrawLine_Bresenham: R_DrawLine_Bresenham,
             R_DrawLine_RayCast: R_DrawLine_RayCast,
             R_DrawTriangle_Wireframe: R_DrawTriangle_Wireframe,
             R_FillTriangle_Flat: R_FillTriangle_Flat,

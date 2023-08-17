@@ -57,7 +57,7 @@
     const Vec3 = M_Vec3.M_Vec3;
 
     const R_Draw = __import__R_Draw();
-    const R_DrawLine_Bresenham = R_Draw.R_DrawLine_Bresenham;
+    const R_DrawLine = R_Draw.R_DrawLine;
     const R_Print = R_Draw.R_Print;
 
     const ORIGIN = Vec3(0, 0, 0);
@@ -319,17 +319,17 @@
         const fwdScreen2 = [fwdClipSpace3[0] * SCREEN_W_2 + SCREEN_W_2,
                             fwdClipSpace3[1] * SCREEN_H_2 + SCREEN_H_2];
         if (originViewSpace4[2] > 0 || axesViewSpace3[0][2] > 0)
-            R_DrawLine_Bresenham(originScreen2[0], originScreen2[1],
-                                 rightScreen2[0], rightScreen2[1],
-                                 255, 0, 0, 255, 2);
+            R_DrawLine(originScreen2[0], originScreen2[1],
+                       rightScreen2[0], rightScreen2[1],
+                       255, 0, 0, 255, 2);
         if (originViewSpace4[2] > 0 || axesViewSpace3[1][2] > 0)
-            R_DrawLine_Bresenham(originScreen2[0], originScreen2[1],
-                                 upScreen2[0], upScreen2[1],
-                                 0, 255, 0, 255, 2);
+            R_DrawLine(originScreen2[0], originScreen2[1],
+                       upScreen2[0], upScreen2[1],
+                       0, 255, 0, 255, 2);
         if (originViewSpace4[2] > 0 || axesViewSpace3[2][2] > 0)
-            R_DrawLine_Bresenham(originScreen2[0], originScreen2[1],
-                                 fwdScreen2[0], fwdScreen2[1],
-                                 0, 0, 255, 255, 2);
+            R_DrawLine(originScreen2[0], originScreen2[1],
+                       fwdScreen2[0], fwdScreen2[1],
+                       0, 0, 255, 255, 2);
     }
 
     window.__import__R_Camera = function ()
