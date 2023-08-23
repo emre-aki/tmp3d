@@ -1,5 +1,5 @@
 /*
- *  d_spaceship.js
+ *  d_spaceship.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-07-08.
@@ -8,9 +8,9 @@
  *      The initial 3-D geometry data and their respective UV mappings.
  */
 
-(function ()
+(function (): void
 {
-    function D_Vertices ()
+    function D_Vertices (): pvec3_t[]
     {
         return [
             [1, -1, -1],
@@ -71,14 +71,14 @@
         ];
     }
 
-    function D_UV ()
+    function D_UV (): pvec2_t[]
     {
         return [
-            
+
         ];
     }
 
-    function D_Triangles ()
+    function D_Triangles (): pvec3_t[]
     {
         return [
             [20, 51, 11],
@@ -190,17 +190,17 @@
         ];
     }
 
-    function D_UVMap ()
+    function D_UVMap (): uvface_t[]
     {
         return [
-            
+
         ];
     }
 
-    function D_TextureAtlas ()
+    function D_TextureAtlas (): { [textureId: string]: string }
     {
         return {
-            
+
         };
     }
 

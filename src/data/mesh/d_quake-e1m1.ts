@@ -1,5 +1,5 @@
 /*
- *  d_quake-e1m1.js
+ *  d_quake-e1m1.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-09-12.
@@ -8,9 +8,9 @@
  *      The initial 3-D geometry data and their respective UV mappings.
  */
 
-(function ()
+(function (): void
 {
-    function D_Vertices ()
+    function D_Vertices (): pvec3_t[]
     {
         return [
             [191.25, -5.625, -30],
@@ -7144,7 +7144,7 @@
         ];
     }
 
-    function D_UV ()
+    function D_UV (): pvec2_t[]
     {
         return [
             [24, -0.5],
@@ -24295,7 +24295,7 @@
         ];
     }
 
-    function D_Triangles ()
+    function D_Triangles (): pvec3_t[]
     {
         return [
             [3, 4, 5],
@@ -39074,7 +39074,7 @@
         ];
     }
 
-    function D_UVMap ()
+    function D_UVMap (): uvface_t[]
     {
         return [
             [0, 1, 2, "tech04_3"],
@@ -53853,7 +53853,7 @@
         ];
     }
 
-    function D_TextureAtlas ()
+    function D_TextureAtlas (): { [textureId: string]: string }
     {
         return {
             "*slime0": "models/quake/_slime0.png",

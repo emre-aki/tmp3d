@@ -1,5 +1,5 @@
 /*
- *  d_daxter.js
+ *  d_daxter.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-07-08.
@@ -8,9 +8,9 @@
  *      The initial 3-D geometry data and their respective UV mappings.
  */
 
-(function ()
+(function (): void
 {
-    function D_Vertices ()
+    function D_Vertices (): pvec3_t[]
     {
         return [
             [-1.5115999999999998, -0.0965, -0.44580000000000003],
@@ -966,7 +966,7 @@
         ];
     }
 
-    function D_UV ()
+    function D_UV (): pvec2_t[]
     {
         return [
             [0.523438, 0.5],
@@ -1617,7 +1617,7 @@
         ];
     }
 
-    function D_Triangles ()
+    function D_Triangles (): pvec3_t[]
     {
         return [
             [0, 1, 2],
@@ -2997,7 +2997,7 @@
         ];
     }
 
-    function D_UVMap ()
+    function D_UVMap (): uvface_t[]
     {
         return [
             [0, 1, 2, "material3489_Imag.017_Fur2.png"],
@@ -4377,7 +4377,7 @@
         ];
     }
 
-    function D_TextureAtlas ()
+    function D_TextureAtlas (): { [textureId: string]: string }
     {
         return {
             "material3489_Imag.016_Cloth.png": "models/daxter/Textures/Cloth.png",

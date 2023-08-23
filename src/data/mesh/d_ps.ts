@@ -1,5 +1,5 @@
 /*
- *  d_ps.js
+ *  d_ps.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-07-31.
@@ -8,9 +8,9 @@
  *      The initial 3-D geometry data and their respective UV mappings.
  */
 
-(function ()
+(function (): void
 {
-    function D_Vertices ()
+    function D_Vertices (): pvec3_t[]
     {
         return [
             [5.62, 3.7, -8.22],
@@ -310,14 +310,14 @@
         ];
     }
 
-    function D_UV ()
+    function D_UV (): pvec2_t[]
     {
         return [
             [0, 0]
         ];
     }
 
-    function D_Triangles ()
+    function D_Triangles (): pvec3_t[]
     {
         return [
             [0, 1, 2],
@@ -883,7 +883,7 @@
         ];
     }
 
-    function D_UVMap ()
+    function D_UVMap (): uvface_t[]
     {
         return [
             [0, 0, 0, "Material__26"],
@@ -1449,7 +1449,7 @@
         ];
     }
 
-    function D_TextureAtlas ()
+    function D_TextureAtlas (): { [textureId: string]: string }
     {
         return {
             "Material__26": "models/pslogo/green.png",

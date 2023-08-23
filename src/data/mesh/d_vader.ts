@@ -1,5 +1,5 @@
 /*
- *  d_vader.js
+ *  d_vader.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-07-11.
@@ -8,9 +8,9 @@
  *      The initial 3-D geometry data and their respective UV mappings.
  */
 
-(function ()
+(function (): void
 {
-    function D_Vertices ()
+    function D_Vertices (): pvec3_t[]
     {
         return [
             [0.490561, -18.775679, -1.001503],
@@ -1923,7 +1923,7 @@
         ];
     }
 
-    function D_UV ()
+    function D_UV (): pvec2_t[]
     {
         return [
             [0.028564, 0.0061029999999999696],
@@ -4362,7 +4362,7 @@
         ];
     }
 
-    function D_Triangles ()
+    function D_Triangles (): pvec3_t[]
     {
         return [
             [0, 1, 2],
@@ -7554,7 +7554,7 @@
         ];
     }
 
-    function D_UVMap ()
+    function D_UVMap (): uvface_t[]
     {
         return [
             [0, 1, 2, "None.002"],
@@ -10746,7 +10746,7 @@
         ];
     }
 
-    function D_TextureAtlas ()
+    function D_TextureAtlas (): { [textureId: string]: string }
     {
         return {
             "None.002": "models/vader/Vaderbody.png",

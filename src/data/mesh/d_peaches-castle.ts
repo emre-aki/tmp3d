@@ -1,5 +1,5 @@
 /*
- *  d_peaches-castle.js
+ *  d_peaches-castle.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-09-12.
@@ -8,9 +8,9 @@
  *      The initial 3-D geometry data and their respective UV mappings.
  */
 
-(function ()
+(function (): void
 {
-    function D_Vertices ()
+    function D_Vertices (): pvec3_t[]
     {
         return [
             [106.15416, 7.897094999999999, 0.514405],
@@ -2641,7 +2641,7 @@
         ];
     }
 
-    function D_UV ()
+    function D_UV (): pvec2_t[]
     {
         return [
             [4.234375, 15.35645],
@@ -5092,7 +5092,7 @@
         ];
     }
 
-    function D_Triangles ()
+    function D_Triangles (): pvec3_t[]
     {
         return [
             [2, 0, 1],
@@ -5973,7 +5973,7 @@
         ];
     }
 
-    function D_UVMap ()
+    function D_UVMap (): uvface_t[]
     {
         return [
             [0, 2, 1, "Shape_259"],
@@ -6854,7 +6854,7 @@
         ];
     }
 
-    function D_TextureAtlas ()
+    function D_TextureAtlas (): { [textureId: string]: string }
     {
         return {
             "Shape_131": "models/mario64/60A64656_c.png",

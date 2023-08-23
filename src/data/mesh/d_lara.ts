@@ -1,5 +1,5 @@
 /*
- *  d_lara.js
+ *  d_lara.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-07-08.
@@ -8,9 +8,9 @@
  *      The initial 3-D geometry data and their respective UV mappings.
  */
 
-(function ()
+(function (): void
 {
-    function D_Vertices ()
+    function D_Vertices (): pvec3_t[]
     {
         return [
             [-4.3, -5.6000000000000005, 1.59999],
@@ -2188,7 +2188,7 @@
         ];
     }
 
-    function D_UV ()
+    function D_UV (): pvec2_t[]
     {
         return [
             [0.882353, 0.492147],
@@ -4366,7 +4366,7 @@
         ];
     }
 
-    function D_Triangles ()
+    function D_Triangles (): pvec3_t[]
     {
         return [
             [0, 1, 2],
@@ -5096,7 +5096,7 @@
         ];
     }
 
-    function D_UVMap ()
+    function D_UVMap (): uvface_t[]
     {
         return [
             [0, 1, 2, "tile0"],
@@ -5826,7 +5826,7 @@
         ];
     }
 
-    function D_TextureAtlas ()
+    function D_TextureAtlas (): { [textureId: string]: string }
     {
         return {
             "tile0": "models/lara/Lara.png",

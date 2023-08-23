@@ -1,5 +1,5 @@
 /*
- *  d_artisans-hub.js
+ *  d_artisans-hub.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-09-12.
@@ -8,9 +8,9 @@
  *      The initial 3-D geometry data and their respective UV mappings.
  */
 
-(function ()
+(function (): void
 {
-    function D_Vertices ()
+    function D_Vertices (): pvec3_t[]
     {
         return [
             [-39.394119, 14.65709, -177.590027],
@@ -5165,7 +5165,7 @@
         ];
     }
 
-    function D_UV ()
+    function D_UV (): pvec2_t[]
     {
         return [
             [0.74998, 0.24995999999999996],
@@ -23179,7 +23179,7 @@
         ];
     }
 
-    function D_Triangles ()
+    function D_Triangles (): pvec3_t[]
     {
         return [
             [1, 3, 0],
@@ -32922,7 +32922,7 @@
         ];
     }
 
-    function D_UVMap ()
+    function D_UVMap (): uvface_t[]
     {
         return [
             [0, 1, 2, "Material.001"],
@@ -42665,7 +42665,7 @@
         ];
     }
 
-    function D_TextureAtlas ()
+    function D_TextureAtlas (): { [textureId: string]: string }
     {
         return {
             "Material.001": "models/spyro/High.png"

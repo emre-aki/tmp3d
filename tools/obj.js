@@ -32,37 +32,37 @@ const tmp3DMeshTemplate = `/*
  *      The initial 3-D geometry data and their respective UV mappings.
  */
 
-(function ()
+(function (): void
 {
-    function D_Vertices ()
+    function D_Vertices (): pvec3_t[]
     {
         return [
             %v
         ];
     }
 
-    function D_UV ()
+    function D_UV (): pvec2_t[]
     {
         return [
             %vt
         ];
     }
 
-    function D_Triangles ()
+    function D_Triangles (): pvec3_t[]
     {
         return [
             %f
         ];
     }
 
-    function D_UVMap ()
+    function D_UVMap (): uvface_t[]
     {
         return [
             %vf
         ];
     }
 
-    function D_TextureAtlas ()
+    function D_TextureAtlas (): { [textureId: string]: string }
     {
         return {
             %ta
@@ -241,12 +241,12 @@ function HandleCommand (pathToObj, args)
         throw new Error("HandleCommand: The input is not an .obj file.");
     /* determine the path into which the output will be written */
     const outputPath = path.join(MESH_PATH,
-                                 `d_${objFilename.toLowerCase()}.js`);
+                                 `d_${objFilename.toLowerCase()}.ts`);
     const outputFilename = path.basename(outputPath);
     const tmp3Data = ObjToTmp3D(pathToObj, pathToMtl, outputFilename, zOffset);
     LogInfo(tmp3Data, { verbose: verbose ?? false });
     WriteFile(outputPath, tmp3Data, { encoding: "utf8" });
-    ReplaceModelPathInView(outputFilename);
+    ReplaceModelPathInView(outputFilename.replace(/\.ts$/, ".js"));
     LogInfo(`Mesh saved at ${path.relative(ROOT, outputPath)}.`);
 }
 

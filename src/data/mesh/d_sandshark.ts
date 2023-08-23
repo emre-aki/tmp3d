@@ -1,5 +1,5 @@
 /*
- *  d_sandshark.js
+ *  d_sandshark.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-07-31.
@@ -8,9 +8,9 @@
  *      The initial 3-D geometry data and their respective UV mappings.
  */
 
-(function ()
+(function (): void
 {
-    function D_Vertices ()
+    function D_Vertices (): pvec3_t[]
     {
         return [
             [9.084, -31.1551, 17.5425],
@@ -2746,7 +2746,7 @@
         ];
     }
 
-    function D_UV ()
+    function D_UV (): pvec2_t[]
     {
         return [
             [0.0177, 1.6005],
@@ -4181,7 +4181,7 @@
         ];
     }
 
-    function D_Triangles ()
+    function D_Triangles (): pvec3_t[]
     {
         return [
             [1, 2, 0],
@@ -8119,7 +8119,7 @@
         ];
     }
 
-    function D_UVMap ()
+    function D_UVMap (): uvface_t[]
     {
         return [
             [0, 1, 2, "Material__26"],
@@ -12057,7 +12057,7 @@
         ];
     }
 
-    function D_TextureAtlas ()
+    function D_TextureAtlas (): { [textureId: string]: string }
     {
         return {
             "Material__26": "models/sandshark/metal5.png",

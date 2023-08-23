@@ -1,5 +1,5 @@
 /*
- *  d_jak.js
+ *  d_jak.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-07-31.
@@ -8,9 +8,9 @@
  *      The initial 3-D geometry data and their respective UV mappings.
  */
 
-(function ()
+(function (): void
 {
-    function D_Vertices ()
+    function D_Vertices (): pvec3_t[]
     {
         return [
             [0.6819, -22.79345, -0.3985],
@@ -10488,7 +10488,7 @@
         ];
     }
 
-    function D_UV ()
+    function D_UV (): pvec2_t[]
     {
         return [
             [-0.2797, 0.6162000000000001],
@@ -16390,7 +16390,7 @@
         ];
     }
 
-    function D_Triangles ()
+    function D_Triangles (): pvec3_t[]
     {
         return [
             [1, 2, 0],
@@ -30650,7 +30650,7 @@
         ];
     }
 
-    function D_UVMap ()
+    function D_UVMap (): uvface_t[]
     {
         return [
             [0, 1, 2, "Material__156"],
@@ -44910,7 +44910,7 @@
         ];
     }
 
-    function D_TextureAtlas ()
+    function D_TextureAtlas (): { [textureId: string]: string }
     {
         return {
             "Material__156": "models/jak3/scarf.png",

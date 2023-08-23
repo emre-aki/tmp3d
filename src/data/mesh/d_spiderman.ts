@@ -1,5 +1,5 @@
 /*
- *  d_spiderman.js
+ *  d_spiderman.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-07-08.
@@ -8,9 +8,9 @@
  *      The initial 3-D geometry data and their respective UV mappings.
  */
 
-(function ()
+(function (): void
 {
-    function D_Vertices ()
+    function D_Vertices (): pvec3_t[]
     {
         return [
             [-2.118583, -36.60488, -4.996436],
@@ -278,7 +278,7 @@
         ];
     }
 
-    function D_UV ()
+    function D_UV (): pvec2_t[]
     {
         return [
             [0.93749, 0.125],
@@ -1856,7 +1856,7 @@
         ];
     }
 
-    function D_Triangles ()
+    function D_Triangles (): pvec3_t[]
     {
         return [
             [1, 0, 2],
@@ -2386,7 +2386,7 @@
         ];
     }
 
-    function D_UVMap ()
+    function D_UVMap (): uvface_t[]
     {
         return [
             [0, 1, 2, "crotch"],
@@ -2916,7 +2916,7 @@
         ];
     }
 
-    function D_TextureAtlas ()
+    function D_TextureAtlas (): { [textureId: string]: string }
     {
         return {
             "face": "models/spiderman/848f5e3b.png",

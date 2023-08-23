@@ -43,6 +43,6 @@ r_screen.ts     - rendering front-end--access to framebuffer APIs
 --------------------------------------------------------------------------------
 D        Data
 --------------------------------------------------------------------------------
-mesh/d_*.js     - initial mesh data
+mesh/d_*.ts     - initial mesh data
 d_player.ts     - initial player data
 d_textures.ts   - texture lookup tables
