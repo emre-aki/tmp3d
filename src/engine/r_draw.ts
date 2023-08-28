@@ -7,7 +7,7 @@
  *  SYNOPSIS:
  *      The rendering backend.
  *
- *      The module that helps draw some geometric primitives, as well as other
+ *      The module that helps draw some graphics primitives, as well as other
  *      more advanced visual effects, directly onto the frame buffer.
  */
 
