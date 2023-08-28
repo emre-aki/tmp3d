@@ -40,10 +40,12 @@
     </img>
 </p>
 
-Tmp3D is a 3-D software renderer written from scratch in nothing but plain-old
-JavaScript, just for kicks. It makes use of the `2d` graphics context of the
-HTML5 `<canvas>` to draw some graphics primitives and is heavily inspired by
-OpenGL sub-routines.
+Tmp3D is a 3-D software renderer written from scratch in nothing but
+[TypeScript](https://www.typescriptlang.org/) (which itself transpiles into
+plain-old JavaScript before going into your browser), just for kicks. It makes
+use of the `2d` graphics context of the HTML5 `<canvas>` to draw some graphics
+primitives and nothing more (no WebGL, THREE.js, no hardware acceleration, no
+nothin').
 
 The project is still heavily a work-in-progress and in its very early stages, so
 you may take it as it is and expect many more features to follow very soon.
@@ -67,6 +69,7 @@ and plans to support
   - Phong reflection model
   - affine texture-mapping
   - occlusion culling (😩)
+  - a more de-coupled & user-friendly shader pipeline
 
 ### Why?
 
