@@ -113,6 +113,6 @@
 
     window.__import__G_Run = function ()
     {
-        return { G_Run: G_Run };
+        return { G_Run };
     };
 })();

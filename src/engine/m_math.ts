@@ -38,12 +38,6 @@
 
     window.__import__M_Math = function ()
     {
-        return {
-            PI_2: PI_2,
-            M_RadToDeg: M_RadToDeg,
-            M_Clamp: M_Clamp,
-            M_ToFixedDigits: M_ToFixedDigits,
-            M_FastSign: M_FastSign,
-        };
+        return { PI_2, M_RadToDeg, M_Clamp, M_ToFixedDigits, M_FastSign };
     };
 })();

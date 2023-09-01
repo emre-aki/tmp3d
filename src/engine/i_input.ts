@@ -236,10 +236,10 @@
         return {
             I_Keys: KEY,
             I_Mouse: MOUSE,
-            I_GetKeyState: I_GetKeyState,
-            I_InitKeyboard: I_InitKeyboard,
-            I_GetMouseState: I_GetMouseState,
-            I_InitMouse: I_InitMouse,
+            I_GetKeyState,
+            I_InitKeyboard,
+            I_GetMouseState,
+            I_InitMouse,
         };
     };
 })();

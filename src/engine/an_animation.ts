@@ -100,10 +100,10 @@
     window.__import__AN_Animation = function ()
     {
         return {
-            AN_StartAnimation: AN_StartAnimation,
-            AN_CancelAnimation: AN_CancelAnimation,
-            AN_QueueAnimation: AN_QueueAnimation,
-            AN_RunQueuedAnimation: AN_RunQueuedAnimation,
+            AN_StartAnimation,
+            AN_CancelAnimation,
+            AN_QueueAnimation,
+            AN_RunQueuedAnimation,
         };
     };
 })();

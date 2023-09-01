@@ -65,10 +65,9 @@
     window.__import__M_Collision3 = function ()
     {
         return {
-            M_TimeBeforePlaneCollision3: M_TimeBeforePlaneCollision3,
-            M_LineSegmentVsPlaneCollision3: M_LineSegmentVsPlaneCollision3,
-            M_BoundingBoxVsBoundingBoxCollision3:
-                M_BoundingBoxVsBoundingBoxCollision3,
+            M_TimeBeforePlaneCollision3,
+            M_LineSegmentVsPlaneCollision3,
+            M_BoundingBoxVsBoundingBoxCollision3,
         };
     };
 })();

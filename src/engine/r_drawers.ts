@@ -91,10 +91,6 @@
 
     window.__import__R_Drawers = function ()
     {
-        return {
-            R_LoadingDrawer: R_LoadingDrawer,
-            R_TitleDrawer: R_TitleDrawer,
-            R_ErrorDrawer: R_ErrorDrawer,
-        };
+        return { R_LoadingDrawer, R_TitleDrawer, R_ErrorDrawer };
     };
 })();

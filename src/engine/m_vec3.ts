@@ -105,19 +105,19 @@
     window.__import__M_Vec3 = function ()
     {
         return {
-            M_Vec3: M_Vec3,
-            M_Vec3FromVec4: M_Vec3FromVec4,
-            M_Dot3: M_Dot3,
-            M_Cross3: M_Cross3,
-            M_Add3: M_Add3,
-            M_Sub3: M_Sub3,
-            M_Scale3: M_Scale3,
-            M_Mag3: M_Mag3,
-            M_Norm3: M_Norm3,
-            M_Base3: M_Base3,
-            M_RotateAroundAxis3: M_RotateAroundAxis3,
-            M_DistToPlane3: M_DistToPlane3,
-            M_IsInFrontOfPlane3: M_IsInFrontOfPlane3,
+            M_Vec3,
+            M_Vec3FromVec4,
+            M_Dot3,
+            M_Cross3,
+            M_Add3,
+            M_Sub3,
+            M_Scale3,
+            M_Mag3,
+            M_Norm3,
+            M_Perp3,
+            M_RotateAroundAxis3,
+            M_DistToPlane3,
+            M_IsInFrontOfPlane3,
         };
     };
 })();

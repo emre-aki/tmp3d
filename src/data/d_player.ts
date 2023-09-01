@@ -10,7 +10,7 @@
 
 (function (): void
 {
-    const VELOCITY = 1;
+    const D_Velocity = 1;
 
     function D_Eye (): pvec3_t
     {
@@ -19,6 +19,6 @@
 
     window.__import__D_Player = function ()
     {
-        return { D_Velocity: VELOCITY, D_Eye: D_Eye };
+        return { D_Velocity, D_Eye };
     };
 })();

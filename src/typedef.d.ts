@@ -384,8 +384,8 @@ type R_DebugStats = (
 type R_DebugAxes = () => void;
 
 type __Mod__R_Camera = {
-    R_ORIGIN: vec3_t,
-    R_BWD: vec3_t,
+    R_Origin: vec3_t,
+    R_Bwd: vec3_t,
     R_InitCamera: R_InitCamera,
     R_UpdateCamera: R_UpdateCamera,
     R_GetCameraState: R_GetCameraState,

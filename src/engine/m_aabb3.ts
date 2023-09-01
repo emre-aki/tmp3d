@@ -20,6 +20,6 @@
 
     window.__import__M_AABB3 = function ()
     {
-        return { M_AABB3: M_AABB3 };
+        return { M_AABB3 };
     };
 })();

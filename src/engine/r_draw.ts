@@ -864,24 +864,23 @@
     window.__import__R_Draw = function ()
     {
         return {
-            R_InitFrameBuffer: R_InitFrameBuffer,
-            R_ResetFrameBuffer: R_ResetFrameBuffer,
-            R_FlushFrame: R_FlushFrame,
-            R_InitZBuffer: R_InitZBuffer,
-            R_ResetZBuffer: R_ResetZBuffer,
-            R_FillRect: R_FillRect,
-            R_DrawLine: R_DrawLine,
-            R_DrawLine_DDA: R_DrawLine_DDA,
-            R_DrawLine_RayCast: R_DrawLine_RayCast,
-            R_DrawTriangle_Wireframe: R_DrawTriangle_Wireframe,
-            R_FillTriangle_Flat: R_FillTriangle_Flat,
+            R_InitFrameBuffer,
+            R_ResetFrameBuffer,
+            R_FlushFrame,
+            R_InitZBuffer,
+            R_ResetZBuffer,
+            R_FillRect,
+            R_DrawLine,
+            R_DrawLine_DDA,
+            R_DrawLine_RayCast,
+            R_DrawTriangle_Wireframe,
+            R_FillTriangle_Flat,
             /* TODO: uncomment these once implemented */
-            // R_FillTriangle_Flat_Bresenham: R_FillTriangle_Flat_Bresenham,
-            // R_FillTriangle_Textured_Affine: R_FillTriangle_Textured_Affine,
-            R_FillTriangle_Textured_Perspective:
-                R_FillTriangle_Textured_Perspective,
-            R_DrawImage: R_DrawImage,
-            R_Print: R_Print,
+            // R_FillTriangle_Flat_Bresenham,
+            // R_FillTriangle_Textured_Affine,
+            R_FillTriangle_Textured_Perspective,
+            R_DrawImage,
+            R_Print,
         };
     };
 })();

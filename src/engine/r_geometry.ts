@@ -59,8 +59,8 @@
 
     // the center of the projection (near-clipping) plane
     let projectionOrigin: vec3_t;
-    const ORIGIN = R_Camera.R_ORIGIN;
-    const BWD = R_Camera.R_BWD, FWD = M_Scale3(BWD, -1);
+    const ORIGIN = R_Camera.R_Origin;
+    const BWD = R_Camera.R_Bwd, FWD = M_Scale3(BWD, -1);
 
     // TODO: make a separate lighting controller module, maybe??
     const DIRECTIONAL_LIGHT = BWD;
@@ -550,13 +550,13 @@
     window.__import__R_Geometry = function ()
     {
         return {
-            R_ToggleGlobalRotation: R_ToggleGlobalRotation,
-            R_ChangeRenderMode: R_ChangeRenderMode,
-            R_LoadGeometry: R_LoadGeometry,
-            R_InitUVTable: R_InitUVTable,
-            R_UpdateGeometry: R_UpdateGeometry,
-            R_RenderGeometries: R_RenderGeometries,
-            R_Tris: R_Tris,
+            R_ToggleGlobalRotation,
+            R_ChangeRenderMode,
+            R_LoadGeometry,
+            R_InitUVTable,
+            R_UpdateGeometry,
+            R_RenderGeometries,
+            R_Tris,
         };
     };
 })();

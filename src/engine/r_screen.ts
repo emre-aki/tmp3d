@@ -34,8 +34,8 @@
         return {
             R_ScreenElement: screen,
             R_Ctx: ctx,
-            R_FlushBuffer: R_FlushBuffer,
-            R_InitBuffer: R_InitBuffer,
+            R_FlushBuffer,
+            R_InitBuffer,
         };
     };
 })();

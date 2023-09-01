@@ -122,6 +122,6 @@
 
     window.__import__G_Setup = function ()
     {
-        return { G_Setup: G_Setup };
+        return { G_Setup };
     };
 })();

@@ -335,16 +335,16 @@
     window.__import__R_Camera = function ()
     {
         return {
-            R_ORIGIN: ORIGIN,
-            R_BWD: BWD,
-            R_InitCamera: R_InitCamera,
-            R_UpdateCamera: R_UpdateCamera,
-            R_GetCameraState: R_GetCameraState,
-            R_GetProjectionOrigin: R_GetProjectionOrigin,
-            R_ToViewSpace: R_ToViewSpace,
-            R_ToClipSpace: R_ToClipSpace,
-            R_DebugStats: R_DebugStats,
-            R_DebugAxes: R_DebugAxes,
+            R_Origin: ORIGIN,
+            R_Bwd: BWD,
+            R_InitCamera,
+            R_UpdateCamera,
+            R_GetCameraState,
+            R_GetProjectionOrigin,
+            R_ToViewSpace,
+            R_ToClipSpace,
+            R_DebugStats,
+            R_DebugAxes,
         };
     };
 })();

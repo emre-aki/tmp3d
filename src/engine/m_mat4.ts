@@ -115,11 +115,6 @@
 
     window.__import__M_Mat4 = function ()
     {
-        return {
-            M_Vec4FromVec3: M_Vec4FromVec3,
-            M_Mat4: M_Mat4,
-            M_QuickInv4: M_QuickInv4,
-            M_Transform4: M_Transform4,
-        };
+        return { M_Vec4FromVec3, M_Mat4, M_QuickInv4, M_Transform4 };
     };
 })();

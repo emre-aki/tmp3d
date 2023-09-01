@@ -39,18 +39,18 @@
     window.__import__G_Const = function ()
     {
         return {
-            FPS: FPS,
-            FOV_X: FOV_X,
-            FOV_Y: FOV_Y,
-            MAX_MOV_TILT: MAX_MOV_TILT,
-            SCREEN_W: SCREEN_W,
-            SCREEN_H: SCREEN_H,
-            SCREEN_W_2: SCREEN_W_2,
-            SCREEN_H_2: SCREEN_H_2,
-            ASPECT: ASPECT,
-            Z_NEAR: Z_NEAR,
-            Z_FAR: Z_FAR,
-            FRUSTUM_AABB3: FRUSTUM_AABB3,
+            FPS,
+            FOV_X,
+            FOV_Y,
+            MAX_MOV_TILT,
+            SCREEN_W,
+            SCREEN_H,
+            SCREEN_W_2,
+            SCREEN_H_2,
+            ASPECT,
+            Z_NEAR,
+            Z_FAR,
+            FRUSTUM_AABB3,
         };
     };
 })();

@@ -42674,12 +42674,6 @@
 
     window.__import__D_Mesh = function ()
     {
-        return {
-            D_Vertices: D_Vertices,
-            D_UV: D_UV,
-            D_Triangles: D_Triangles,
-            D_UVMap: D_UVMap,
-            D_TextureAtlas: D_TextureAtlas,
-        };
+        return { D_Vertices, D_UV, D_Triangles, D_UVMap, D_TextureAtlas };
     };
 })();

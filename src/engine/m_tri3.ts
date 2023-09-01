@@ -87,11 +87,11 @@
     window.__import__M_Tri3 = function ()
     {
         return {
-            M_Tri3: M_Tri3,
-            M_TriNormal3: M_TriNormal3,
-            M_TransformTri3: M_TransformTri3,
-            M_AABB3FromTri3: M_AABB3FromTri3,
-            M_RotateTriAroundAxis3: M_RotateTriAroundAxis3,
+            M_Tri3,
+            M_TriNormal3,
+            M_TransformTri3,
+            M_AABB3FromTri3,
+            M_RotateTriAroundAxis3,
         };
     };
 })();

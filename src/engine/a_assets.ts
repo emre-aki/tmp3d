@@ -73,6 +73,6 @@
 
     window.__import__A_Assets = function ()
     {
-        return { A_LoadTextures: A_LoadTextures, A_Texture: A_Texture };
+        return { A_LoadTextures, A_Texture };
     };
 })();
