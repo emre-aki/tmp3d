@@ -51,7 +51,7 @@
     const M_Scale3 = M_Vec3.M_Scale3;
     const M_Cross3 = M_Vec3.M_Cross3;
     const M_Norm3 = M_Vec3.M_Norm3;
-    const M_Base3 = M_Vec3.M_Base3;
+    const M_Perp3 = M_Vec3.M_Perp3;
     const M_RotateAroundAxis3 = M_Vec3.M_RotateAroundAxis3;
     const M_Vec3FromVec4 = M_Vec3.M_Vec3FromVec4;
     const Vec3 = M_Vec3.M_Vec3;
@@ -87,7 +87,7 @@
         // because the `up` vector in the arguments does not necessarily have to
         // be perpendicular to the `z` axis, we have to adjust it to make sure
         // the orthonormality is preserved
-        const vecCamY3 = M_Norm3(M_Base3(up, vecCamZ3));
+        const vecCamY3 = M_Norm3(M_Perp3(up, vecCamZ3));
         // calculate the `x` axis for the camera:
         // a simple cross product of `y` & `z` axes (mind the order) will give
         // us the `x` axis for the camera

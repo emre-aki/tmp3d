@@ -249,7 +249,7 @@ type M_Sub3 = (u: vec3_t, v: vec3_t) => vec3_t;
 type M_Scale3 = (u: vec3_t, s: number) => vec3_t;
 type M_Mag3 = (u: vec3_t) => number;
 type M_Norm3 = (u: vec3_t) => vec3_t;
-type M_Base3 = (vec: vec3_t, base: vec3_t) => vec3_t;
+type M_Perp3 = (vec: vec3_t, base: vec3_t) => vec3_t;
 
 type M_RotateAroundAxis3 = (
     point: vec3_t,
@@ -280,7 +280,7 @@ type __Mod__M_Vec3 = {
     M_Scale3: M_Scale3,
     M_Mag3: M_Mag3,
     M_Norm3: M_Norm3,
-    M_Base3: M_Base3,
+    M_Perp3: M_Perp3,
     M_RotateAroundAxis3: M_RotateAroundAxis3,
     M_DistToPlane3: M_DistToPlane3,
     M_IsInFrontOfPlane3: M_IsInFrontOfPlane3,

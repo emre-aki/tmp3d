@@ -61,7 +61,7 @@
         return M_Vec3(u[0] * mag_, u[1] * mag_, u[2] * mag_);
     }
 
-    function M_Base3 (vec: vec3_t, base: vec3_t): vec3_t
+    function M_Perp3 (vec: vec3_t, base: vec3_t): vec3_t
     {
         return M_Sub3(vec, M_Scale3(base, M_Dot3(base, vec)));
     }
