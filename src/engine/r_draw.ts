@@ -567,6 +567,7 @@
             {
                 u += gradU; v += gradV; c += gradC;
                 nx += gradNX; ny += gradNY; nz += gradNZ; nw += gradNW;
+
                 continue;
             }
             zBuffer[bufferIndex] = c; // don't forget to update the z-buffer!

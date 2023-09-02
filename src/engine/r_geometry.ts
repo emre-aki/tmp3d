@@ -607,13 +607,16 @@
         {
             case RENDER_MODE.WIREFRAME:
                 R_RenderGeomeries_Wireframe(nTrisOnScreen);
+
                 break;
             case RENDER_MODE.FLAT:
                 R_RenderGeomeries_Flat(nTrisOnScreen);
+
                 break;
             case RENDER_MODE.TEXTURED:
             case RENDER_MODE.TEXTURED_SHADED:
                 R_RenderGeometries_Textured(nTrisOnScreen);
+
                 break;
             default:
                 break;

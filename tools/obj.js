@@ -139,6 +139,7 @@ function ObjToTmp3D (pathToObj, pathToMtl, outputFilename, zOffset)
                                       -parseFloat(vertex[1]),
                                       -parseFloat(vertex[2]) + zOffset];
                 vertices.push(vertexParsed);
+
                 break;
             }
             case "vt": // texture vertices
@@ -147,6 +148,7 @@ function ObjToTmp3D (pathToObj, pathToMtl, outputFilename, zOffset)
                 // flip the `v` coordinate, as it points up in Blender but down
                 // in Tmp3D
                 uvVertices.push([parseFloat(uv[0]), 1 - parseFloat(uv[1])]);
+
                 break;
             }
             case "f": // face
@@ -193,10 +195,12 @@ function ObjToTmp3D (pathToObj, pathToMtl, outputFilename, zOffset)
                                       parseInt(vertexIndices[2]) - 1];
                     triangles.push(triangle);
                 }
+
                 break;
             }
             case "usemtl": // use material definition
                 mtlId = tokens[1];
+
                 break;
             default:
                 break;
