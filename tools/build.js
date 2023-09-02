@@ -59,10 +59,10 @@ function TranspileTs (filepath, outputPath)
     }
     const transpiledFilename = path.basename(filepath).replace(/\.ts$/, ".js");
     const transpiledPath = path.join(outputPath, transpiledFilename);
-    LogInfo(`Transpiling ${filepath}...`, LOG_OPTIONS);
     WriteFile(transpiledPath,
               transpileModule(ReadFile(filepath).toString(),
                               tsConfig.compilerOptions).outputText);
+    LogInfo(`Transpiled ${filepath}.`, LOG_OPTIONS);
 }
 
 function CopyStatic (sourceDir, outputDir, onFile)
@@ -133,16 +133,16 @@ function Build (outputPath, debug, verbose)
     const pathToView = path.join(outputDir, "index.html");
     // compile the `index.html`
     WriteFile(pathToView, BuildView(debug), { encoding: "utf8" });
-    LogInfo(`View saved at ${pathToView}.`, LOG_OPTIONS);
+    LogInfo(`Saved view at ${pathToView}.`, LOG_OPTIONS);
     LogInfo(`Copying ${SRC}...`, LOG_OPTIONS);
     /* copy the static files, i.e, scripts, assets, and anything that is static,
      * over to the output directory
      */
     CopyStatic(SRC, outputDir, TranspileTs);
-    LogInfo(`Contents of ${SRC} copied to ${outputDir}.`, LOG_OPTIONS);
+    LogInfo(`Copied contents of ${SRC} to ${outputDir}.`, LOG_OPTIONS);
     LogInfo(`Copying ${ASSETS}...`, LOG_OPTIONS);
     CopyStatic(ASSETS, outputDir);
-    LogInfo(`Contents of ${ASSETS} copied to ${outputDir}.`, LOG_OPTIONS);
+    LogInfo(`Copied contents of ${ASSETS} to ${outputDir}.`, LOG_OPTIONS);
 }
 
 function HandleCommand (args)
