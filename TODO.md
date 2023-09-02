@@ -3,15 +3,12 @@
 ## Debugging-aid
 
 - [x] Draw axes
+- [ ] Draw surface & vertex normals
 
 ## Feature-wise
 
 - [x] Camera transformations w/ 2 degrees-of-freedom (yaw and pitch)
 - [x] Perspective transformation
-- [x] Graphic primitives
-    - [x] Rectangles
-    - [x] Lines
-    - [x] Triangles
 - [x] Back-face culling
 - [x] Raster-clipping
 - [ ] Culling & clipping based on the view space
@@ -26,14 +23,21 @@
 - [x] Flat-shading
 - [ ] Phong reflection model
     - [x] Ambient lighting
-    - [ ] Diffuse shading
-    - [ ] Specular lighting
+    - [x] Diffuse lighting
+    - [ ] Specular reflections
 
 - [ ] Texture-mapping
     - [ ] Affine
     - [x] Perspective-correct
 - [ ] Occlusion culling (😩)
 - [ ] Functionality for dynamically (re)loading mesh data (should go to server?)
+
+## Primitives
+
+- [x] Rectangles
+- [x] Lines
+- [x] Triangles
+- [ ] Circles
 
 ## Project Organization
 
@@ -42,7 +46,7 @@
 - [x] `CONVENTIONS`
 - [x] Migrate to TypeScript
 - [ ] Decoupling? Inspiration from `OLC_PixelGameEngine`, or
-      `OLC_ConsoleGameEngine`?
+      `OLC_ConsoleGameEngine`, or OpenGL shading pipeline?
 
 # Tentative Backlog
 
@@ -60,12 +64,16 @@
 
 ### release: 0.0.7
 - [x] Crude frustum-culling
-- [x] Smooth-shading
+- [x] Diffuse lighting
 
-### release 0.0.9
-- [ ] Point-lighting
+### release: 0.0.8
+- [ ] Point light(s)
+- [ ] The complete Phong Reflection Model
+    - [x] Ambient
+    - [x] Diffuse
+    - [ ] Specular
 
-### release: 0.0.10
+### release: 0.0.9
 - [ ] Fix the oscillation in the frametimes
 
 ### release: 0.0.x
