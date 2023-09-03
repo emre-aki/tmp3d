@@ -42,7 +42,9 @@
     const R_UpdateGeometry = R_Geometry.R_UpdateGeometry;
 
     const R_Shader = __import__R_Shader();
-    const R_ChangeShader = R_Shader.R_ChangeShader;
+    const R_ToggleWireframe = R_Shader.R_ToggleWireframe;
+    const R_ChangeFillMode = R_Shader.R_ChangeFillMode;
+    const R_ChangeLightingMode = R_Shader.R_ChangeLightingMode;
 
     const TICK_DELAY = 1000 / FPS;
 
@@ -53,7 +55,6 @@
 
     function G_UpdateScreen (deltaT: number): void
     {
-        R_ChangeShader();
         R_RenderGeometries(nTrisOnScreen);
         R_FlushFrame();
         if (DEBUG_MODE) R_DebugStats(deltaT, nTrisOnScreen);
@@ -63,6 +64,9 @@
     {
         R_UpdateCamera(1); // TODO: take `deltaT` into account
         R_ToggleGlobalRotation();
+        R_ToggleWireframe();    // need these to be handled in their own
+        R_ChangeFillMode();     // separate listeners so the key strokes
+        R_ChangeLightingMode(); // associated with each event can be captured
         R_UpdateGeometry();
     }
 

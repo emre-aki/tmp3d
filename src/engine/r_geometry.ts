@@ -62,7 +62,10 @@
         R_Draw.R_DrawTriangle_Textured_Perspective;
 
     const R_Shader = __import__R_Shader();
-    const R_ShaderMode = R_Shader.R_ShaderMode;
+    const R_ShaderMode_Wireframe = R_Shader.R_ShaderMode_Wireframe;
+    const R_ShaderMode_Fill = R_Shader.R_ShaderMode_Fill;
+    const R_ShaderMode_Lights = R_Shader.R_ShaderMode_Lights;
+    const R_ShaderMode_Texture = R_Shader.R_ShaderMode_Texture;
     const vso = R_Shader.R_VertexShaderObj;
     const pso = R_Shader.R_PixelShaderObj;
 
@@ -452,10 +455,21 @@
 
     function R_RenderGeomeries_Flat (nTrisOnScreen: Uint32Array): void
     {
-        /* directional light that falls on the triangle */
-        pso.lightX = DIRECTIONAL_LIGHT[0];
-        pso.lightY = DIRECTIONAL_LIGHT[1];
-        pso.lightZ = DIRECTIONAL_LIGHT[2];
+        // TODO: herp-derp commenterp
+        if (pso.mode & R_ShaderMode_Lights) // TODO: add diffuse/flat differentiation here!
+        {
+            // the directional light falling on the triangle
+            pso.lightX = DIRECTIONAL_LIGHT[0];
+            pso.lightY = DIRECTIONAL_LIGHT[1];
+            pso.lightZ = DIRECTIONAL_LIGHT[2];
+        }
+        /* FIXME: find a better way!!! */
+        else
+        {
+            pso.lightX = undefined;
+            pso.lightY = undefined;
+            pso.lightZ = undefined;
+        }
         let trisRendered = 0;
         for (let i = 0; i < nCulledBuffer; ++i)
         {
@@ -508,7 +522,7 @@
                 vso.br = 0; vso.bg = 255; vso.bb = 0;
                 vso.cr = 0; vso.cg = 0; vso.cb = 255;
                 R_FillTriangle_Flat(vso, pso);
-                if (DEBUG_MODE)
+                if (pso.mode & R_ShaderMode_Wireframe)
                     R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
                                              0, 0, 0, 255, 2);
                 ++trisRendered;
@@ -523,7 +537,7 @@
         let trisRendered = 0;
         // early return if the mesh does not have texture-mapping
         if (!uvTable3) return;
-        if (pso.mode === R_ShaderMode.TEXTURED_SHADED)
+        if (pso.mode & R_ShaderMode_Lights) // TODO: add diffuse/flat differentiation here!
         {
             // currently the camera also acts as a point light
             const cam = R_Camera.R_GetCameraState();
@@ -619,7 +633,7 @@
                 vso.wbx = wBX; vso.wby = wBY; vso.wbz = wBZ;
                 vso.wcx = wCX; vso.wcy = wCY; vso.wcz = wCZ;
                 R_DrawTriangle_Textured_Perspective(vso, pso);
-                if (DEBUG_MODE)
+                if (pso.mode & R_ShaderMode_Wireframe)
                     R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
                                              255, 255, 255, 255, 2);
                 ++trisRendered;
@@ -698,24 +712,15 @@
     function R_RenderGeometries (nTrisOnScreen: Uint32Array): void
     {
         R_CullGeometry();
-        switch (pso.mode)
+        if (pso.mode & R_ShaderMode_Fill)
         {
-            case R_ShaderMode.WIREFRAME:
-                R_RenderGeomeries_Wireframe(nTrisOnScreen);
-
-                break;
-            case R_ShaderMode.FLAT:
-                R_RenderGeomeries_Flat(nTrisOnScreen);
-
-                break;
-            case R_ShaderMode.TEXTURED:
-            case R_ShaderMode.TEXTURED_SHADED:
+            if (pso.mode & R_ShaderMode_Texture)
                 R_RenderGeometries_Textured(nTrisOnScreen);
-
-                break;
-            default:
-                break;
+            else
+                R_RenderGeomeries_Flat(nTrisOnScreen);
         }
+        else if (pso.mode & R_ShaderMode_Wireframe)
+            R_RenderGeomeries_Wireframe(nTrisOnScreen);
         if (DEBUG_MODE) R_RenderDebugAxes(1000);
     }
 

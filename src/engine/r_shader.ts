@@ -17,38 +17,27 @@
     const I_GetKeyState = I_Input.I_GetKeyState;
     const I_Keys = I_Input.I_Keys;
 
-    /* FIXME: make into a bitmask!
-     *
-     * 0|1 - wireframe
-     * 0|1 - smooth
-     * 0|1 - textured
-     *
-     * 001 - wireframe
-     * 010 - smooth
-     * 011 - smooth + wireframe
-     * 100 - textured + flat
-     * 101 - textured + flat + wireframe
-     * 110 - textured + smooth
-     * 111 - textured + smooth + wireframe
-     */
-    const SHADER_MODE = {
-        FLAT: "FLAT",
-        TEXTURED: "TEXTURED",
-        TEXTURED_SHADED: "TEXTURED_SHADED",
-        WIREFRAME: "WIREFRAME",
-    } as const;
+    // bit flag to set wireframe mode on/off
+    const SHADER_MODE_MASK_WIREFRAME = 0x1;
+    // bit flag to set fill mode on/off — off means no fills, in which case
+    // overrides whatever is set to `SHADER_MODE_MASK_TEXTURED_FILL`
+    const SHADER_MODE_MASK_FILL = 0x2;
+    // bit flag to set lights on/off — off means ambient (base) light only, in
+    // which case overrides whatever is set to `SHADER_MODE_MASK_DIFFUSE` or
+    // `SHADER_MODE_MASK_SPECULAR`
+    const SHADER_MODE_MASK_LIGHTS = 0x4;
+    // bit flag to set per-pixel diffuse lighting on/off — off means flat
+    // shading, a constant light intensity over the entire geometry
+    const SHADER_MODE_MASK_DIFFUSE = 0x8;
+    // bit flag to set texture mode on/off
+    const SHADER_MODE_MASK_TEXTURED_FILL = 0x10;
 
-    const SHADER_MODES = [
-        SHADER_MODE.WIREFRAME,
-        SHADER_MODE.FLAT,
-        SHADER_MODE.TEXTURED,
-        SHADER_MODE.TEXTURED_SHADED,
-    ] as const;
-
-    const nShaders = SHADER_MODES.length;
+    let mode = SHADER_MODE_MASK_FILL |
+               SHADER_MODE_MASK_LIGHTS |
+               SHADER_MODE_MASK_DIFFUSE |
+               SHADER_MODE_MASK_TEXTURED_FILL;
 
     const shaderChangeDebounce = 250;
-    let mode = 3;
     let lastShaderChange = Date.now();
 
     /* the vertex shader object */
@@ -83,7 +72,7 @@
     /* the pixel (fragment) shader object */
     const pso = {
         // shader mode
-        mode: SHADER_MODES[mode],
+        mode,
         // the bitmap texture to map onto the triangle — color fill mode is
         // inferred if set to `undefined`
         tex: undefined,
@@ -119,14 +108,66 @@
         alpha: 1,
     };
 
-    function R_ChangeShader (): void
+    //
+    // R_ToggleWireframe
+    // Toggle wireframe mode on/off
+    //
+    function R_ToggleWireframe (): void
+    {
+        const now = Date.now();
+        if (I_GetKeyState(I_Keys.F) &&
+            now - lastShaderChange > shaderChangeDebounce)
+        {
+            mode ^= SHADER_MODE_MASK_WIREFRAME;
+            pso.mode = mode;
+            lastShaderChange = now;
+        }
+    }
+
+    //
+    // R_ChangeShader
+    // Cycle between flat color, textured and no fill modes
+    //
+    function R_ChangeFillMode (): void
     {
         const now = Date.now();
         if (I_GetKeyState(I_Keys.R) &&
             now - lastShaderChange > shaderChangeDebounce)
         {
-            if (++mode === nShaders) mode = 0;
-            pso.mode = SHADER_MODES[mode];
+            const fillModeMask = mode & SHADER_MODE_MASK_FILL;
+            const textureModeMask = mode & SHADER_MODE_MASK_TEXTURED_FILL;
+            // @ts-ignore
+            const noFill = !!fillModeMask - 1, fill = !fillModeMask - 1;
+            // @ts-ignore
+            const isTextureFill = !textureModeMask - 1;
+            /* branchless programming 101? 🤦‍♀️🔫 */
+            mode ^= ((noFill | isTextureFill) & SHADER_MODE_MASK_FILL) |
+                    ((fill | isTextureFill) & SHADER_MODE_MASK_TEXTURED_FILL);
+            pso.mode = mode;
+            lastShaderChange = now;
+        }
+    }
+
+    //
+    // R_ChangeLighting
+    // Cycle between diffuse, flat and ambient (base) lighting modes
+    //
+    function R_ChangeLightingMode (): void
+    {
+        const now = Date.now();
+        if (I_GetKeyState(I_Keys.L) &&
+            now - lastShaderChange > shaderChangeDebounce)
+        {
+            const lightsOnMask = mode & SHADER_MODE_MASK_LIGHTS;
+            const diffuseModeMask = mode & SHADER_MODE_MASK_DIFFUSE;
+            // @ts-ignore
+            const lightsOff = !!lightsOnMask - 1, lightsOn = !lightsOnMask - 1;
+            // @ts-ignore
+            const isDiffuseMode = !diffuseModeMask - 1;
+            /* branchless programming 102!? 🤷‍♀️ */
+            mode ^= ((lightsOff | isDiffuseMode) & SHADER_MODE_MASK_LIGHTS) |
+                    ((lightsOn | isDiffuseMode) & SHADER_MODE_MASK_DIFFUSE);
+            pso.mode = mode;
             lastShaderChange = now;
         }
     }
@@ -136,8 +177,14 @@
         return {
             R_VertexShaderObj: vso,
             R_PixelShaderObj: pso,
-            R_ShaderMode: SHADER_MODE,
-            R_ChangeShader,
+            R_ShaderMode_Wireframe: SHADER_MODE_MASK_WIREFRAME,
+            R_ShaderMode_Fill: SHADER_MODE_MASK_FILL,
+            R_ShaderMode_Lights: SHADER_MODE_MASK_LIGHTS,
+            R_ShaderMode_Diffuse: SHADER_MODE_MASK_DIFFUSE,
+            R_ShaderMode_Texture: SHADER_MODE_MASK_TEXTURED_FILL,
+            R_ToggleWireframe,
+            R_ChangeFillMode,
+            R_ChangeLightingMode,
         };
     };
 })();
