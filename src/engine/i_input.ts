@@ -30,6 +30,23 @@
         SPC: "SPC",
     } as const;
 
+    const KEY_CODES = {
+        Enter: KEY.RTN,
+        Space: KEY.SPC,
+        ArrowLeft: KEY.ARW_LEFT,
+        ArrowUp: KEY.ARW_UP,
+        ArrowRight: KEY.ARW_RIGHT,
+        ArrowDown: KEY.ARW_DOWN,
+        KeyA: KEY.A,
+        KeyD: KEY.D,
+        KeyE: KEY.E,
+        KeyG: KEY.G,
+        KeyW: KEY.W,
+        KeyQ: KEY.Q,
+        KeyR: KEY.R,
+        KeyS: KEY.S,
+    } as const;
+
     const MOUSE = {
         LEFT: "LEFT",
         MIDDLE: "MIDDLE",
@@ -42,6 +59,14 @@
         WHEELING: "WHEELING",
         DELTA_WHEEL: "DELTA_WHEEL",
     } as const;
+
+    const MOUSE_CODES = [
+        MOUSE.LEFT,
+        MOUSE.MIDDLE,
+        MOUSE.RIGHT,
+        MOUSE.BRWS_BWD,
+        MOUSE.BRWS_FWD,
+     ] as const;
 
     const keyState: { [key in (keyof KEY)]: 0 | 1 } = {
         [KEY.A]: 0,
@@ -76,36 +101,18 @@
     const MOUSE_RESET_DELAY = 100;
     let mouseStopTimeout: number, mouseWheelTimeout: number;
 
-    function I_UpdateKeyState (key: number, state: 0 | 1): void
-    {
-        switch (key)
-        {
-            case 13: keyState.RTN = state ? 1 : 0; break;
-            case 32: keyState.SPC = state ? 1 : 0; break;
-            case 37: keyState.ARW_LEFT = state ? 1 : 0; break;
-            case 38: keyState.ARW_UP = state ? 1 : 0; break;
-            case 39: keyState.ARW_RIGHT = state ? 1 : 0; break;
-            case 40: keyState.ARW_DOWN = state ? 1 : 0; break;
-            case 65: keyState.A = state ? 1 : 0; break;
-            case 68: keyState.D = state ? 1 : 0; break;
-            case 69: keyState.E = state ? 1 : 0; break;
-            case 71: keyState.G = state ? 1 : 0; break;
-            case 87: keyState.W = state ? 1 : 0; break;
-            case 81: keyState.Q = state ? 1 : 0; break;
-            case 82: keyState.R = state ? 1 : 0; break;
-            case 83: keyState.S = state ? 1 : 0; break;
-            default: break;
-        }
-    }
-
     function I_KeyDown (event: KeyboardEvent): void
     {
-        I_UpdateKeyState(event.keyCode, 1);
+        const code = event.code;
+        if (code in KEY_CODES)
+            keyState[KEY_CODES[code as keyof typeof KEY_CODES]] = 1;
     }
 
     function I_KeyUp (event: KeyboardEvent): void
     {
-        I_UpdateKeyState(event.keyCode, 0);
+        const code = event.code;
+        if (code in KEY_CODES)
+            keyState[KEY_CODES[code as keyof typeof KEY_CODES]] = 0;
     }
 
     function I_GetKeyState (key: keyof typeof KEY): 0 | 1
@@ -119,27 +126,16 @@
         onElement.onkeyup = I_KeyUp;
     }
 
-    function I_UpdateMouseButtonState (button: number, state: 0 | 1): void
-    {
-        switch (button)
-        {
-            case 0: mouseState.LEFT = state ? 1 : 0; break;
-            case 1: mouseState.MIDDLE = state ? 1 : 0; break;
-            case 2: mouseState.RIGHT = state ? 1 : 0; break;
-            case 3: mouseState.BRWS_BWD = state ? 1 : 0; break;
-            case 4: mouseState.BRWS_FWD = state ? 1 : 0; break;
-            default: break;
-        }
-    }
-
     function I_MouseDown (event: MouseEvent): void
     {
-        I_UpdateMouseButtonState(event.button, 1);
+        const button = event.button;
+        if (MOUSE_CODES[button]) mouseState[MOUSE_CODES[button]] = 1;
     }
 
     function I_MouseUp (event: MouseEvent): void
     {
-        I_UpdateMouseButtonState(event.button, 0);
+        const button = event.button;
+        if (MOUSE_CODES[button]) mouseState[MOUSE_CODES[button]] = 0;
     }
 
     function I_ResetMouseMovement (): void
