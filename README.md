@@ -159,6 +159,7 @@ will reject it otherwise.*
 | Cycle between (*R*)endering modes                   | <kbd>R</kbd>                                                                      |
 | Cycle between (*L*)ighting modes                    | <kbd>L</kbd>                                                                      |
 | Switch between (*P*)oint and directional lights     | <kbd>P</kbd>                                                                      |
+| Toggle specular (*H*)ighlights on/off               | <kbd>H</kbd>                                                                      |
 
 > ⚠️ *<sup>__\*__</sup> You should first click <kbd>![LMB]</kbd> on the `canvas` to
   activate mouse controls.*

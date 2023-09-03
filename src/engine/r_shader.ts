@@ -29,7 +29,8 @@
     const SHADER_MODE_MASK_TEXTURE_FILL = 0x4;
     // bit flag to set light calculations on/off — off means ambient (base)
     // light only, in which case overrides whatever is set to
-    // `SHADER_MODE_MASK_SMOOTH` or `SHADER_MODE_MASK_POINT_LIGHT`
+    // `SHADER_MODE_MASK_SMOOTH`, `SHADER_MODE_MASK_POINT_LIGHT`, or
+    // `SHADER_MODE_MASK_SPECULAR`
     const SHADER_MODE_MASK_LIGHTS = 0x8;
     // bit flag to set per-pixel smooth shading calculations on/off — off means
     // flat shading, a constant light intensity over the entire triangle
@@ -37,12 +38,16 @@
     // bit flag to be used to switch between directional and point lights —
     // requires `SHADER_MODE_MASK_LIGHTS` to be set
     const SHADER_MODE_MASK_POINT_LIGHT = 0x20;
+    // bit flag to set specular highlights on/off — requires
+    // `SHADER_MODE_MASK_SMOOTH` to be set
+    const SHADER_MODE_MASK_SPECULAR = 0x40;
 
     let mode = SHADER_MODE_MASK_FILL |
                SHADER_MODE_MASK_TEXTURE_FILL |
                SHADER_MODE_MASK_LIGHTS |
                SHADER_MODE_MASK_SMOOTH |
-               SHADER_MODE_MASK_POINT_LIGHT;
+               SHADER_MODE_MASK_POINT_LIGHT |
+               SHADER_MODE_MASK_SPECULAR;
 
     const shaderChangeDebounce = 250;
     let lastShaderChange = Date.now();
@@ -216,6 +221,24 @@
         }
     }
 
+    //
+    // R_ToggleSpecularHighlights
+    // Toggle specular highlights on meshes on/off
+    //
+    function R_ToggleSpecularHighlights (): void
+    {
+        const now = Date.now();
+        if (I_GetKeyState(I_Keys.H) &&
+            now - lastShaderChange >= shaderChangeDebounce)
+        {
+            mode ^= SHADER_MODE_MASK_SPECULAR;
+            pso.mode = mode;
+            lastShaderChange = now;
+            if (mode & SHADER_MODE_MASK_SPECULAR)
+                R_SetOnScreenMessage("Specular highlights", 50);
+        }
+    }
+
     window.__import__R_Shader = function ()
     {
         return {
@@ -227,10 +250,12 @@
             R_ShaderMode_Lights: SHADER_MODE_MASK_LIGHTS,
             R_ShaderMode_Smooth: SHADER_MODE_MASK_SMOOTH,
             R_ShaderMode_PointLight: SHADER_MODE_MASK_POINT_LIGHT,
+            R_ShaderMode_Specular: SHADER_MODE_MASK_SPECULAR,
             R_ToggleWireframe,
             R_ChangeFillMode,
             R_ChangeLightingMode,
             R_TogglePointLight,
+            R_ToggleSpecularHighlights,
         };
     };
 })();

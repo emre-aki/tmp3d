@@ -146,6 +146,7 @@ type KEY = {
     E: "E",
     F: "F",
     G: "G",
+    H: "H",
     L: "L",
     P: "P",
     Q: "Q",
@@ -505,11 +506,13 @@ type __Mod__R_Shader = {
     R_ShaderMode_Texture: number,
     R_ShaderMode_Lights: number,
     R_ShaderMode_Smooth: number,
+    R_ShaderMode_Specular: number,
     R_ShaderMode_PointLight: number,
     R_ToggleWireframe (): void,
     R_ChangeFillMode (): void,
     R_ChangeLightingMode (): void,
     R_TogglePointLight (): void,
+    R_ToggleSpecularHighlights (): void,
 };
 
 declare function __import__R_Shader (): __Mod__R_Shader;
