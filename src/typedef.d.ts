@@ -162,6 +162,7 @@ type KEY = {
     E: "E",
     F: "F",
     G: "G",
+    H: "H",
     L: "L",
     Q: "Q",
     R: "R",
@@ -658,6 +659,7 @@ type pso_t = {
 type R_ToggleWireframe = () => void;
 type R_ChangeFillMode = () => void;
 type R_ChangeLightingMode = () => void;
+type R_ToggleSpecularHighlights = () => void;
 
 type __Mod__R_Shader = {
     R_VertexShaderObj: vso_t,
@@ -666,10 +668,12 @@ type __Mod__R_Shader = {
     R_ShaderMode_Fill: number,
     R_ShaderMode_Lights: number,
     R_ShaderMode_Diffuse: number,
+    R_ShaderMode_Specular: number,
     R_ShaderMode_Texture: number,
     R_ToggleWireframe: R_ToggleWireframe,
     R_ChangeFillMode: R_ChangeFillMode,
     R_ChangeLightingMode: R_ChangeLightingMode,
+    R_ToggleSpecularHighlights: R_ToggleSpecularHighlights,
 };
 
 declare function __import__R_Shader (): __Mod__R_Shader;

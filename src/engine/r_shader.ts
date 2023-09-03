@@ -29,12 +29,16 @@
     // bit flag to set per-pixel diffuse lighting on/off — off means flat
     // shading, a constant light intensity over the entire geometry
     const SHADER_MODE_MASK_DIFFUSE = 0x8;
+    // bit flag to set specular highlights on/off — requires
+    // `SHADER_MODE_MASK_DIFFUSE` to be set
+    const SHADER_MODE_MASK_SPECULAR = 0x10;
     // bit flag to set texture mode on/off
-    const SHADER_MODE_MASK_TEXTURED_FILL = 0x10;
+    const SHADER_MODE_MASK_TEXTURED_FILL = 0x20;
 
     let mode = SHADER_MODE_MASK_FILL |
                SHADER_MODE_MASK_LIGHTS |
                SHADER_MODE_MASK_DIFFUSE |
+               SHADER_MODE_MASK_SPECULAR |
                SHADER_MODE_MASK_TEXTURED_FILL;
 
     const shaderChangeDebounce = 250;
@@ -172,6 +176,22 @@
         }
     }
 
+    //
+    // R_ToggleSpecularHighlights
+    // Toggle specular highlights on meshes on/off
+    //
+    function R_ToggleSpecularHighlights (): void
+    {
+        const now = Date.now();
+        if (I_GetKeyState(I_Keys.H) &&
+            now - lastShaderChange >= shaderChangeDebounce)
+        {
+            mode ^= SHADER_MODE_MASK_SPECULAR;
+            pso.mode = mode;
+            lastShaderChange = now;
+        }
+    }
+
     window.__import__R_Shader = function ()
     {
         return {
@@ -181,10 +201,12 @@
             R_ShaderMode_Fill: SHADER_MODE_MASK_FILL,
             R_ShaderMode_Lights: SHADER_MODE_MASK_LIGHTS,
             R_ShaderMode_Diffuse: SHADER_MODE_MASK_DIFFUSE,
+            R_ShaderMode_Specular: SHADER_MODE_MASK_SPECULAR,
             R_ShaderMode_Texture: SHADER_MODE_MASK_TEXTURED_FILL,
             R_ToggleWireframe,
             R_ChangeFillMode,
             R_ChangeLightingMode,
+            R_ToggleSpecularHighlights,
         };
     };
 })();

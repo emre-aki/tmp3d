@@ -45,6 +45,7 @@
     const R_ToggleWireframe = R_Shader.R_ToggleWireframe;
     const R_ChangeFillMode = R_Shader.R_ChangeFillMode;
     const R_ChangeLightingMode = R_Shader.R_ChangeLightingMode;
+    const R_ToggleSpecularHighlights = R_Shader.R_ToggleSpecularHighlights;
 
     const TICK_DELAY = 1000 / FPS;
 
@@ -64,9 +65,10 @@
     {
         R_UpdateCamera(1); // TODO: take `deltaT` into account
         R_ToggleGlobalRotation();
-        R_ToggleWireframe();    // need these to be handled in their own
-        R_ChangeFillMode();     // separate listeners so the key strokes
-        R_ChangeLightingMode(); // associated with each event can be captured
+        R_ToggleWireframe();          // need these to be handled in their own
+        R_ChangeFillMode();           // separate listeners so the key strokes
+        R_ChangeLightingMode();       // associated with each event can be
+        R_ToggleSpecularHighlights(); // successfully captured
         R_UpdateGeometry();
     }
 
