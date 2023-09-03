@@ -425,7 +425,10 @@
         let lightLevel = 1;
         if (lightX !== undefined &&
             lightY !== undefined &&
-            lightZ !== undefined)
+            lightZ !== undefined &&
+            normalX !== undefined &&
+            normalY !== undefined &&
+            normalZ !== undefined)
             lightLevel = lightX * normalX + lightY * normalY + lightZ * normalZ;
         // raster clipping: clip the scanline if it goes out-of-bounds of screen
         // coordinates
@@ -506,7 +509,7 @@
        cx, cy, cw,
        ar, ag, ab,
        br, bg, bb,
-       cr, cg, cb, }: vso_t,
+       cr, cg, cb }: vso_t,
      pso: pso_t ): void
     {
         /* coordinates of the triangle in screen-space */
@@ -753,6 +756,7 @@
     // R_LerpTexturedScanline_Perspective
     // Lerp a single texture-mapped scanline with smooth shading
     //
+    /* FIXME: remove redundant lighting associated branches in this function */
     function
     R_LerpTexturedScanline_Perspective
     ({ tex,
@@ -762,6 +766,7 @@
        u0, v0, u1, v1,
        nx0, ny0, nz0, nx1, ny1, nz1,
        wx0, wy0, wz0, wx1, wy1, wz1,
+       normalX, normalY, normalZ,
        lightX, lightY, lightZ,
        alpha }: pso_t): void
     {
@@ -832,21 +837,36 @@
             /* wrap-around the texture if the sampling point is out-of-bounds */
             sX = Math.floor((((sX % 1) + 1) % 1) * texWidth);
             sY = Math.floor((((sY % 1) + 1) % 1) * texHeight);
-            const NX = nx * w_, NY = ny * w_, NZ = nz * w_;
-            /* TODO: maybe use `Q_rsqrt` here??? */
-            const magN_ = 1 / Math.sqrt(NX * NX + NY * NY + NZ * NZ);
-            const nXUnit = NX * magN_, nYUnit = NY * magN_, nZUnit = NZ * magN_;
-            const WX = wx * w_, WY = wy * w_, WZ = wz * w_;
             let lightLevel = 1;
             if (shouldShade)
             {
+                const WX = wx * w_, WY = wy * w_, WZ = wz * w_;
                 const lX = lightX - WX, lY = lightY - WY, lZ = lightZ - WZ;
+                /* TODO: maybe use `Q_rsqrt` here??? */
                 const magL_ = 1 / Math.sqrt(lX * lX + lY * lY + lZ * lZ);
                 const lXUnit = lX * magL_;
                 const lYUnit = lY * magL_;
                 const lZUnit = lZ * magL_;
-                lightLevel =
-                    lXUnit * nXUnit + lYUnit * nYUnit + lZUnit * nZUnit;
+                /* flat shading */
+                if (normalX !== undefined &&
+                    normalY !== undefined &&
+                    normalZ !== undefined)
+                {
+                    lightLevel =
+                        lXUnit * normalX + lYUnit * normalY + lZUnit * normalZ;
+                }
+                /* diffuse shading */
+                else
+                {
+                    const NX = nx * w_, NY = ny * w_, NZ = nz * w_;
+                    /* TODO: maybe use `Q_rsqrt` here??? */
+                    const magN_ = 1 / Math.sqrt(NX * NX + NY * NY + NZ * NZ);
+                    const nXUnit = NX * magN_;
+                    const nYUnit = NY * magN_;
+                    const nZUnit = NZ * magN_;
+                    lightLevel =
+                        lXUnit * nXUnit + lYUnit * nYUnit + lZUnit * nZUnit;
+                }
             }
             /* draw a single pixel in screen-space sampled from the
              * perspective-corrected texture space

@@ -166,7 +166,9 @@ type KEY = {
     A: "A",
     D: "D",
     E: "E",
+    F: "F",
     G: "G",
+    L: "L",
     Q: "Q",
     R: "R",
     S: "S",
@@ -637,7 +639,7 @@ type vso_t = {
 };
 
 type pso_t = {
-    mode: keyof SHADER_MODE,
+    mode: number,
     tex?: texture_t,
     dy: number,
     dx0: number, dx1: number,
@@ -648,32 +650,26 @@ type pso_t = {
     nx1: number, ny1: number, nz1: number,
     wx0: number, wy0: number, wz0: number,
     wx1: number, wy1: number, wz1: number,
-    normalX: number, normalY: number, normalZ: number,
+    normalX?: number, normalY?: number, normalZ?: number,
     lightX?: number, lightY?: number, lightZ?: number,
     alpha: number,
 };
 
-type SHADER_MODE = {
-    FLAT: "FLAT",
-    TEXTURED: "TEXTURED",
-    TEXTURED_SHADED: "TEXTURED_SHADED",
-    WIREFRAME: "WIREFRAME",
-};
-
-type SHADER_MODES = [
-    SHADER_MODE["WIREFRAME"],
-    SHADER_MODE["FLAT"],
-    SHADER_MODE["TEXTURED"],
-    SHADER_MODE["TEXTURED_SHADED"],
-];
-
-type R_ChangeShader = () => void;
+type R_ToggleWireframe = () => void;
+type R_ChangeFillMode = () => void;
+type R_ChangeLightingMode = () => void;
 
 type __Mod__R_Shader = {
     R_VertexShaderObj: vso_t,
     R_PixelShaderObj: pso_t,
-    R_ShaderMode: SHADER_MODE,
-    R_ChangeShader: R_ChangeShader,
+    R_ShaderMode_Wireframe: number,
+    R_ShaderMode_Fill: number,
+    R_ShaderMode_Texture: number,
+    R_ShaderMode_Lights: number,
+    R_ShaderMode_Diffuse: number,
+    R_ToggleWireframe: R_ToggleWireframe,
+    R_ChangeFillMode: R_ChangeFillMode,
+    R_ChangeLightingMode: R_ChangeLightingMode,
 };
 
 declare function __import__R_Shader (): __Mod__R_Shader;

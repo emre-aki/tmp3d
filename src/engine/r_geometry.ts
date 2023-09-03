@@ -62,7 +62,11 @@
         R_Draw.R_DrawTriangle_Textured_Perspective;
 
     const R_Shader = __import__R_Shader();
-    const R_ShaderMode = R_Shader.R_ShaderMode;
+    const R_ShaderMode_Wireframe = R_Shader.R_ShaderMode_Wireframe;
+    const R_ShaderMode_Fill = R_Shader.R_ShaderMode_Fill;
+    const R_ShaderMode_Texture = R_Shader.R_ShaderMode_Texture;
+    const R_ShaderMode_Lights = R_Shader.R_ShaderMode_Lights;
+    const R_ShaderMode_Diffuse = R_Shader.R_ShaderMode_Diffuse;
     const vso = R_Shader.R_VertexShaderObj;
     const pso = R_Shader.R_PixelShaderObj;
 
@@ -450,12 +454,25 @@
         nTrisOnScreen[1] = nCulledBuffer;
     }
 
+    /* TODO: add vertex normals and world-coordinates, and directional/point
+     * and flat/diffuse differentiation
+     */
     function R_RenderGeomeries_Flat (nTrisOnScreen: Uint32Array): void
     {
-        /* directional light that falls on the triangle */
-        pso.lightX = DIRECTIONAL_LIGHT[0];
-        pso.lightY = DIRECTIONAL_LIGHT[1];
-        pso.lightZ = DIRECTIONAL_LIGHT[2];
+        /* set the light */
+        if (pso.mode & R_ShaderMode_Lights)
+        {
+            /* the directional light falling on the triangle */
+            pso.lightX = DIRECTIONAL_LIGHT[0];
+            pso.lightY = DIRECTIONAL_LIGHT[1];
+            pso.lightZ = DIRECTIONAL_LIGHT[2];
+        }
+        else
+        {
+            pso.lightX = undefined;
+            pso.lightY = undefined;
+            pso.lightZ = undefined;
+        }
         let trisRendered = 0;
         for (let i = 0; i < nCulledBuffer; ++i)
         {
@@ -468,7 +485,7 @@
                                                                clippedTriQueue);
             // TODO: clip against far-plane
             /* calculate the surface normal */
-            if (nClipResult)
+            if (nClipResult) // TODO: add flat/diffuse differentiation here
             {
                 const triNormal = M_TriNormal3(triWorld);
                 pso.normalX = triNormal[0];
@@ -508,7 +525,7 @@
                 vso.br = 0; vso.bg = 255; vso.bb = 0;
                 vso.cr = 0; vso.cg = 0; vso.cb = 255;
                 R_FillTriangle_Flat(vso, pso);
-                if (DEBUG_MODE)
+                if (pso.mode & R_ShaderMode_Wireframe)
                     R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
                                              0, 0, 0, 255, 2);
                 ++trisRendered;
@@ -523,7 +540,8 @@
         let trisRendered = 0;
         // early return if the mesh does not have texture-mapping
         if (!uvTable3) return;
-        if (pso.mode === R_ShaderMode.TEXTURED_SHADED)
+        /* set the light */
+        if (pso.mode & R_ShaderMode_Lights)
         {
             // currently the camera also acts as a point light
             const cam = R_Camera.R_GetCameraState();
@@ -557,6 +575,22 @@
                 uvMap,
                 clippedUvMapQueue
             );
+            /* calculate the surface normal if the shader mode is set to
+             * flat-shading
+             */
+            if (nClipResult && !(pso.mode & R_ShaderMode_Diffuse))
+            {
+                const triNormal = M_TriNormal3(triWorld);
+                pso.normalX = triNormal[0];
+                pso.normalY = triNormal[1];
+                pso.normalZ = triNormal[2];
+            }
+            else
+            {
+                pso.normalX = undefined;
+                pso.normalY = undefined;
+                pso.normalZ = undefined;
+            }
             // grab the texture and pass it along to the pixel shader object
             pso.tex = A_Texture(textureTable[triIndex]);
             // TODO: clip against far-plane
@@ -619,7 +653,7 @@
                 vso.wbx = wBX; vso.wby = wBY; vso.wbz = wBZ;
                 vso.wcx = wCX; vso.wcy = wCY; vso.wcz = wCZ;
                 R_DrawTriangle_Textured_Perspective(vso, pso);
-                if (DEBUG_MODE)
+                if (pso.mode & R_ShaderMode_Wireframe)
                     R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
                                              255, 255, 255, 255, 2);
                 ++trisRendered;
@@ -698,24 +732,15 @@
     function R_RenderGeometries (nTrisOnScreen: Uint32Array): void
     {
         R_CullGeometry();
-        switch (pso.mode)
+        if (pso.mode & R_ShaderMode_Fill)
         {
-            case R_ShaderMode.WIREFRAME:
-                R_RenderGeomeries_Wireframe(nTrisOnScreen);
-
-                break;
-            case R_ShaderMode.FLAT:
-                R_RenderGeomeries_Flat(nTrisOnScreen);
-
-                break;
-            case R_ShaderMode.TEXTURED:
-            case R_ShaderMode.TEXTURED_SHADED:
+            if (pso.mode & R_ShaderMode_Texture)
                 R_RenderGeometries_Textured(nTrisOnScreen);
-
-                break;
-            default:
-                break;
+            else
+                R_RenderGeomeries_Flat(nTrisOnScreen);
         }
+        else if (pso.mode & R_ShaderMode_Wireframe)
+            R_RenderGeomeries_Wireframe(nTrisOnScreen);
         if (DEBUG_MODE) R_RenderDebugAxes(1000);
     }
 
