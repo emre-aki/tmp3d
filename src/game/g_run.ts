@@ -44,6 +44,7 @@
         R_ChangeFillMode,
         R_ChangeLightingMode,
         R_TogglePointLight,
+        R_ToggleSpecularHighlights,
         R_ToggleWireframe,
         R_ToggleNormals,
     } = __import__R_Shader();
@@ -66,11 +67,12 @@
     {
         R_UpdateCamera(1); // TODO: take `deltaT` into account
         R_ToggleGlobalRotation();
-        R_ToggleWireframe();    // need these to be handled in their own
-        R_ChangeFillMode();     // separate listeners so the key strokes
-        R_ChangeLightingMode(); // associated with each event can be captured
-        R_TogglePointLight();   // individually
-        R_ToggleNormals();      //
+        R_ToggleWireframe();          // need these events to be handled in
+        R_ChangeFillMode();           // their own separate listeners so that
+        R_ChangeLightingMode();       // the key strokes associated with each
+        R_TogglePointLight();         // event can be captured individually with
+        R_ToggleNormals();            // no collisions
+        R_ToggleSpecularHighlights(); //
         R_UpdateWorld();
     }
 
