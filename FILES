@@ -27,6 +27,7 @@ M        Math
 m_math.ts       - math utilities
 m_mat4.ts       - 4x4 matrix
 m_tri3.ts       - 3-D triangle
+m_vec2.ts       - 2-D vector
 m_vec3.ts       - 3-D vector
 m_aabb3.ts      - 3-D axis-aligned bounding-box
 m_collision.ts  - Collisions in 2-D & 3-D

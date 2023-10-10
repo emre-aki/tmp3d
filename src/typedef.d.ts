@@ -32,6 +32,7 @@ interface Window {
     __import__M_Mat4: typeof __import__M_Mat4;
     __import__M_Math: typeof __import__M_Math;
     __import__M_Tri3: typeof __import__M_Tri3;
+    __import__M_Vec2: typeof __import__M_Vec2;
     __import__M_Vec3: typeof __import__M_Vec3;
     __import__R_Camera: typeof __import__R_Camera;
     __import__R_Draw: typeof __import__R_Draw;
@@ -234,6 +235,26 @@ type __Mod__M_Collision = {
  };
 
  declare function __import__M_Collision (): __Mod__M_Collision;
+
+// -----------------------------------------------------------------------------
+// engine/m_vec2.ts
+// -----------------------------------------------------------------------------
+type vec2_t = Float32Array;
+type M_Vec2 = (x: number, y: number) => vec2_t;
+type M_Cross2 = (u: vec2_t, v: vec2_t) => number;
+type M_Add2 = (u: vec2_t, v: vec2_t) => vec2_t;
+type M_Sub2 = (u: vec2_t, v: vec2_t) => vec2_t;
+type M_Scale2 = (u: vec2_t, s: number) => vec2_t;
+
+type __Mod__M_Vec2 = {
+    M_Vec2: M_Vec2,
+    M_Cross2: M_Cross2,
+    M_Add2: M_Add2,
+    M_Sub2: M_Sub2,
+    M_Scale2: M_Scale2,
+};
+
+declare function __import__M_Vec2 (): __Mod__M_Vec2;
 
 // -----------------------------------------------------------------------------
 // engine/m_vec3.ts
