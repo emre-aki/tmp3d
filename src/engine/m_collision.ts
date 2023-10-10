@@ -10,11 +10,41 @@
 
 (function (): void
 {
+    const M_Vec2 = __import__M_Vec2();
+    const M_Add2 = M_Vec2.M_Add2;
+    const M_Cross2 = M_Vec2.M_Cross2;
+    const M_Scale2 = M_Vec2.M_Scale2;
+    const M_Sub2 = M_Vec2.M_Sub2;
+    const Vec2 = M_Vec2.M_Vec2;
+
     const M_Vec3 = __import__M_Vec3();
     const M_Add3 = M_Vec3.M_Add3;
     const M_DistToPlane3 = M_Vec3.M_DistToPlane3;
     const M_Scale3 = M_Vec3.M_Scale3;
     const M_Sub3 = M_Vec3.M_Sub3;
+
+    function
+    M_LineVsLine2
+    ( ax: number, ay: number,
+      bx: number, by: number,
+      cx: number, cy: number,
+      dx: number, dy: number,
+      segment?: 1 ): vec2_t | undefined
+    {
+        const a = Vec2(ax, ay), b = Vec2(bx, by);
+        const c = Vec2(cx, cy), d = Vec2(dx, dy);
+        const s = M_Sub2(b, a), t = M_Sub2(d, c);
+        const c_a = M_Sub2(c, a);
+        const denom = 1 / M_Cross2(s, t);
+        const X = M_Cross2(c_a, t) * denom;
+        if (segment)
+        {
+            const Y = M_Cross2(c_a, s) * denom;
+            if (X < 0 || X > 1 || Y < 0 || Y > 1) return;
+        }
+
+        return M_Add2(a, M_Scale2(s, X));
+    }
 
     function
     M_TimeBeforePlaneCollision3
@@ -65,6 +95,7 @@
     window.__import__M_Collision = function ()
     {
         return {
+            M_LineVsLine2,
             M_TimeBeforePlaneCollision3,
             M_LineSegmentVsPlaneCollision3,
             M_BoundingBoxVsBoundingBoxCollision3,

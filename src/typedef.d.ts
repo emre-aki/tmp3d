@@ -213,6 +213,14 @@ declare function __import__M_AABB3 (): __Mod__M_AABB3;
 // -----------------------------------------------------------------------------
 // engine/m_collision.ts
 // -----------------------------------------------------------------------------
+type M_LineVsLine2 = (
+    ax: number, ay: number,
+    bx: number, by: number,
+    cx: number, cy: number,
+    dx: number, dy: number,
+    segment?: 1
+) => vec2_t | undefined;
+
 type M_TimeBeforePlaneCollision3 = (
     lineSrc: vec3_t, lineDest: vec3_t,
     planeRef: vec3_t, planeNormal: vec3_t
@@ -229,6 +237,7 @@ type M_BoundingBoxVsBoundingBoxCollision3 = (
 ) => boolean;
 
 type __Mod__M_Collision = {
+    M_LineVsLine2: M_LineVsLine2,
     M_TimeBeforePlaneCollision3: M_TimeBeforePlaneCollision3,
     M_LineSegmentVsPlaneCollision3: M_LineSegmentVsPlaneCollision3,
     M_BoundingBoxVsBoundingBoxCollision3: M_BoundingBoxVsBoundingBoxCollision3,
