@@ -1,11 +1,11 @@
 /*
- *  m_collision3.ts
+ *  m_collision.ts
  *  tmp3d
  *
  *  Created by Emre Akı on 2022-10-07.
  *
  *  SYNOPSIS:
- *      Routines for detecting various collisions in 3-D.
+ *      Routines for detecting various collisions in 2-D and 3-D.
  */
 
 (function (): void
@@ -62,7 +62,7 @@
                aabb1[2] + aabb1[5] >= aabb0[2];
     }
 
-    window.__import__M_Collision3 = function ()
+    window.__import__M_Collision = function ()
     {
         return {
             M_TimeBeforePlaneCollision3,

@@ -25,11 +25,10 @@
     const I_GetKeyState = I_Input.I_GetKeyState;
     const I_Keys = I_Input.I_Keys;
 
-    const M_Collision3 = __import__M_Collision3();
-    const M_TimeBeforePlaneCollision3 =
-        M_Collision3.M_TimeBeforePlaneCollision3;
+    const M_Collision = __import__M_Collision();
+    const M_TimeBeforePlaneCollision3 = M_Collision.M_TimeBeforePlaneCollision3;
     const M_BoundingBoxVsBoundingBoxCollision3 =
-        M_Collision3.M_BoundingBoxVsBoundingBoxCollision3;
+        M_Collision.M_BoundingBoxVsBoundingBoxCollision3;
 
     const M_Tri3 = __import__M_Tri3();
     const M_TriNormal3 = M_Tri3.M_TriNormal3;

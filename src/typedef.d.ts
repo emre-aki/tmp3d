@@ -28,7 +28,7 @@ interface Window {
     __import__AN_Animation: typeof __import__AN_Animation;
     __import__I_Input: typeof __import__I_Input;
     __import__M_AABB3: typeof __import__M_AABB3;
-    __import__M_Collision3: typeof __import__M_Collision3;
+    __import__M_Collision: typeof __import__M_Collision;
     __import__M_Mat4: typeof __import__M_Mat4;
     __import__M_Math: typeof __import__M_Math;
     __import__M_Tri3: typeof __import__M_Tri3;
@@ -210,7 +210,7 @@ type __Mod__M_AABB3 = { M_AABB3: M_AABB3 };
 declare function __import__M_AABB3 (): __Mod__M_AABB3;
 
 // -----------------------------------------------------------------------------
-// engine/m_collision3.ts
+// engine/m_collision.ts
 // -----------------------------------------------------------------------------
 type M_TimeBeforePlaneCollision3 = (
     lineSrc: vec3_t, lineDest: vec3_t,
@@ -227,13 +227,13 @@ type M_BoundingBoxVsBoundingBoxCollision3 = (
     aabb1: aabb3_t
 ) => boolean;
 
-type __Mod__M_Collision3 = {
+type __Mod__M_Collision = {
     M_TimeBeforePlaneCollision3: M_TimeBeforePlaneCollision3,
     M_LineSegmentVsPlaneCollision3: M_LineSegmentVsPlaneCollision3,
     M_BoundingBoxVsBoundingBoxCollision3: M_BoundingBoxVsBoundingBoxCollision3,
  };
 
- declare function __import__M_Collision3 (): __Mod__M_Collision3;
+ declare function __import__M_Collision (): __Mod__M_Collision;
 
 // -----------------------------------------------------------------------------
 // engine/m_vec3.ts
