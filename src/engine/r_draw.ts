@@ -177,7 +177,6 @@
             R_Bresenham_HorizontalSweep(dX, dY, sX, sY, r, g, b, a, stroke);
     }
 
-
     function
     R_DrawLine_DDA
     ( sx: number, sy: number,
