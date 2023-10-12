@@ -59,7 +59,7 @@
     {
         // TODO: throw an error should the `filenames` and `ids` have different
         // lengths, maybe??
-        const texturePromises: Promise<void>[] = Array(numTextures);
+        const texturePromises = Array<Promise<void>>(numTextures);
         for (let i = 0; i < numTextures; ++i)
             texturePromises[i] = A_TexturePromise(ids[i], filenames[i]);
 

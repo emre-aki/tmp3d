@@ -142,7 +142,7 @@
         transformedTriVertexNormals3 = Array(nTriangles);
         culledBuffer = new Uint32Array(nTriangles); // TODO: maybe 16??
         // temporary buffer to compute vertex normals
-        const vertexNormals3: vec3_t[] = Array(nVertices);
+        const vertexNormals3 = Array<vec3_t>(nVertices);
         /* go over each triangle to collect their vertices and vertex normals */
         for (let i = 0; i < nTriangles; ++i)
         {
@@ -272,7 +272,7 @@
       clippedTriQueue: [tri3_t, tri3_t] ): number
     {
         let nVerticesInside = 0;
-        const inside: vec3_t[] = Array(4);
+        const inside = Array<vec3_t>(4);
         /* test each vertex in the original triangle against the near-clipping
          * plane to see whether they fall inside of the plane or not
          */
@@ -321,9 +321,9 @@
       uvMap: tri3_t, clippedUvMapQueue: [tri3_t, tri3_t] ): number
     {
         let nVerticesInside = 0;
-        const inside: vec3_t[] = Array(4);
-        const nInside: vec3_t[] = Array(4);
-        const uvInside: vec3_t[] = Array(4);
+        const inside = Array<vec3_t>(4);
+        const nInside = Array<vec3_t>(4);
+        const uvInside = Array<vec3_t>(4);
         /* test each vertex in the original triangle against the near-clipping
          * plane to see whether they fall inside of the plane or not
          */
