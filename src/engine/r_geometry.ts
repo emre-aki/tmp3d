@@ -316,9 +316,12 @@
      */
     function
     R_ClipGeometryAgainstNearPlane_Textured
-    ( triView: tri3_t, clippedTriQueue: [tri3_t, tri3_t],
-      triVertexNormals: tri3_t, clippedTriVertexNormalQueue: [tri3_t, tri3_t],
-      uvMap: tri3_t, clippedUvMapQueue: [tri3_t, tri3_t] ): number
+    ( triView: tri3_t,
+      clippedTriQueue: [tri3_t, tri3_t],
+      triVertexNormals: tri3_t,
+      clippedTriVertexNormalQueue: [tri3_t, tri3_t],
+      uvMap: tri3_t,
+      clippedUvMapQueue: [tri3_t, tri3_t] ): number
     {
         let nVerticesInside = 0;
         const inside = Array<vec3_t>(4);
