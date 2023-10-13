@@ -17,9 +17,15 @@
     const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
     const N_PIXELS = SCREEN_W * SCREEN_H;
 
+    const M_Collision = __import__M_Collision();
+    const M_LineVsLine2 = M_Collision.M_LineVsLine2;
+
     const M_Math = __import__M_Math();
     const M_Clamp = M_Math.M_Clamp;
     const M_FastSign = M_Math.M_FastSign;
+
+    const M_Vec2 = __import__M_Vec2();
+    const Vec2 = M_Vec2.M_Vec2;
 
     const R_Screen = __import__R_Screen();
     const R_Ctx = R_Screen.R_Ctx;
@@ -83,13 +89,56 @@
         }
     }
 
-    /*
-    function R_ClampLine (sx: number, sy: number, dx: number, dy: number): void
+    function
+    R_ClampLine
+    ( sx: number, sy: number,
+      dx: number, dy: number,
+      sClamped: vec2_t,
+      dClamped: vec2_t ): 1 | 0
     {
-        // TODO: implement 2-D line vs. rectangle intersection & utilize in all
-        // line drawing routines
+        let nVerticesInside = 0;
+        const inside = Array<vec2_t>(2);
+        // start with the assumption that both endpoints (vertices) are within
+        // the bounds of the framebuffer
+        sClamped[0] = sx; sClamped[1] = sy; dClamped[0] = dx; dClamped[1] = dy;
+        /* if vertex `s` is already within the bounds of the framebuffer */
+        if (sClamped[0] >= 0 && sClamped[0] < SCREEN_W &&
+            sClamped[1] >= 0 && sClamped[1] < SCREEN_H)
+            inside[nVerticesInside++] = sClamped;
+        /* if vertex `d` is already within the bounds of the framebuffer */
+        if (dClamped[0] >= 0 && dClamped[0] < SCREEN_W &&
+            dClamped[1] >= 0 && dClamped[1] < SCREEN_H)
+            inside[nVerticesInside++] = dClamped;
+        // early return if both endpoints are indeed within the bounds of the
+        // framebuffer
+        if (nVerticesInside === 2) return 1;
+        /* test to see whether the line intersects with any one or two edges of
+         * the framebuffer
+         */
+        const top = M_LineVsLine2(0, 0, SCREEN_W, 0, sx, sy, dx, dy, 1);
+        const right = M_LineVsLine2(SCREEN_W, 0, SCREEN_W, SCREEN_H,
+                                    sx, sy, dx, dy, 1);
+        const bottom = M_LineVsLine2(0, SCREEN_H, SCREEN_W, SCREEN_H,
+                                     sx, sy, dx, dy, 1);
+        const left = M_LineVsLine2(0, 0, 0, SCREEN_H, sx, sy, dx, dy, 1);
+        if (top && !(isNaN(top[0]) || isNaN(top[1])))
+            inside[nVerticesInside++] = top;
+        if (right && !(isNaN(right[0]) || isNaN(right[1])))
+            inside[nVerticesInside++] = right;
+        if (bottom && !(isNaN(bottom[0]) || isNaN(bottom[1])))
+            inside[nVerticesInside++] = bottom;
+        if (left && !(isNaN(left[0]) || isNaN(left[1])))
+            inside[nVerticesInside++] = left;
+        // exit with a value of `0` indicating the line lies completely outside
+        // the bounds of the framebuffer
+        if (nVerticesInside !== 2) return 0;
+        sClamped[0] = inside[0][0]; sClamped[1] = inside[0][1];
+        dClamped[0] = inside[1][0]; dClamped[1] = inside[1][1];
+
+        // exit with a value of `1` indicating the clamped line is contained
+        // within the bounds of the framebuffer
+        return 1;
     }
-    */
 
     function
     R_Bresenham_HorizontalSweep
@@ -98,9 +147,8 @@
       r: number, g: number, b: number, a: number,
       stroke: number ): void
     {
-        const stroke_ = stroke || 1;
         const deltaX = dx - sx, deltaY = dy - sy;
-        const dirY = M_FastSign(deltaY), strokeY = dirY * stroke_;
+        const dirY = M_FastSign(deltaY), strokeY = dirY * stroke;
         // need to fix the signs in the formulae
         const deltaYAbs = deltaY * dirY;
         // the increment for Pk+1, if Pk < 0
@@ -109,9 +157,9 @@
         const pIncrementForNextRow = 0 - deltaX - deltaX;
         // the initial value for the decision parameter, P0
         const p0 = pIncrementForSameRow + pIncrementForNextRow + deltaX;
-        for (let x = sx, y = sy, pK = p0; x < dx; x += stroke_)
+        for (let x = sx, y = sy, pK = p0; x < dx; x += stroke)
         {
-            R_FillRect(x, y, stroke_, stroke_, r, g, b, a);
+            R_FillRect(x, y, stroke, stroke, r, g, b, a);
             const decision = ~(pK >> 31);
             pK += pIncrementForSameRow;
             pK += pIncrementForNextRow & decision;
@@ -126,9 +174,8 @@
       r: number, g: number, b: number, a: number,
       stroke: number ): void
     {
-        const stroke_ = stroke || 1;
         const deltaX = dx - sx, deltaY = dy - sy;
-        const dirX = M_FastSign(deltaX), strokeX = dirX * stroke_;
+        const dirX = M_FastSign(deltaX), strokeX = dirX * stroke;
         // need to fix the signs in the formulae
         const deltaXAbs = deltaX * dirX;
         // the increment for Pk+1, if Pk < 0
@@ -137,9 +184,9 @@
         const pIncrementForNextCol = 0 - deltaY - deltaY;
         // the initial value for the decision parameter, P0
         const p0 = pIncrementForSameCol + pIncrementForNextCol + deltaY;
-        for (let x = sx, y = sy, pK = p0; y < dy; y += stroke_)
+        for (let x = sx, y = sy, pK = p0; y < dy; y += stroke)
         {
-            R_FillRect(x, y, stroke_, stroke_, r, g, b, a);
+            R_FillRect(x, y, stroke, stroke, r, g, b, a);
             const decision = ~(pK >> 31);
             pK += pIncrementForSameCol;
             pK += pIncrementForNextCol & decision;
@@ -158,21 +205,32 @@
       r: number, g: number, b: number, a: number,
       stroke: number ): void
     {
-        const sX = Math.floor(sx), sY = Math.floor(sy);
-        const dX = Math.floor(dx), dY = Math.floor(dy);
-        if (sX === dX && sY === dY) return; // early return if nothing to draw
-        const isVerticalSweep = Math.abs(dX - sX) < Math.abs(dY - sY);
-        /* the x-direction of the line should always be >= 0 */
-        if (isVerticalSweep && dY > sY)
-            R_Bresenham_VerticalSweep(sX, sY, dX, dY, r, g, b, a, stroke);
+        /* clip those portions of the line that extend beyond the bounds of the
+         * framebuffer
+         */
+        const sClamped = Vec2(0, 0), dClamped = Vec2(0, 0);
+        if (!R_ClampLine(sx, sy, dx, dy, sClamped, dClamped)) return;
+        const cSX = Math.floor(sClamped[0]), cSY = Math.floor(sClamped[1]);
+        const cDX = Math.floor(dClamped[0]), cDY = Math.floor(dClamped[1]);
+        // early return if nothing to draw
+        if (cSX === cDX && cSY === cDY) return;
+        /* branch out based on the octant the line falls in */
+        const isVerticalSweep = Math.abs(cDX - cSX) < Math.abs(cDY - cSY);
+        if (isVerticalSweep && cDY > cSY) // should always grow in y-direction
+            R_Bresenham_VerticalSweep(cSX, cSY, cDX, cDY, r, g, b, a, stroke);
         else if (isVerticalSweep)
-            R_Bresenham_VerticalSweep(dX, dY, sX, sY, r, g, b, a, stroke);
-        else if (dX > sX)
-            R_Bresenham_HorizontalSweep(sX, sY, dX, dY, r, g, b, a, stroke);
+            R_Bresenham_VerticalSweep(cDX, cDY, cSX, cSY, r, g, b, a, stroke);
+        else if (cDX > cSX) // should always grow in x-direction
+            R_Bresenham_HorizontalSweep(cSX, cSY, cDX, cDY, r, g, b, a, stroke);
         else
-            R_Bresenham_HorizontalSweep(dX, dY, sX, sY, r, g, b, a, stroke);
+            R_Bresenham_HorizontalSweep(cDX, cDY, cSX, cSY, r, g, b, a, stroke);
     }
 
+    //
+    // R_DrawLine_DDA
+    // Interpolates a line between given endpoints by accumulating constant step
+    // variables akin to a DDA
+    //
     function
     R_DrawLine_DDA
     ( sx: number, sy: number,
@@ -180,40 +238,51 @@
       r: number, g: number, b: number, a: number,
       stroke: number ): void
     {
-        const stroke_ = stroke || 1;
-        const sX = Math.floor(sx), sY = Math.floor(sy);
-        const dX = Math.floor(dx), dY = Math.floor(dy);
-        const deltaX = dX - sX, deltaY = dY - sY;
+        /* clip those portions of the line that extend beyond the bounds of the
+         * framebuffer
+         */
+        const sClamped = Vec2(0, 0), dClamped = Vec2(0, 0);
+        if (!R_ClampLine(sx, sy, dx, dy, sClamped, dClamped)) return;
+        const cSX = Math.floor(sClamped[0]), cSY = Math.floor(sClamped[1]);
+        const cDX = Math.floor(dClamped[0]), cDY = Math.floor(dClamped[1]);
+        // early return if nothing to draw
+        if (cSX === cDX && cSY === cDY) return;
+        /* calculate step variables */
+        const deltaX = cDX - cSX, deltaY = cDY - cSY;
         const dirX = Math.sign(deltaX), dirY = Math.sign(deltaY);
         const slope = deltaY / deltaX, slopeInverse = deltaX / deltaY;
-        const strokeInXHorizontal = stroke_ * dirX;
+        const strokeInXHorizontal = stroke * dirX;
         const stepInYHorizontal = slope * dirX;
-        const strokeInYVertical = stroke_ * dirY;
+        const strokeInYVertical = stroke * dirY;
         const stepInXVertical = slopeInverse * dirY;
         if (strokeInXHorizontal)
         {
-            for (let x = sX, y = sY;
-                 (dX - x) * dirX > 0;
+            for (let x = cSX, y = cSY;
+                 (cDX - x) * dirX > 0;
                  x += strokeInXHorizontal)
             {
-                const Y = sY + Math.floor(y - sY) * stroke_;
-                R_FillRect(x, Y, stroke_, stroke_, r, g, b, a);
+                const Y = cSY + Math.floor(y - cSY) * stroke;
+                R_FillRect(x, Y, stroke, stroke, r, g, b, a);
                 y += stepInYHorizontal;
             }
         }
         if (strokeInYVertical)
         {
-            for (let x = sX, y = sY;
-                 (dY - y) * dirY > 0;
+            for (let x = cSX, y = cSY;
+                 (cDY - y) * dirY > 0;
                  y += strokeInYVertical)
             {
-                const X = sX + Math.floor(x - sX) * stroke_;
-                R_FillRect(X, y, stroke_, stroke_, r, g, b, a);
+                const X = cSX + Math.floor(x - cSX) * stroke;
+                R_FillRect(X, y, stroke, stroke, r, g, b, a);
                 x += stepInXVertical;
             }
         }
     }
 
+    //
+    // R_DrawLine_RayCast
+    // Interpolates a line between given endpoints by casting a ray
+    //
     function
     R_DrawLine_RayCast
     ( sx: number, sy: number,
@@ -221,34 +290,39 @@
       r: number, g: number, b: number, a: number,
       stroke: number ): void
     {
-        const stroke_ = stroke || 1;
-        const sX = Math.floor(sx), sY = Math.floor(sy);
-        const dX = Math.floor(dx), dY = Math.floor(dy);
-        if (sX === dX && sY === dY) return; // early return if nothing to draw
-        const deltaX = dX - sX, deltaY = dY - sY;
+        /* clip those portions of the line that extend beyond the bounds of the
+         * framebuffer
+         */
+        const sClamped = Vec2(0, 0), dClamped = Vec2(0, 0);
+        if (!R_ClampLine(sx, sy, dx, dy, sClamped, dClamped)) return;
+        const cSX = Math.floor(sClamped[0]), cSY = Math.floor(sClamped[1]);
+        const cDX = Math.floor(dClamped[0]), cDY = Math.floor(dClamped[1]);
+        // early return if nothing to draw
+        if (cSX === cDX && cSY === cDY) return;
+        const deltaX = cDX - cSX, deltaY = cDY - cSY;
         const dirX = Math.sign(deltaX), dirY = Math.sign(deltaY);
         const slope = deltaY / deltaX, slopeInverse = deltaX / deltaY;
         const stepVerticalY = dirX * slope;
         const stepHorizontalX = dirY * slopeInverse;
-        const strokeXVertical = dirX * stroke_;
-        const strokeYVertical = stepVerticalY * stroke_;
-        const strokeXHorizontal = stepHorizontalX * stroke_;
-        const strokeYHorizontal = dirY * stroke_;
-        const lineLength = (dx - sx) * (dx - sx) + (dy - sy) * (dy - sy);
+        const strokeXVertical = dirX * stroke;
+        const strokeYVertical = stepVerticalY * stroke;
+        const strokeXHorizontal = stepHorizontalX * stroke;
+        const strokeYHorizontal = dirY * stroke;
+        const lineLength = deltaX * deltaX + deltaY * deltaY;
         let currentLength = 0;
-        let x = sX, y = sY;
-        let traceVerticalX = dirX > 0 ? Math.floor(sx + 1) : sX;
-        let traceVerticalY = sy + (traceVerticalX - sx) * slope;
-        let traceHorizontalY = dirY > 0 ? Math.floor(sy + 1) : sY;
-        let traceHorizontalX = sx + (traceHorizontalY - sy) * slopeInverse;
+        let x = cSX, y = cSY;
+        let traceVerticalX = dirX > 0 ? cSX + 1 : cSX;
+        let traceVerticalY = cSY + (traceVerticalX - cSX) * slope;
+        let traceHorizontalY = dirY > 0 ? cSY + 1 : cSY;
+        let traceHorizontalX = cSX + (traceHorizontalY - cSY) * slopeInverse;
         let advanceVertically;
         while (currentLength < lineLength)
         {
-            R_FillRect(x, y, stroke_, stroke_, r, g, b, a);
-            const verticalDistInX = traceVerticalX - sx;
-            const verticalDistInY = traceVerticalY - sy;
-            const horizontalDistInX = traceHorizontalX - sx;
-            const horizontalDistInY = traceHorizontalY - sy;
+            R_FillRect(x, y, stroke, stroke, r, g, b, a);
+            const verticalDistInX = traceVerticalX - cSX;
+            const verticalDistInY = traceVerticalY - cSY;
+            const horizontalDistInX = traceHorizontalX - cSX;
+            const horizontalDistInY = traceHorizontalY - cSY;
             const distVertical = verticalDistInX * verticalDistInX +
                                  verticalDistInY * verticalDistInY;
             const distHorizontal = horizontalDistInX * horizontalDistInX +
