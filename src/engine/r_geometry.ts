@@ -266,6 +266,13 @@
     /* TODO: make a generic function that takes in as arguments the `planeRef` &
      * `planeNormal` to clip the geometry against, possibly, maybe??
      */
+    //
+    // R_ClipGeometryAgainstNearPlane
+    // Clip the given triangle against the near-clipping plane of the view
+    // frustum
+    //
+    // Expects the input triangle `triView` to be in view space.
+    //
     function
     R_ClipGeometryAgainstNearPlane
     ( triView: tri3_t,
@@ -314,6 +321,15 @@
     /* TODO: make a generic function that takes in as arguments the `planeRef` &
      * `planeNormal` to clip the geometry against, possibly, maybe??
      */
+    //
+    // R_ClipGeometryAgainstNearPlane_Textured
+    // Clip the given triangle, along with the UV-map and the vertex normals
+    // associated with each of its vertices, against the near-clipping plane of
+    // the view frustum
+    //
+    // Expects the input triangle `triView` to be in view space — UV-map and
+    // vertex normals can be in any arbitrary space.
+    //
     function
     R_ClipGeometryAgainstNearPlane_Textured
     ( triView: tri3_t,
