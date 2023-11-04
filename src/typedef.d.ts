@@ -432,10 +432,8 @@ declare function __import__R_Camera (): __Mod__R_Camera;
 // engine/r_draw.ts
 // -----------------------------------------------------------------------------
 type R_InitFrameBuffer = () => void;
-type R_ResetFrameBuffer = () => void;
-type R_FlushFrame = () => void;
 type R_InitZBuffer = () => void;
-type R_ResetZBuffer = () => void;
+type R_FlushFrame = () => void;
 
 type R_FillRect = (
     x: number, y: number,
@@ -535,10 +533,8 @@ type R_Print = (
 
 type __Mod__R_Draw = {
     R_InitFrameBuffer: R_InitFrameBuffer,
-    R_ResetFrameBuffer: R_ResetFrameBuffer,
-    R_FlushFrame: R_FlushFrame,
     R_InitZBuffer: R_InitZBuffer,
-    R_ResetZBuffer: R_ResetZBuffer,
+    R_FlushFrame: R_FlushFrame,
     R_FillRect: R_FillRect,
     R_DrawLine: R_DrawLine,
     R_DrawLine_DDA: R_DrawLine_DDA,

@@ -31,9 +31,7 @@
     const R_DebugStats = R_Camera.R_DebugStats;
 
     const R_Draw = __import__R_Draw();
-    const R_ResetFrameBuffer = R_Draw.R_ResetFrameBuffer;
     const R_FlushFrame = R_Draw.R_FlushFrame;
-    const R_ResetZBuffer = R_Draw.R_ResetZBuffer;
 
     const R_Drawers = __import__R_Drawers();
     const R_TitleDrawer = R_Drawers.R_TitleDrawer;
@@ -53,9 +51,6 @@
 
     function G_UpdateScreen (deltaT: number): void
     {
-        // clear the frame buffer so that the frame can start fresh
-        R_ResetFrameBuffer();
-        R_ResetZBuffer();
         R_ChangeRenderMode();
         R_RenderGeometries(nTrisOnScreen);
         R_FlushFrame();
@@ -100,7 +95,7 @@
     {
         if (!setupResolution) return; // exit with error
         // first, clear the frame buffer for any further drawing to take place
-        R_ResetFrameBuffer();
+        R_FlushFrame();
         // then, clear the loading animation that is currently running
         AN_CancelAnimation(setupResolution.loadingId);
         /* finally, start the animation for the title screen */

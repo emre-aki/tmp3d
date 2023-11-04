@@ -26,22 +26,16 @@
     const R_FlushBuffer = R_Screen.R_FlushBuffer;
     const R_InitBuffer = R_Screen.R_InitBuffer;
 
-    let frameBuffer: ImageData;
+    /* double-buffering */
+    let frameBuffer: ImageData, cleanFrameBuffer: Uint8ClampedArray;
     let zBuffer: Float32Array, cleanZBuffer: Float32Array;
 
     function R_InitFrameBuffer (): void
     {
+        const frameBufferSize = N_PIXELS << 2;
+        cleanFrameBuffer = new Uint8ClampedArray(frameBufferSize);
+        for (let i = 3; i < frameBufferSize; i += 4) cleanFrameBuffer[i] = 255;
         frameBuffer = R_InitBuffer(SCREEN_W, SCREEN_H);
-    }
-
-    function R_ResetFrameBuffer (): void
-    {
-        R_FillRect(0, 0, SCREEN_W, SCREEN_H, 0, 0, 0, 255);
-    }
-
-    function R_FlushFrame (): void
-    {
-        R_FlushBuffer(frameBuffer);
     }
 
     function R_InitZBuffer (): void
@@ -50,8 +44,10 @@
         zBuffer = new Float32Array(N_PIXELS);
     }
 
-    function R_ResetZBuffer (): void
+    function R_FlushFrame (): void
     {
+        R_FlushBuffer(frameBuffer);
+        frameBuffer.data.set(cleanFrameBuffer);
         zBuffer.set(cleanZBuffer);
     }
 
@@ -1024,10 +1020,8 @@
     {
         return {
             R_InitFrameBuffer,
-            R_ResetFrameBuffer,
-            R_FlushFrame,
             R_InitZBuffer,
-            R_ResetZBuffer,
+            R_FlushFrame,
             R_FillRect,
             R_DrawLine,
             R_DrawLine_DDA,
