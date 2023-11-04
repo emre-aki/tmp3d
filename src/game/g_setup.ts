@@ -106,6 +106,7 @@
             R_ErrorDrawer("setup error");
             throw error;
         }
+
         /* async operations */
         return G_SetupPromise()
             .then(function G_SetupResolver ()
