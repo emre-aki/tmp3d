@@ -70,7 +70,7 @@
         {
             for (let brushX = sX; brushX < dX; ++brushX)
             {
-                const pixIndex = 4 * (SCREEN_W * brushY + brushX);
+                const pixIndex = (SCREEN_W * brushY + brushX) << 2;
                 const bufferRed = frameBuffer.data[pixIndex];
                 const bufferGreen = frameBuffer.data[pixIndex + 1];
                 const bufferBlue = frameBuffer.data[pixIndex + 2];
@@ -328,7 +328,7 @@
             /* fill a single pixel in screen-space with the color defined by
              * parameters `r`, `g`, `b`, and `a`.
              */
-            const paintIndex = 4 * bufferIndex;
+            const paintIndex = bufferIndex << 2;
             const bufferRed = frameBuffer.data[paintIndex];
             const bufferGreen = frameBuffer.data[paintIndex + 1];
             const bufferBlue = frameBuffer.data[paintIndex + 2];
@@ -592,12 +592,12 @@
             /* draw a single pixel in screen-space sampled from the
              * perspective-corrected texture-space
              */
-            const sampleIndex = 4 * (sY * texWidth + sX);
+            const sampleIndex = (sY * texWidth + sX) << 2;
             const sampleRed = bitmap[sampleIndex];
             const sampleGreen = bitmap[sampleIndex + 1];
             const sampleBlue = bitmap[sampleIndex + 2];
             const sampleAlpha = bitmap[sampleIndex + 3] * alpha;
-            const paintIndex = 4 * bufferIndex;
+            const paintIndex = bufferIndex << 2;
             const bufferRed = frameBuffer.data[paintIndex];
             const bufferGreen = frameBuffer.data[paintIndex + 1];
             const bufferBlue = frameBuffer.data[paintIndex + 2];
@@ -975,12 +975,12 @@
                 // stop drawing any further pixels if we've gone out-of-bounds
                 // in the texture-space along the x-axis
                 else if (imgX >= imgWidth) break;
-                const sampleIndex = 4 * (imgY * imgWidth + imgX);
+                const sampleIndex = (imgY * imgWidth + imgX) << 2;
                 const sampleRed = bitmap[sampleIndex];
                 const sampleGreen = bitmap[sampleIndex + 1];
                 const sampleBlue = bitmap[sampleIndex + 2];
                 const sampleAlpha = bitmap[sampleIndex + 3] * ALPHA;
-                const paintIndex = 4 * (y * SCREEN_W + x);
+                const paintIndex = (y * SCREEN_W + x) << 2;
                 const bufferRed = frameBuffer.data[paintIndex];
                 const bufferGreen = frameBuffer.data[paintIndex + 1];
                 const bufferBlue = frameBuffer.data[paintIndex + 2];
