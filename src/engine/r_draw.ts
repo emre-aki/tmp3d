@@ -586,7 +586,7 @@
             if (lx !== undefined && ly !== undefined && lz !== undefined)
                 lightLevel = lx * nXUnit + ly * nYUnit + lz * nZUnit;
             /* draw a single pixel in screen-space sampled from the
-             * perspective-corrected texture-space
+             * perspective-corrected texture space
              */
             const sampleIndex = (sY * texWidth + sX) << 2;
             const sampleRed = bitmap[sampleIndex];
@@ -639,7 +639,7 @@
         let topX = ax, topY = ay;
         let midX = bx, midY = by;
         let bottomX = cx, bottomY = cy;
-        /* coordinates of the triangle in perspective-corrected texture-space */
+        /* coordinates of the triangle in perspective-corrected texture space */
         let topC = ac / aw, midC = bc / bw, bottomC = cc / cw;
         let topU = au * topC, topV = av * topC;
         let midU = bu * midC, midV = bv * midC;
@@ -761,11 +761,11 @@
         let xUpper = preStepFromTop * stepXAlongUpper + topX;
         let xLower = preStepFromMid * stepXAlongLower + midX;
         let xMajor = preStepFromTop * stepXAlongMajor + topX;
-        /* current `u` coordinates in perspective-correct texture-space */
+        /* current `u` coordinates in perspective-correct texture space */
         let uUpper = preStepFromTop * stepUAlongUpper + topU;
         let uLower = preStepFromMid * stepUAlongLower + midU;
         let uMajor = preStepFromTop * stepUAlongMajor + topU;
-        /* current `v` coordinates in perspective-correct texture-space */
+        /* current `v` coordinates in perspective-correct texture space */
         let vUpper = preStepFromTop * stepVAlongUpper + topV;
         let vLower = preStepFromMid * stepVAlongLower + midV;
         let vMajor = preStepFromTop * stepVAlongMajor + topV;
@@ -773,19 +773,19 @@
         let cUpper = preStepFromTop * stepCAlongUpper + topC;
         let cLower = preStepFromMid * stepCAlongLower + midC;
         let cMajor = preStepFromTop * stepCAlongMajor + topC;
-        /* current `nx` coordinates in perspective-correct world-space */
+        /* current `nx` coordinates in perspective-correct world space */
         let nXUpper = preStepFromTop * stepNXAlongUpper + topNX;
         let nXLower = preStepFromMid * stepNXAlongLower + midNX;
         let nXMajor = preStepFromTop * stepNXAlongMajor + topNX;
-        /* current `ny` coordinates in perspective-correct world-space */
+        /* current `ny` coordinates in perspective-correct world space */
         let nYUpper = preStepFromTop * stepNYAlongUpper + topNY;
         let nYLower = preStepFromMid * stepNYAlongLower + midNY;
         let nYMajor = preStepFromTop * stepNYAlongMajor + topNY;
-        /* current `nz` coordinates in perspective-correct world-space */
+        /* current `nz` coordinates in perspective-correct world space */
         let nZUpper = preStepFromTop * stepNZAlongUpper + topNZ;
         let nZLower = preStepFromMid * stepNZAlongLower + midNZ;
         let nZMajor = preStepFromTop * stepNZAlongMajor + topNZ;
-        /* current `nw` coordinates in perspective-correct world-space */
+        /* current `nw` coordinates in perspective-correct world space */
         let nWUpper = preStepFromTop * stepNWAlongUpper + topNW;
         let nWLower = preStepFromMid * stepNWAlongLower + midNW;
         let nWMajor = preStepFromTop * stepNWAlongMajor + topNW;
@@ -930,7 +930,7 @@
         /* determine how bright & translucent the image is going to be drawn */
         const ALPHA = alpha !== undefined ? alpha : 1;
         const LIGHT_LEVEL = lightLevel !== undefined ? lightLevel : 1;
-        // 1 step in screen-space equals how many steps in texture-space
+        // 1 step in screen-space equals how many steps in texture space
         const scaleX = sw / dw, scaleY = sh / dh;
         // raster clipping: clip the screen coordinates against the bounds of
         // the buffer
@@ -947,29 +947,29 @@
          */
         const preStepFromLeft = dStartX + 0.5 - dx;
         const preStepFromTop = dStartY + 0.5 - dy;
-        /* where to start sampling in the texture-space */
+        /* where to start sampling in the texture space */
         const sampleStartX = preStepFromLeft * scaleX + sx;
         const sampleStartY = preStepFromTop * scaleY + sy;
-        let sampleY = sampleStartY; // current `y` coordinate in texture-space
+        let sampleY = sampleStartY; // current `y` coordinate in texture space
         for (let y = dStartY; y < dEndY && y < SCREEN_H; ++y)
         {
             const imgY = Math.floor(sampleY);
             // skip drawing this scanline if we're not yet within the bounds of
-            // the texture-space along the y-axis
+            // the texture space along the y-axis
             if (imgY < 0) { sampleY += scaleY; continue; }
             // stop drawing any further scanlines if we've gone out-of-bounds in
-            // the texture-space along the y-axis
+            // the texture space along the y-axis
             else if (imgY >= imgHeight) break;
-            // current `x` coordinate in texture-space
+            // current `x` coordinate in texture space
             let sampleX = sampleStartX;
             for (let x = dStartX; x < dEndX && x < SCREEN_W; ++x)
             {
                 const imgX = Math.floor(sampleX);
                 // skip drawing this pixel if we're not yet within the bounds of
-                // the texture-space along the x-axis
+                // the texture space along the x-axis
                 if (imgX < 0) { sampleX += scaleX; continue; }
                 // stop drawing any further pixels if we've gone out-of-bounds
-                // in the texture-space along the x-axis
+                // in the texture space along the x-axis
                 else if (imgX >= imgWidth) break;
                 const sampleIndex = (imgY * imgWidth + imgX) << 2;
                 const sampleRed = bitmap[sampleIndex];

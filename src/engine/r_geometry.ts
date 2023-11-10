@@ -386,7 +386,7 @@
         /* ...the same goes for the vertex normals */
         clippedTriVertexNormalQueue[0] =
             Tri3(nInside[0], nInside[1], nInside[2]);
-        // ...the same goes for the vertices in the texture-space
+        // ...the same goes for the vertices in the texture space
         clippedUvMapQueue[0] = Tri3(uvInside[0], uvInside[1], uvInside[2]);
         /* the vertices that fall inside the near-clipping plane form a quad,
          * triangulate it by forming an additional triangle and save that in the
@@ -398,7 +398,7 @@
             /* ...the same goes for the vertex normals */
             clippedTriVertexNormalQueue[1] =
                 Tri3(nInside[2], nInside[3], nInside[0]);
-            // ...the same goes for the vertices in the texture-space
+            // ...the same goes for the vertices in the texture space
             clippedUvMapQueue[1] = Tri3(uvInside[2], uvInside[3], uvInside[0]);
         }
 

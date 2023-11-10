@@ -152,7 +152,7 @@
 
     //
     // R_UpdateCamera
-    // Update the orientation and the position of the camera in world-space
+    // Update the orientation and the position of the camera in world space
     //
     function R_UpdateCamera (mult: number): void
     {

@@ -131,7 +131,7 @@ function ObjToTmp3D (pathToObj, pathToMtl, outputFilename, zOffset)
         {
             case "v": // vertex
             {
-                const vertex = tokens.slice(1); // world-space coordinates
+                const vertex = tokens.slice(1); // world space coordinates
                 /* rotate the vertex read around the x-axis by π radians as the
                  * +y axis in Tmp3D point down whereas in Blender it points up
                  */
@@ -144,7 +144,7 @@ function ObjToTmp3D (pathToObj, pathToMtl, outputFilename, zOffset)
             }
             case "vt": // texture vertices
             {
-                const uv = tokens.slice(1); // texture-space coordinates
+                const uv = tokens.slice(1); // texture space coordinates
                 // flip the `v` coordinate, as it points up in Blender but down
                 // in Tmp3D
                 uvVertices.push([parseFloat(uv[0]), 1 - parseFloat(uv[1])]);
