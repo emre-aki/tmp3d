@@ -28,7 +28,6 @@
     const FOV_X = G_Const.FOV_X, FOV_Y = G_Const.FOV_Y;
     const MAX_MOV_TILT = G_Const.MAX_MOV_TILT;
     const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
-    const SCREEN_W_2 = G_Const.SCREEN_W_2, SCREEN_H_2 = G_Const.SCREEN_H_2;
 
     const M_Mat4 = __import__M_Mat4();
     const M_QuickInv4 = M_Mat4.M_QuickInv4;
@@ -44,7 +43,6 @@
 
     const M_Tri3 = __import__M_Tri3();
     const M_TransformTri3 = M_Tri3.M_TransformTri3;
-    const Tri3 = M_Tri3.M_Tri3;
 
     const M_Vec3 = __import__M_Vec3();
     const M_Add3 = M_Vec3.M_Add3;
@@ -58,13 +56,11 @@
     const Vec3 = M_Vec3.M_Vec3;
 
     const R_Draw = __import__R_Draw();
-    const R_DrawLine = R_Draw.R_DrawLine;
     const R_Print = R_Draw.R_Print;
 
     const ORIGIN = Vec3(0, 0, 0);
     // the axes
     const RIGHT = Vec3(1, 0 ,0), DOWN = Vec3(0, 1, 0), FWD = Vec3(0, 0, 1);
-    const BWD = Vec3(0, 0, -1);
 
     let veloc: number; // camera velocity
     // the elementary rotations for the camera
@@ -231,14 +227,25 @@
         matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camDown);
     }
 
-    function R_ToViewSpace (triangle: tri3_t): tri3_t
+    function R_TriToViewSpace (triangle: tri3_t): tri3_t
     {
         return M_TransformTri3(matLookAt, triangle);
     }
 
-    function R_ToClipSpace (triangle: tri3_t): tri3_t
+    function R_TriToClipSpace (triangle: tri3_t): tri3_t
     {
         return M_TransformTri3(matPerspective, triangle);
+    }
+
+    function R_VecToViewSpace (vec: vec3_t): vec3_t
+    {
+        return M_Vec3FromVec4(M_Transform4(matLookAt, M_Vec4FromVec3(vec, 1)));
+    }
+
+    function R_VecToClipSpace (vec: vec3_t): vec3_t
+    {
+        return M_Vec3FromVec4(M_Transform4(matPerspective,
+                                           M_Vec4FromVec3(vec, 1)));
     }
 
     function R_GetCameraState (): cam3_t
@@ -299,53 +306,22 @@
                 5, 90, "#FF0000", 14);
     }
 
-    /* FIXME: move this function to a more sensible file/module */
-    function R_DebugAxes (): void
-    {
-        const originViewSpace4 = M_Transform4(matLookAt,
-                                              M_Vec4FromVec3(ORIGIN, 1));
-        const originClipSpace3 = M_Vec3FromVec4(M_Transform4(matPerspective,
-                                                             originViewSpace4));
-        const axesViewSpace3 = R_ToViewSpace(Tri3(RIGHT, DOWN, FWD));
-        const axesClipSpace3 = R_ToClipSpace(axesViewSpace3);
-        const rightClipSpace3 = axesClipSpace3[0];
-        const upClipSpace3 = axesClipSpace3[1];
-        const fwdClipSpace3 = axesClipSpace3[2];
-        const originScreen2 = [originClipSpace3[0] * SCREEN_W_2 + SCREEN_W_2,
-                               originClipSpace3[1] * SCREEN_H_2 + SCREEN_H_2];
-        const rightScreen2 = [rightClipSpace3[0] * SCREEN_W_2 + SCREEN_W_2,
-                              rightClipSpace3[1] * SCREEN_H_2 + SCREEN_H_2];
-        const upScreen2 = [upClipSpace3[0] * SCREEN_W_2 + SCREEN_W_2,
-                           upClipSpace3[1] * SCREEN_H_2 + SCREEN_H_2];
-        const fwdScreen2 = [fwdClipSpace3[0] * SCREEN_W_2 + SCREEN_W_2,
-                            fwdClipSpace3[1] * SCREEN_H_2 + SCREEN_H_2];
-        if (originViewSpace4[2] > 0 || axesViewSpace3[0][2] > 0)
-            R_DrawLine(originScreen2[0], originScreen2[1],
-                       rightScreen2[0], rightScreen2[1],
-                       255, 0, 0, 255, 2);
-        if (originViewSpace4[2] > 0 || axesViewSpace3[1][2] > 0)
-            R_DrawLine(originScreen2[0], originScreen2[1],
-                       upScreen2[0], upScreen2[1],
-                       0, 255, 0, 255, 2);
-        if (originViewSpace4[2] > 0 || axesViewSpace3[2][2] > 0)
-            R_DrawLine(originScreen2[0], originScreen2[1],
-                       fwdScreen2[0], fwdScreen2[1],
-                       0, 0, 255, 255, 2);
-    }
-
     window.__import__R_Camera = function ()
     {
         return {
             R_Origin: ORIGIN,
-            R_Bwd: BWD,
+            R_Right: RIGHT,
+            R_Down: DOWN,
+            R_Fwd: FWD,
             R_InitCamera,
             R_UpdateCamera,
             R_GetCameraState,
             R_GetProjectionOrigin,
-            R_ToViewSpace,
-            R_ToClipSpace,
+            R_TriToViewSpace,
+            R_TriToClipSpace,
+            R_VecToViewSpace,
+            R_VecToClipSpace,
             R_DebugStats,
-            R_DebugAxes,
         };
     };
 })();

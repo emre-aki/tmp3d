@@ -403,27 +403,30 @@ type R_InitCamera = (
 type R_UpdateCamera = (mult: number) => void;
 type R_GetCameraState = () => cam3_t;
 type R_GetProjectionOrigin = () => vec3_t;
-type R_ToViewSpace = (triangle: tri3_t) => tri3_t;
-type R_ToClipSpace = (triangle: tri3_t) => tri3_t;
+type R_TriToViewSpace = (triangle: tri3_t) => tri3_t;
+type R_TriToClipSpace = (triangle: tri3_t) => tri3_t;
+type R_VecToViewSpace = (vec: vec3_t) => vec3_t;
+type R_VecToClipSpace = (vec: vec3_t) => vec3_t;
 
 type R_DebugStats = (
     deltaT: number,
     nTrisOnScreen: Uint32Array
 ) => void;
 
-type R_DebugAxes = () => void;
-
 type __Mod__R_Camera = {
     R_Origin: vec3_t,
-    R_Bwd: vec3_t,
+    R_Right: vec3_t,
+    R_Down: vec3_t,
+    R_Fwd: vec3_t,
     R_InitCamera: R_InitCamera,
     R_UpdateCamera: R_UpdateCamera,
     R_GetCameraState: R_GetCameraState,
     R_GetProjectionOrigin: R_GetProjectionOrigin,
-    R_ToViewSpace: R_ToViewSpace,
-    R_ToClipSpace: R_ToClipSpace,
+    R_TriToViewSpace: R_TriToViewSpace,
+    R_TriToClipSpace: R_TriToClipSpace,
+    R_VecToViewSpace: R_VecToViewSpace,
+    R_VecToClipSpace: R_VecToClipSpace,
     R_DebugStats: R_DebugStats,
-    R_DebugAxes: R_DebugAxes,
 };
 
 declare function __import__R_Camera (): __Mod__R_Camera;
@@ -586,6 +589,13 @@ type R_InitUVTable = (
 
 type R_UpdateGeometry = () => void;
 type R_RenderGeometries = (nTrisOnScreen: Uint32Array) => void;
+
+type R_RenderLine = (
+    src: vec3_t, dest: vec3_t,
+    r: number, g: number, b: number, a: number,
+    stroke: number
+) => void;
+
 type R_Tris = () => tri3_t[];
 
 type __Mod__R_Geometry = {
@@ -594,6 +604,7 @@ type __Mod__R_Geometry = {
     R_LoadGeometry: R_LoadGeometry,
     R_InitUVTable: R_InitUVTable,
     R_UpdateGeometry: R_UpdateGeometry,
+    R_RenderLine: R_RenderLine,
     R_RenderGeometries: R_RenderGeometries,
     R_Tris: R_Tris,
 };

@@ -27,6 +27,8 @@
 
     const M_Collision = __import__M_Collision();
     const M_TimeBeforePlaneCollision3 = M_Collision.M_TimeBeforePlaneCollision3;
+    const M_LineSegmentVsPlaneCollision3 =
+        M_Collision.M_LineSegmentVsPlaneCollision3;
     const M_BoundingBoxVsBoundingBoxCollision3 =
         M_Collision.M_BoundingBoxVsBoundingBoxCollision3;
 
@@ -39,18 +41,21 @@
     const M_Vec3 = __import__M_Vec3();
     const M_IsInFrontOfPlane3 = M_Vec3.M_IsInFrontOfPlane3;
     const M_Add3 = M_Vec3.M_Add3;
+    const M_Dot3 = M_Vec3.M_Dot3;
+    const M_Norm3 = M_Vec3.M_Norm3;
     const M_Sub3 = M_Vec3.M_Sub3;
     const M_Scale3 = M_Vec3.M_Scale3;
-    const M_Dot3 = M_Vec3.M_Dot3;
     const Vec3 = M_Vec3.M_Vec3;
 
     const R_Camera = __import__R_Camera();
-    const R_DebugAxes = R_Camera.R_DebugAxes;
-    const R_ToViewSpace = R_Camera.R_ToViewSpace;
-    const R_ToClipSpace = R_Camera.R_ToClipSpace;
+    const R_TriToViewSpace = R_Camera.R_TriToViewSpace;
+    const R_TriToClipSpace = R_Camera.R_TriToClipSpace;
+    const R_VecToViewSpace = R_Camera.R_VecToViewSpace;
+    const R_VecToClipSpace = R_Camera.R_VecToClipSpace;
     const R_GetProjectionOrigin = R_Camera.R_GetProjectionOrigin;
 
     const R_Draw = __import__R_Draw();
+    const R_DrawLine = R_Draw.R_DrawLine;
     const R_DrawTriangle_Wireframe = R_Draw.R_DrawTriangle_Wireframe;
     const R_FillTriangle_Flat = R_Draw.R_FillTriangle_Flat;
     const R_DrawTriangle_Textured_Perspective =
@@ -58,11 +63,14 @@
 
     // the center of the projection (near-clipping) plane
     let projectionOrigin: vec3_t;
+    /* base vectors in world space */
     const ORIGIN = R_Camera.R_Origin;
-    const BWD = R_Camera.R_Bwd, FWD = M_Scale3(BWD, -1);
+    const RIGHT = R_Camera.R_Right;
+    const DOWN = R_Camera.R_Down;
+    const FWD = R_Camera.R_Fwd;
 
     // TODO: make a separate lighting controller module, maybe??
-    const DIRECTIONAL_LIGHT = BWD;
+    const DIRECTIONAL_LIGHT = M_Norm3(Vec3(1, -1, -1));
 
     let nTris: number; // total number of triangles in the model
     let tris3: tri3_t[]; // a pool of raw triangle data
@@ -248,7 +256,7 @@
         let nTrianglesAfterCulling = 0;
         for (let i = 0; i < nTris; ++i)
         {
-            const triView = R_ToViewSpace(transformedTris3[i]);
+            const triView = R_TriToViewSpace(transformedTris3[i]);
             const aView = triView[0];
             if (
                 // frustum-culling: is the triangle at least partially within
@@ -410,8 +418,8 @@
     ( tri0: number,
       tri1: number ): number
     {
-        const tri0View = R_ToViewSpace(transformedTris3[tri0]);
-        const tri1View = R_ToViewSpace(transformedTris3[tri1]);
+        const tri0View = R_TriToViewSpace(transformedTris3[tri0]);
+        const tri1View = R_TriToViewSpace(transformedTris3[tri1]);
 
         return tri1View[0][2] + tri1View[1][2] + tri1View[2][2] -
                tri0View[0][2] - tri0View[1][2] - tri0View[2][2];
@@ -438,7 +446,7 @@
         {
             const triIndex = culledBuffer[i];
             const triWorld = transformedTris3[triIndex];
-            const triView = R_ToViewSpace(triWorld);
+            const triView = R_TriToViewSpace(triWorld);
             // keep a buffer of clipped triangles for drawing
             const clippedTriQueue = Array(2) as [tri3_t, tri3_t];
             const nClipResult = R_ClipGeometryAgainstNearPlane(triView,
@@ -447,7 +455,7 @@
             for (let j = 0; j < nClipResult; ++j)
             {
                 const triFrustum = clippedTriQueue[j];
-                const triClip = R_ToClipSpace(triFrustum);
+                const triClip = R_TriToClipSpace(triFrustum);
                 const aClip3 = triClip[0];
                 const bClip3 = triClip[1];
                 const cClip3 = triClip[2];
@@ -473,7 +481,7 @@
         {
             const triIndex = culledBuffer[i];
             const triWorld = transformedTris3[triIndex];
-            const triView = R_ToViewSpace(triWorld);
+            const triView = R_TriToViewSpace(triWorld);
             // the original triangle after having clipped against the near-plane
             const clippedTriQueue = Array(2) as [tri3_t, tri3_t];
             const nClipResult = R_ClipGeometryAgainstNearPlane(triView,
@@ -491,7 +499,7 @@
             for (let j = 0; j < nClipResult; ++j)
             {
                 const triFrustum = clippedTriQueue[j];
-                const triClip = R_ToClipSpace(triFrustum);
+                const triClip = R_TriToClipSpace(triFrustum);
                 const aClip3 = triClip[0];
                 const bClip3 = triClip[1];
                 const cClip3 = triClip[2];
@@ -533,14 +541,16 @@
         let lightZ: number | undefined;
         if (RENDER_MODES[renderMode] === RENDER_MODE.TEXTURED_SHADED)
         {
-            lightX = 0; lightY = 0; lightZ = 1;
+            lightX = DIRECTIONAL_LIGHT[0];
+            lightY = DIRECTIONAL_LIGHT[1];
+            lightZ = DIRECTIONAL_LIGHT[2];
         }
         for (let i = 0; i < nCulledBuffer; ++i)
         {
             const triIndex = culledBuffer[i];
             const triWorld = transformedTris3[triIndex];
             const uvMap = uvTable3[triIndex];
-            const triView = R_ToViewSpace(triWorld);
+            const triView = R_TriToViewSpace(triWorld);
             // the original triangle after having clipped against the near-plane
             const clippedTriQueue = Array(2) as [tri3_t, tri3_t];
             // the vertex normals after having clipped against the near-plane
@@ -561,7 +571,7 @@
                 const triFrustum = clippedTriQueue[j];
                 const triVertexNormals = clippedTriVertexNormalQueue[j];
                 const uvFrustum = clippedUvMapQueue[j];
-                const triClip = R_ToClipSpace(triFrustum);
+                const triClip = R_TriToClipSpace(triFrustum);
                 const aClip3 = triClip[0];
                 const bClip3 = triClip[1];
                 const cClip3 = triClip[2];
@@ -618,6 +628,72 @@
         nTrisOnScreen[1] = nCulledBuffer;
     }
 
+    //
+    // R_RenderLine
+    // Render a 3-D line
+    //
+    // Vertices `src` and `dest` are in world space
+    //
+    function
+    R_RenderLine
+    ( src: vec3_t, dest: vec3_t,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void
+    {
+        const srcView = R_VecToViewSpace(src);
+        const destView = R_VecToViewSpace(dest);
+        const zNear = projectionOrigin[2];
+        const zSrc = srcView[2], zDest = destView[2];
+        let srcClip: vec3_t, destClip: vec3_t;
+        // both ends of the line are behind the near-clipping plane, nothing to
+        // draw, exit early
+        if (zSrc < zNear && zDest < zNear) return;
+        // both ends of the line are in front of the near-clipping plane, no
+        // need to clip
+        if (zSrc >= zNear && zDest >= zNear)
+        {
+            srcClip = R_VecToClipSpace(srcView);
+            destClip = R_VecToClipSpace(destView);
+        }
+        /* one end of the line is behind, while the other is in front: it has to
+         * be clipped against the near-clipping plane
+         */
+        else
+        {
+            const intersect = M_LineSegmentVsPlaneCollision3(srcView,
+                                                             destView,
+                                                             projectionOrigin,
+                                                             FWD);
+            if (!intersect) return; // how would this ever happen!?
+            /* clip the `src` endpoint */
+            if (zDest > zSrc)
+            {
+                srcClip = R_VecToClipSpace(intersect);
+                destClip = R_VecToClipSpace(destView);
+
+            }
+            /* clip the `dest` endpoint */
+            else
+            {
+                srcClip = R_VecToClipSpace(srcView);
+                destClip = R_VecToClipSpace(intersect);
+            }
+        }
+        R_DrawLine(srcClip[0] * SCREEN_W_2 + SCREEN_W_2,
+                   srcClip[1] * SCREEN_H_2 + SCREEN_H_2,
+                   destClip[0] * SCREEN_W_2 + SCREEN_W_2,
+                   destClip[1] * SCREEN_H_2 + SCREEN_H_2,
+                   r, g, b, a,
+                   stroke);
+    }
+
+    function R_RenderDebugAxes (length: number): void
+    {
+        R_RenderLine(ORIGIN, M_Scale3(RIGHT, length), 255, 0, 0, 255, 2);
+        R_RenderLine(ORIGIN, M_Scale3(DOWN, length), 0, 255, 0, 255, 2);
+        R_RenderLine(ORIGIN, M_Scale3(FWD, length), 0, 0, 255, 255, 2);
+    }
+
     function R_RenderGeometries (nTrisOnScreen: Uint32Array): void
     {
         R_CullGeometry();
@@ -639,7 +715,7 @@
             default:
                 break;
         }
-        if (DEBUG_MODE) R_DebugAxes();
+        if (DEBUG_MODE) R_RenderDebugAxes(1000);
     }
 
     function R_Tris (): tri3_t[]
@@ -655,6 +731,7 @@
             R_LoadGeometry,
             R_InitUVTable,
             R_UpdateGeometry,
+            R_RenderLine,
             R_RenderGeometries,
             R_Tris,
         };
