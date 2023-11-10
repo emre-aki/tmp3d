@@ -276,7 +276,7 @@
     {
         projectionOrigin = Vec3(0, 0, zNear);
         veloc = velocity;
-        camPitch = 0; camYaw = Math.PI; camRoll = 0;
+        camPitch = 0; camYaw = 0; camRoll = 0;
         camPos = Vec3(eye[0], eye[1], eye[2]);
         camRight = RIGHT; camDown = DOWN; camFwd = FWD;
         matLookAt = R_LookAt(camPos, M_Add3(camPos, camFwd), camDown);

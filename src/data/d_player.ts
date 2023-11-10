@@ -14,7 +14,7 @@
 
     function D_Eye (): pvec3_t
     {
-        return [0, -20, 100];
+        return [0, -20, -100];
     }
 
     window.__import__D_Player = function ()

@@ -52,6 +52,8 @@ you may take it as it is and expect many more features to follow very soon.
 
 Tmp3D currently supports
 
+  - efficient drawing of such graphics primitives as lines, rectangles and
+    triangles
   - a first-person camera with _6_ degrees-of-freedom: translating along _x_,
     _y_ & _z_ axes, and _yaw_, _pitch_ & _roll_
   - back-face culling
@@ -62,6 +64,7 @@ Tmp3D currently supports
   - perspective-correct texture-mapping
   - loading & rendering 3-D models in the [Wavefront `.obj` format](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
   - depth-buffering & depth-sorting
+  - double-buffering
 
 and plans to support
 
