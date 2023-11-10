@@ -5,7 +5,8 @@
  *  Created by Emre Akı on 2022-02-13.
  *
  *  SYNOPSIS:
- *      The 3-D camera, having 2-degrees-of-freedom: pitch and yaw.
+ *      The 3-D camera, having 6-degrees-of-freedom:
+ *      tranlating along x, y and z, and pitch, yaw and roll.
  *
  *      The module that helps carry out world-space-to-view-space
  *      transformations with respect to the camera, as well as perform
