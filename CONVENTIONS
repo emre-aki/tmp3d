@@ -44,7 +44,7 @@ zNear = -------------------
      \|/
       +y
 
-The camera has two degrees of freedom and its rotations use Rodrigues'
+The camera has six degrees of freedom and its rotations use Rodrigues'
 Axis-angle representation. The yaw is always followed by the pitch. The positive
 rotations follow the right-hand rule as well: they are clockwise when looking
 towards the positive direction of that particular axis.
