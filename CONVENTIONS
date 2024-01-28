@@ -49,7 +49,7 @@ Axis-angle representation. The yaw is always followed by the pitch. The positive
 rotations follow the right-hand rule as well: they are clockwise when looking
 towards the positive direction of that particular axis.
 
-The screen-space origin is at <0, 0> and the +y points downwards.
+The screen space origin is at <0, 0> and the +y points downwards.
 
 <0, 0>-------------> +x
    |           |
