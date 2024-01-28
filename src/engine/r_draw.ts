@@ -430,7 +430,7 @@
         // raster clipping: clip the scanline if it goes out-of-bounds of screen
         // coordinates
         const clipLeft = Math.max(-dx0, 0);
-        // bias the start and end endpoints in screen-space by -0.5 horizontally
+        // bias the start and end endpoints in screen space by -0.5 horizontally
         // as per the top-left pixel coverage rules
         const dX0 = Math.ceil(dx0 + clipLeft - 0.5), dX1 = Math.ceil(dx1 - 0.5);
         const deltaX = dx1 - dx0, deltaX_ = 1 / deltaX;
@@ -472,7 +472,7 @@
             }
             zBuffer[bufferIndex] = w; // update the z-buffer
             const w_ = 1 / w;
-            /* fill a single pixel in screen-space with the color defined by
+            /* fill a single pixel in screen space with the color defined by
              * parameters `r`, `g`, `b`, and `alpha`.
              */
             const paintIndex = bufferIndex << 2;
@@ -509,7 +509,7 @@
        cr, cg, cb, }: vso_t,
      pso: pso_t ): void
     {
-        /* coordinates of the triangle in screen-space */
+        /* coordinates of the triangle in screen space */
         let topX = ax, midX = bx, bottomX = cx;
         let topY = ay, midY = by, bottomY = cy;
         // z-coordinates in the perspective-correct space
@@ -525,7 +525,7 @@
          */
         if (topY > midY)
         {
-            /* swap in screen-space */
+            /* swap in screen space */
             const auxX = topX; topX = midX; midX = auxX;
             const auxY = topY; topY = midY; midY = auxY;
             // swap in perspective-correct (1/z) space
@@ -537,7 +537,7 @@
         }
         if (midY > bottomY)
         {
-            /* swap in screen-space */
+            /* swap in screen space */
             const auxX = midX; midX = bottomX; bottomX = auxX;
             const auxY = midY; midY = bottomY; bottomY = auxY;
             // swap in perspective-correct (1/z) space
@@ -549,7 +549,7 @@
         }
         if (topY > midY)
         {
-            /* swap in screen-space */
+            /* swap in screen space */
             const auxX = topX; topX = midX; midX = auxX;
             const auxY = topY; topY = midY; midY = auxY;
             // swap in perspective-correct (1/z) space
@@ -585,7 +585,7 @@
         // raster clipping: clip the triangle if it goes out-of-bounds of screen
         // coordinates
         const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
-        /* vertical endpoints of the rasterization in screen-space, biased by
+        /* vertical endpoints of the rasterization in screen space, biased by
          * -0.5 as per the top-left pixel coverage rules
          */
         const startY = Math.ceil(topY + clipTop - 0.5);
@@ -596,7 +596,7 @@
          */
         const preStepFromTop = startY + 0.5 - topY;
         const preStepFromMid = midStopY + 0.5 - midY;
-        /* current `x` coordinates in screen-space */
+        /* current `x` coordinates in screen space */
         let xUpper = preStepFromTop * stepXAlongUpper + topX;
         let xLower = preStepFromMid * stepXAlongLower + midX;
         let xMajor = preStepFromTop * stepXAlongMajor + topX;
@@ -623,7 +623,7 @@
         const isLeftMajor = stepXAlongMajor < stepXAlongUpper;
         if (isLeftMajor)
         {
-            /* lerp based on `y` in screen-space for the upper half of the
+            /* lerp based on `y` in screen space for the upper half of the
              * triangle
              */
             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
@@ -643,7 +643,7 @@
                 gUpper += stepGAlongUpper; gMajor += stepGAlongMajor;
                 bUpper += stepBAlongUpper; bMajor += stepBAlongMajor;
             }
-            /* lerp based on `y` in screen-space for the lower half of the
+            /* lerp based on `y` in screen space for the lower half of the
              * triangle
              */
             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
@@ -666,7 +666,7 @@
         }
         else
         {
-            /* lerp based on `y` in screen-space for the upper half of the
+            /* lerp based on `y` in screen space for the upper half of the
              * triangle
              */
             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
@@ -686,7 +686,7 @@
                 gUpper += stepGAlongUpper; gMajor += stepGAlongMajor;
                 bUpper += stepBAlongUpper; bMajor += stepBAlongMajor;
             }
-            /* lerp based on `y` in screen-space for the lower half of the
+            /* lerp based on `y` in screen space for the lower half of the
              * triangle
              */
             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
@@ -773,7 +773,7 @@
         // raster clipping: clip the scanline if it goes out-of-bounds of screen
         // coordinates
         const clipLeft = Math.max(-dx0, 0);
-        // bias the start and end endpoints in screen-space by -0.5 horizontally
+        // bias the start and end endpoints in screen space by -0.5 horizontally
         // as per the top-left pixel coverage rules
         const dX0 = Math.ceil(dx0 + clipLeft - 0.5), dX1 = Math.ceil(dx1 - 0.5);
         const deltaX = dx1 - dx0, deltaX_ = 1 / deltaX;
@@ -851,7 +851,7 @@
                 lightLevel =
                     lXUnit * nXUnit + lYUnit * nYUnit + lZUnit * nZUnit;
             }
-            /* draw a single pixel in screen-space sampled from the
+            /* draw a single pixel in screen space sampled from the
              * perspective-corrected texture space
              */
             const sampleIndex = (sY * texWidth + sX) << 2;
@@ -901,7 +901,7 @@
        wcx, wcy, wcz }: vso_t,
      pso: pso_t): void
     {
-        /* coordinates of the triangle in screen-space */
+        /* coordinates of the triangle in screen space */
         let topX = ax, midX = bx, bottomX = cx;
         let topY = ay, midY = by, bottomY = cy;
         // z-coordinates in the perspective-correct space
@@ -924,7 +924,7 @@
          */
         if (topY > midY)
         {
-            /* swap vertices in screen-space */
+            /* swap vertices in screen space */
             const auxX = topX; topX = midX; midX = auxX;
             const auxY = topY; topY = midY; midY = auxY;
             // swap in perspective-correct (1/z) space
@@ -943,7 +943,7 @@
         }
         if (midY > bottomY)
         {
-            /* swap vertices in screen-space */
+            /* swap vertices in screen space */
             const auxX = midX; midX = bottomX; bottomX = auxX;
             const auxY = midY; midY = bottomY; bottomY = auxY;
             // swap in perspective-correct (1/z) space
@@ -962,7 +962,7 @@
         }
         if (topY > midY)
         {
-            /* swap vertices in screen-space */
+            /* swap vertices in screen space */
             const auxX = topX; topX = midX; midX = auxX;
             const auxY = topY; topY = midY; midY = auxY;
             // swap in perspective-correct (1/z) space
@@ -1025,7 +1025,7 @@
         // raster clipping: clip the triangle if it goes out-of-bounds of screen
         // coordinates
         const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
-        /* vertical endpoints of the rasterization in screen-space, biased by
+        /* vertical endpoints of the rasterization in screen space, biased by
          * -0.5 as per the top-left pixel coverage rules
          */
         const startY = Math.ceil(topY + clipTop - 0.5);
@@ -1036,7 +1036,7 @@
          */
         const preStepFromTop = startY + 0.5 - topY;
         const preStepFromMid = midStopY + 0.5 - midY;
-        /* current `x` coordinates in screen-space */
+        /* current `x` coordinates in screen space */
         let xUpper = preStepFromTop * stepXAlongUpper + topX;
         let xLower = preStepFromMid * stepXAlongLower + midX;
         let xMajor = preStepFromTop * stepXAlongMajor + topX;
@@ -1080,7 +1080,7 @@
         const isLeftMajor = stepXAlongMajor < stepXAlongUpper;
         if (isLeftMajor)
         {
-            /* lerp based on `y` in screen-space for the upper half of the
+            /* lerp based on `y` in screen space for the upper half of the
              * triangle
              */
             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
@@ -1110,7 +1110,7 @@
                 wYUpper += stepWYAlongUpper; wYMajor += stepWYAlongMajor;
                 wZUpper += stepWZAlongUpper; wZMajor += stepWZAlongMajor;
             }
-            /* lerp based on `y` in screen-space for the lower half of the
+            /* lerp based on `y` in screen space for the lower half of the
              * triangle
              */
             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
@@ -1143,7 +1143,7 @@
         }
         else
         {
-            /* lerp based on `y` in screen-space for the upper half of the
+            /* lerp based on `y` in screen space for the upper half of the
              * triangle
              */
             for (let y = startY; y < midStopY && y < SCREEN_H; ++y)
@@ -1173,7 +1173,7 @@
                 wYUpper += stepWYAlongUpper; wYMajor += stepWYAlongMajor;
                 wZUpper += stepWZAlongUpper; wZMajor += stepWZAlongMajor;
             }
-            /* lerp based on `y` in screen-space for the lower half of the
+            /* lerp based on `y` in screen space for the lower half of the
              * triangle
              */
             for (let y = midStopY; y < endY && y < SCREEN_H; ++y)
@@ -1225,12 +1225,12 @@
         /* determine how bright & translucent the image is going to be drawn */
         const ALPHA = alpha !== undefined ? alpha : 1;
         const LIGHT_LEVEL = lightLevel !== undefined ? lightLevel : 1;
-        // 1 step in screen-space equals how many steps in texture space
+        // 1 step in screen space equals how many steps in texture space
         const scaleX = sw / dw, scaleY = sh / dh;
         // raster clipping: clip the screen coordinates against the bounds of
         // the buffer
         const clipLeft = Math.max(-dx, 0), clipTop = Math.max(-dy, 0);
-        /* draw endpoints in screen-space, biased by -0.5 as per the top-left
+        /* draw endpoints in screen space, biased by -0.5 as per the top-left
          * pixel coverage rules
          */
         const dStartX = Math.ceil(dx + clipLeft - 0.5);

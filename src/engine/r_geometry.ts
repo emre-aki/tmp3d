@@ -541,7 +541,7 @@
         {
             // currently the camera also acts as a point light
             const cam = R_Camera.R_GetCameraState();
-            /* the position of the point light in world-space */
+            /* the position of the point light in world space */
             pso.lightX = cam.x; pso.lightY = cam.y; pso.lightZ = cam.z;
         }
         else

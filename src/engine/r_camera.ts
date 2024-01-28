@@ -10,7 +10,7 @@
  *
  *      The module that helps carry out world-space-to-view-space
  *      transformations with respect to the camera, as well as perform
- *      perspective projection into 2-D screen-space.
+ *      perspective projection into 2-D screen space.
  *
  *      Also provides functionality for updating the orientation of the camera
  *      in 3-D with user input.
