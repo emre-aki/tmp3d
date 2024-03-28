@@ -157,6 +157,12 @@ declare function __import__AN_Animation (): __Mod__AN_Animation;
 // engine/i_input.ts
 // -----------------------------------------------------------------------------
 type KEY = {
+    RTN: "RTN",
+    SPC: "SPC",
+    ARW_DOWN: "ARW_DOWN",
+    ARW_LEFT: "ARW_LEFT",
+    ARW_RIGHT: "ARW_RIGHT",
+    ARW_UP: "ARW_UP",
     A: "A",
     D: "D",
     E: "E",
@@ -165,12 +171,6 @@ type KEY = {
     R: "R",
     S: "S",
     W: "W",
-    ARW_DOWN: "ARW_DOWN",
-    ARW_LEFT: "ARW_LEFT",
-    ARW_RIGHT: "ARW_RIGHT",
-    ARW_UP: "ARW_UP",
-    RTN: "RTN",
-    SPC: "SPC",
 };
 
 type MOUSE = {

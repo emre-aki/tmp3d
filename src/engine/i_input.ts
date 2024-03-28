@@ -11,6 +11,14 @@
 (function (): void
 {
     const KEY = {
+        /* special keys */
+        RTN: "RTN",
+        SPC: "SPC",
+        /* arrow keys */
+        ARW_DOWN: "ARW_DOWN",
+        ARW_LEFT: "ARW_LEFT",
+        ARW_RIGHT: "ARW_RIGHT",
+        ARW_UP: "ARW_UP",
         /* standard keys */
         A: "A",
         D: "D",
@@ -20,14 +28,6 @@
         R: "R",
         S: "S",
         W: "W",
-        /* arrow keys */
-        ARW_DOWN: "ARW_DOWN",
-        ARW_LEFT: "ARW_LEFT",
-        ARW_RIGHT: "ARW_RIGHT",
-        ARW_UP: "ARW_UP",
-        /* special keys */
-        RTN: "RTN",
-        SPC: "SPC",
     } as const;
 
     const KEY_CODES = {
@@ -41,10 +41,10 @@
         KeyD: KEY.D,
         KeyE: KEY.E,
         KeyG: KEY.G,
-        KeyW: KEY.W,
         KeyQ: KEY.Q,
         KeyR: KEY.R,
         KeyS: KEY.S,
+        KeyW: KEY.W,
     } as const;
 
     const MOUSE = {
@@ -69,6 +69,12 @@
      ] as const;
 
     const keyState: { [key in (keyof KEY)]: 0 | 1 } = {
+        [KEY.RTN]: 0,
+        [KEY.SPC]: 0,
+        [KEY.ARW_DOWN]: 0,
+        [KEY.ARW_LEFT]: 0,
+        [KEY.ARW_RIGHT]: 0,
+        [KEY.ARW_UP]: 0,
         [KEY.A]: 0,
         [KEY.D]: 0,
         [KEY.E]: 0,
@@ -77,12 +83,6 @@
         [KEY.R]: 0,
         [KEY.S]: 0,
         [KEY.W]: 0,
-        [KEY.ARW_DOWN]: 0,
-        [KEY.ARW_LEFT]: 0,
-        [KEY.ARW_RIGHT]: 0,
-        [KEY.ARW_UP]: 0,
-        [KEY.RTN]: 0,
-        [KEY.SPC]: 0,
     };
 
     const mouseState: { [key in (keyof MOUSE)]: number } = {
