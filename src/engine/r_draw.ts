@@ -768,6 +768,7 @@
        wx0, wy0, wz0, wx1, wy1, wz1,
        normalX, normalY, normalZ,
        lightX, lightY, lightZ,
+       isPointLight,
        alpha }: pso_t): void
     {
         const shouldShade = lightX !== undefined &&
@@ -837,11 +838,21 @@
             /* wrap-around the texture if the sampling point is out-of-bounds */
             sX = Math.floor((((sX % 1) + 1) % 1) * texWidth);
             sY = Math.floor((((sY % 1) + 1) % 1) * texHeight);
+            /* calculate light intensity on the current pixel */
             let lightLevel = 1;
             if (shouldShade)
             {
-                const WX = wx * w_, WY = wy * w_, WZ = wz * w_;
-                const lX = lightX - WX, lY = lightY - WY, lZ = lightZ - WZ;
+                // start with the assumption that the given light is a
+                // directional light...
+                let lX = lightX, lY = lightY, lZ = lightZ;
+                /* ...and adjust accordingly if it turns out to be a point light
+                 * instead
+                 */
+                if (isPointLight)
+                {
+                    const WX = wx * w_, WY = wy * w_, WZ = wz * w_;
+                    lX = lightX - WX; lY = lightY - WY; lZ = lightZ - WZ;
+                }
                 /* TODO: maybe use `Q_rsqrt` here??? */
                 const magL_ = 1 / Math.sqrt(lX * lX + lY * lY + lZ * lZ);
                 const lXUnit = lX * magL_;

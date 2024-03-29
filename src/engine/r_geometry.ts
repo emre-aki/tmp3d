@@ -67,6 +67,7 @@
     const R_ShaderMode_Texture = R_Shader.R_ShaderMode_Texture;
     const R_ShaderMode_Lights = R_Shader.R_ShaderMode_Lights;
     const R_ShaderMode_Diffuse = R_Shader.R_ShaderMode_Diffuse;
+    const R_ShaderMode_PointLight = R_Shader.R_ShaderMode_PointLight;
     const vso = R_Shader.R_VertexShaderObj;
     const pso = R_Shader.R_PixelShaderObj;
 
@@ -543,10 +544,22 @@
         /* set the light */
         if (pso.mode & R_ShaderMode_Lights)
         {
-            // currently the camera also acts as a point light
+            // currently the camera also acts as both a directional light, and a
+            // point light
             const cam = R_Camera.R_GetCameraState();
-            /* the position of the point light in world-space */
-            pso.lightX = cam.x; pso.lightY = cam.y; pso.lightZ = cam.z;
+            pso.isPointLight = pso.mode & R_ShaderMode_PointLight;
+            if (pso.isPointLight)
+            {
+                pso.lightX = cam.x;
+                pso.lightY = cam.y;
+                pso.lightZ = cam.z;
+            }
+            else
+            {
+                pso.lightX = -cam.fwdX;
+                pso.lightY = -cam.fwdY;
+                pso.lightZ = -cam.fwdZ;
+            }
         }
         else
         {

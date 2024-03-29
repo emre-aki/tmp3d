@@ -149,15 +149,16 @@ will reject it otherwise.*
 
 ### Controls
 
-| **Action**                        | **Keys**                                                                          |
-|-----------------------------------|-----------------------------------------------------------------------------------|
-| Movement                          | <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>                               |
-| Free-look                         | <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd> <kbd>←</kbd>, or the mouse<sup>__*__</sup> |
-| Change elevation                  | <kbd>Q</kbd> <kbd>E</kbd>, or <kbd>![MSW]</kbd><sup>__*__</sup>                   |
-| Toggle model rotation on/off      | <kbd>G</kbd>                                                                      |
-| Toggle wire(*F*)rames on/off      | <kbd>F</kbd>                                                                      |
-| Cycle between (*R*)endering modes | <kbd>R</kbd>                                                                      |
-| Cycle between (*L*)ighting modes  | <kbd>L</kbd>                                                                      |
+| **Action**                                          | **Keys**                                                                          |
+|-----------------------------------------------------|-----------------------------------------------------------------------------------|
+| Movement                                            | <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>                               |
+| Free-look                                           | <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd> <kbd>←</kbd>, or the mouse<sup>__*__</sup> |
+| Change elevation                                    | <kbd>Q</kbd> <kbd>E</kbd>, or <kbd>![MSW]</kbd><sup>__*__</sup>                   |
+| Toggle model rotation on/off                        | <kbd>G</kbd>                                                                      |
+| Toggle wire(*F*)rames on/off                        | <kbd>F</kbd>                                                                      |
+| Cycle between (*R*)endering modes                   | <kbd>R</kbd>                                                                      |
+| Cycle between (*L*)ighting modes                    | <kbd>L</kbd>                                                                      |
+| Switch between (*P*)oint and directional lights     | <kbd>P</kbd>                                                                      |
 
 > ⚠️ *<sup>__\*__</sup> You should first click <kbd>![LMB]</kbd> on the `canvas` to
   activate mouse controls.*

@@ -169,6 +169,7 @@ type KEY = {
     F: "F",
     G: "G",
     L: "L",
+    P: "P",
     Q: "Q",
     R: "R",
     S: "S",
@@ -652,12 +653,14 @@ type pso_t = {
     wx1: number, wy1: number, wz1: number,
     normalX?: number, normalY?: number, normalZ?: number,
     lightX?: number, lightY?: number, lightZ?: number,
+    isPointLight: number,
     alpha: number,
 };
 
 type R_ToggleWireframe = () => void;
 type R_ChangeFillMode = () => void;
 type R_ChangeLightingMode = () => void;
+type R_TogglePointLight = () => void;
 
 type __Mod__R_Shader = {
     R_VertexShaderObj: vso_t,
@@ -667,9 +670,11 @@ type __Mod__R_Shader = {
     R_ShaderMode_Texture: number,
     R_ShaderMode_Lights: number,
     R_ShaderMode_Diffuse: number,
+    R_ShaderMode_PointLight: number,
     R_ToggleWireframe: R_ToggleWireframe,
     R_ChangeFillMode: R_ChangeFillMode,
     R_ChangeLightingMode: R_ChangeLightingMode,
+    R_TogglePointLight: R_TogglePointLight,
 };
 
 declare function __import__R_Shader (): __Mod__R_Shader;

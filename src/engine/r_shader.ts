@@ -26,16 +26,20 @@
     const SHADER_MODE_MASK_TEXTURE_FILL = 0x4;
     // bit flag to set light calculations on/off — off means ambient (base)
     // light only, in which case overrides whatever is set to
-    // `SHADER_MODE_MASK_DIFFUSE`
+    // `SHADER_MODE_MASK_DIFFUSE` or `SHADER_MODE_MASK_POINT_LIGHT`
     const SHADER_MODE_MASK_LIGHTS = 0x8;
     // bit flag to set per-pixel diffuse light calculations on/off — off means
     // flat shading, a constant light intensity over the entire triangle
     const SHADER_MODE_MASK_DIFFUSE = 0x10;
+    // bit flag to be used to switch between directional and point lights —
+    // requires `SHADER_MODE_MASK_LIGHTS` to be set
+    const SHADER_MODE_MASK_POINT_LIGHT = 0x20;
 
     let mode = SHADER_MODE_MASK_FILL |
                SHADER_MODE_MASK_TEXTURE_FILL |
                SHADER_MODE_MASK_LIGHTS |
-               SHADER_MODE_MASK_DIFFUSE;
+               SHADER_MODE_MASK_DIFFUSE |
+               SHADER_MODE_MASK_POINT_LIGHT;
 
     const shaderChangeDebounce = 250;
     let lastShaderChange = Date.now();
@@ -104,6 +108,10 @@
         // the position of the point light in world space, or the direction of
         // the directional light, both of which affect the entire scene
         lightX: undefined, lightY: undefined, lightZ: undefined,
+        // whether to interpret the light defined by the vector
+        // <`lightX`, `lightY`, `lightZ`> as a directional light or as a point
+        // light
+        isPointLight: 0,
         // alpha compositing
         alpha: 1,
     };
@@ -172,6 +180,22 @@
         }
     }
 
+    //
+    // R_TogglePointLight
+    // Switch between directional and point lights
+    //
+    function R_TogglePointLight (): void
+    {
+        const now = Date.now();
+        if (I_GetKeyState(I_Keys.P) &&
+            now - lastShaderChange > shaderChangeDebounce)
+        {
+            mode ^= SHADER_MODE_MASK_POINT_LIGHT;
+            pso.mode = mode;
+            lastShaderChange = now;
+        }
+    }
+
     window.__import__R_Shader = function ()
     {
         return {
@@ -182,9 +206,11 @@
             R_ShaderMode_Texture: SHADER_MODE_MASK_TEXTURE_FILL,
             R_ShaderMode_Lights: SHADER_MODE_MASK_LIGHTS,
             R_ShaderMode_Diffuse: SHADER_MODE_MASK_DIFFUSE,
+            R_ShaderMode_PointLight: SHADER_MODE_MASK_POINT_LIGHT,
             R_ToggleWireframe,
             R_ChangeFillMode,
             R_ChangeLightingMode,
+            R_TogglePointLight,
         };
     };
 })();

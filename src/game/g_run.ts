@@ -45,6 +45,7 @@
     const R_ToggleWireframe = R_Shader.R_ToggleWireframe;
     const R_ChangeFillMode = R_Shader.R_ChangeFillMode;
     const R_ChangeLightingMode = R_Shader.R_ChangeLightingMode;
+    const R_TogglePointLight = R_Shader.R_TogglePointLight;
 
     const TICK_DELAY = 1000 / FPS;
 
@@ -67,6 +68,7 @@
         R_ToggleWireframe();    // need these to be handled in their own
         R_ChangeFillMode();     // separate listeners so the key strokes
         R_ChangeLightingMode(); // associated with each event can be captured
+        R_TogglePointLight();   // individually
         R_UpdateGeometry();
     }
 
