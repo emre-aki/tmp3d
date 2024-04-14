@@ -17,6 +17,9 @@
     const I_GetKeyState = I_Input.I_GetKeyState;
     const I_Keys = I_Input.I_Keys;
 
+    const R_Drawers = __import__R_Drawers();
+    const R_SetOnScreenMessage = R_Drawers.R_SetOnScreenMessage;
+
     // bit flag to set wireframe mode on/off
     const SHADER_MODE_MASK_WIREFRAME = 0x1;
     // bit flag to set fill mode on/off — off means no fills, in which case
@@ -153,6 +156,12 @@
                     (fill & SHADER_MODE_MASK_TEXTURE_FILL);
             pso.mode = mode;
             lastShaderChange = now;
+            if (mode & SHADER_MODE_MASK_TEXTURE_FILL)
+                R_SetOnScreenMessage("Texture fill", 50);
+            else if (mode & SHADER_MODE_MASK_FILL)
+                R_SetOnScreenMessage("Color fill", 50);
+            else
+                R_SetOnScreenMessage("No fill", 50);
         }
     }
 
@@ -177,6 +186,12 @@
                     (lightsOn & SHADER_MODE_MASK_DIFFUSE);
             pso.mode = mode;
             lastShaderChange = now;
+            if (mode & SHADER_MODE_MASK_DIFFUSE)
+                R_SetOnScreenMessage("Diffuse shading", 50);
+            else if (mode & SHADER_MODE_MASK_LIGHTS)
+                R_SetOnScreenMessage("Flat shading", 50);
+            else
+                R_SetOnScreenMessage("Ambient light", 50);
         }
     }
 
@@ -193,6 +208,10 @@
             mode ^= SHADER_MODE_MASK_POINT_LIGHT;
             pso.mode = mode;
             lastShaderChange = now;
+            if (mode & SHADER_MODE_MASK_POINT_LIGHT)
+                R_SetOnScreenMessage("Point light", 50);
+            else
+                R_SetOnScreenMessage("Directional light", 50);
         }
     }
 

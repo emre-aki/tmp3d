@@ -553,11 +553,15 @@ declare function __import__R_Draw (): __Mod__R_Draw;
 type R_LoadingDrawer = (onEnd?: () => void) => string;
 type R_TitleDrawer = (decor: texture_t, onEnd?: () => void) => string;
 type R_ErrorDrawer = (reason: string) => void;
+type R_PrintOnScreenMessage = () => void;
+type R_SetOnScreenMessage = (msg: string, ticks: number) => void;
 
 type __Mod__R_Drawers = {
     R_LoadingDrawer: R_LoadingDrawer,
     R_TitleDrawer: R_TitleDrawer,
     R_ErrorDrawer: R_ErrorDrawer,
+    R_PrintOnScreenMessage: R_PrintOnScreenMessage,
+    R_SetOnScreenMessage: R_SetOnScreenMessage,
 };
 
 declare function __import__R_Drawers (): __Mod__R_Drawers;

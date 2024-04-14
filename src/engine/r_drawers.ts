@@ -39,6 +39,9 @@
     const ERROR_FONT_COLOR = "#FF0000";
     const ERROR_FONT_SIZE = 16;
 
+    let remainingOnScreenMsgTicks = 0;
+    let onScreenMsg: string;
+
     function R_DrawLoadingFrame (index: number): void
     {
         const dots = Array(index % N_LOADING_STATES).fill(".").join("");
@@ -89,8 +92,27 @@
                 ERROR_FONT_COLOR, ERROR_FONT_SIZE);
     }
 
+    function R_PrintOnScreenMessage (): void
+    {
+        if (!remainingOnScreenMsgTicks) return;
+        R_Print(onScreenMsg, 5, SCREEN_H - 5, "#FF0000", 14);
+        --remainingOnScreenMsgTicks;
+    }
+
+    function R_SetOnScreenMessage (msg: string, ticks: number): void
+    {
+        remainingOnScreenMsgTicks = ticks;
+        onScreenMsg = msg;
+    }
+
     window.__import__R_Drawers = function ()
     {
-        return { R_LoadingDrawer, R_TitleDrawer, R_ErrorDrawer };
+        return {
+            R_LoadingDrawer,
+            R_TitleDrawer,
+            R_ErrorDrawer,
+            R_PrintOnScreenMessage,
+            R_SetOnScreenMessage,
+         };
     };
 })();

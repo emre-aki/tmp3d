@@ -35,6 +35,7 @@
 
     const R_Drawers = __import__R_Drawers();
     const R_TitleDrawer = R_Drawers.R_TitleDrawer;
+    const R_PrintOnScreenMessage = R_Drawers.R_PrintOnScreenMessage;
 
     const R_Geometry = __import__R_Geometry();
     const R_RenderGeometries = R_Geometry.R_RenderGeometries;
@@ -76,6 +77,7 @@
     {
         G_UpdateGame(deltaT); // update actors & game state
         G_UpdateScreen(deltaT); // update screen buffer
+        R_PrintOnScreenMessage(); // print an on-screen message
     }
 
     function G_AdvanceTick (currentTick: number): void
