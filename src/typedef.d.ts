@@ -484,16 +484,16 @@ type R_DrawTriangle_Wireframe = (
     stroke: number
 ) => void;
 
-type R_FillTriangle_Flat = (vso: vso_t, pso: pso_t) => void;
+type R_FillTriangle_Colored = (vso: vso_t, pso: pso_t) => void;
 
-type R_FillTriangle_Flat_Bresenham = (
+type R_FillTriangle_Colored_Bresenham = (
     ax: number, ay: number,
     bx: number, by: number,
     cx: number, cy: number,
     r: number, g: number, b: number, a: number
 ) => void;
 
-type R_DrawTriangle_Textured_Affine = (
+type R_FillTriangle_Textured_Affine = (
     tex: texture_t,
     ax: number, ay: number,
     bx: number, by: number,
@@ -505,7 +505,7 @@ type R_DrawTriangle_Textured_Affine = (
     lightLevel: number
 ) => void;
 
-type R_DrawTriangle_Textured_Perspective = (vso: vso_t, pso: pso_t) => void;
+type R_FillTriangle_Textured_Perspective = (vso: vso_t, pso: pso_t) => void;
 
 type R_DrawImage = (
     img: texture_t,
@@ -536,11 +536,11 @@ type __Mod__R_Draw = {
     R_DrawLine_RayCast: R_DrawLine_RayCast,
     R_DrawCircle: R_DrawCircle,
     R_DrawTriangle_Wireframe: R_DrawTriangle_Wireframe,
-    R_FillTriangle_Flat: R_FillTriangle_Flat,
+    R_FillTriangle_Colored: R_FillTriangle_Colored,
     /* TODO: uncomment these once they are implemented */
-    // R_FillTriangle_Flat_Bresenham: R_FillTriangle_Flat_Bresenham,
-    // R_DrawTriangle_Textured_Affine: R_DrawTriangle_Textured_Affine,
-    R_DrawTriangle_Textured_Perspective: R_DrawTriangle_Textured_Perspective,
+    // R_FillTriangle_Colored_Bresenham: R_FillTriangle_Colored_Bresenham,
+    // R_FillTriangle_Textured_Affine: R_FillTriangle_Textured_Affine,
+    R_FillTriangle_Textured_Perspective: R_FillTriangle_Textured_Perspective,
     R_DrawImage: R_DrawImage,
     R_Print: R_Print,
 };

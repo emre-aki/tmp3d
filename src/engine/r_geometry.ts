@@ -41,7 +41,6 @@
     const M_Vec3 = __import__M_Vec3();
     const M_IsInFrontOfPlane3 = M_Vec3.M_IsInFrontOfPlane3;
     const M_Add3 = M_Vec3.M_Add3;
-    const M_Norm3 = M_Vec3.M_Norm3;
     const M_Sub3 = M_Vec3.M_Sub3;
     const M_Scale3 = M_Vec3.M_Scale3;
     const Vec3 = M_Vec3.M_Vec3;
@@ -57,9 +56,9 @@
     const R_Draw = __import__R_Draw();
     const R_DrawLine = R_Draw.R_DrawLine;
     const R_DrawTriangle_Wireframe = R_Draw.R_DrawTriangle_Wireframe;
-    const R_FillTriangle_Flat = R_Draw.R_FillTriangle_Flat;
-    const R_DrawTriangle_Textured_Perspective =
-        R_Draw.R_DrawTriangle_Textured_Perspective;
+    const R_FillTriangle_Colored = R_Draw.R_FillTriangle_Colored;
+    const R_FillTriangle_Textured_Perspective =
+        R_Draw.R_FillTriangle_Textured_Perspective;
 
     const R_Shader = __import__R_Shader();
     const R_ShaderMode_Wireframe = R_Shader.R_ShaderMode_Wireframe;
@@ -78,9 +77,6 @@
     const RIGHT = R_Camera.R_Right;
     const DOWN = R_Camera.R_Down;
     const FWD = R_Camera.R_Fwd;
-
-    // TODO: make a separate lighting controller module, maybe??
-    const DIRECTIONAL_LIGHT = M_Norm3(Vec3(1, -1, -1));
 
     let nTris: number; // total number of triangles in the model
     let tris3: tri3_t[]; // a pool of raw triangle data
@@ -265,18 +261,26 @@
     function
     R_ClipGeometryAgainstNearPlane
     ( triView: tri3_t,
-      clippedTriQueue: [tri3_t, tri3_t] ): number
+      clippedTriQueue: [tri3_t, tri3_t],
+      triVertexNormals: tri3_t,
+      clippedTriVertexNormalQueue: [tri3_t, tri3_t] ): number
     {
         let nVerticesInside = 0;
-        const inside = Array<vec3_t>(4);
+        const inside = Array<vec3_t>(4), nInside = Array<vec3_t>(4);
         /* test each vertex in the original triangle against the near-clipping
          * plane to see whether they fall inside of the plane or not
          */
         for (let i = 0; i < 3; ++i)
         {
-            const v = triView[i], vNext = triView[i === 2 ? 0 : i + 1];
+            const iNext = i === 2 ? 0 : i + 1;
+            const v = triView[i], vNext = triView[iNext];
+            const n = triVertexNormals[i], nNext = triVertexNormals[iNext];
             const vInside = v[2] >= Z_NEAR, vNextInside = vNext[2] >= Z_NEAR;
-            if (vInside) inside[nVerticesInside++] = v;
+            if (vInside)
+            {
+                inside[nVerticesInside] = v;
+                nInside[nVerticesInside++] = n;
+            }
             /* if the edge of the triangle formed by vertices `v` & `vNext`
              * intersects the near-clipping plane, store the point of
              * intersection as an "inside" vertex
@@ -287,7 +291,9 @@
                 const t = M_TimeBeforePlaneCollision3(v, vNext,
                                                       projectionOrigin, FWD)!;
                 const intersect = M_Add3(M_Scale3(M_Sub3(vNext, v), t), v);
-                inside[nVerticesInside++] = intersect;
+                const intersectN = M_Add3(M_Scale3(M_Sub3(nNext, n), t), n);
+                inside[nVerticesInside] = intersect;
+                nInside[nVerticesInside++] = intersectN;
             }
         }
         // early return: no vertices lie inside/in front of the near-clipping
@@ -297,12 +303,20 @@
          * triangle, add it to the clip-buffer
          */
         clippedTriQueue[0] = Tri3(inside[0], inside[1], inside[2]);
+        /* ...the same goes for the vertex normals */
+        clippedTriVertexNormalQueue[0] =
+            Tri3(nInside[0], nInside[1], nInside[2]);
         /* the vertices that fall inside the near-clipping plane form a quad,
          * triangulate it by forming an additional triangle and save that in the
          * clip-buffer
          */
         if (nVerticesInside === 4)
+        {
             clippedTriQueue[1] = Tri3(inside[2], inside[3], inside[0]);
+            /* ...the same goes for the vertex normals */
+            clippedTriVertexNormalQueue[1] =
+                Tri3(nInside[2], nInside[3], nInside[0]);
+        }
 
         return nVerticesInside - 2; // triangulation of an n-gon
      }
@@ -430,8 +444,15 @@
             const triView = R_TriToViewSpace(triWorld);
             // keep a buffer of clipped triangles for drawing
             const clippedTriQueue = Array(2) as [tri3_t, tri3_t];
-            const nClipResult = R_ClipGeometryAgainstNearPlane(triView,
-                                                               clippedTriQueue);
+            // UNUSED: the vertex normals after having clipped against the
+            // near-plane
+            const clippedTriVertexNormalQueue = Array(2) as [tri3_t, tri3_t];
+            const nClipResult = R_ClipGeometryAgainstNearPlane(
+                triView,
+                clippedTriQueue,
+                transformedTriVertexNormals3[triIndex],
+                clippedTriVertexNormalQueue
+            );
             // TODO: clip against far-plane
             for (let j = 0; j < nClipResult; ++j)
             {
@@ -455,18 +476,27 @@
         nTrisOnScreen[1] = nCulledBuffer;
     }
 
-    /* TODO: add vertex normals and world-coordinates, and directional/point
-     * and flat/smooth differentiation
-     */
-    function R_RenderGeomeries_Flat (nTrisOnScreen: Uint32Array): void
+    function R_RenderGeomeries_ColorFill (nTrisOnScreen: Uint32Array): void
     {
         /* set the light */
         if (pso.mode & R_ShaderMode_Lights)
         {
-            /* the directional light falling on the triangle */
-            pso.lightX = DIRECTIONAL_LIGHT[0];
-            pso.lightY = DIRECTIONAL_LIGHT[1];
-            pso.lightZ = DIRECTIONAL_LIGHT[2];
+            // currently the camera also acts as both a directional light, and a
+            // point light
+            const cam = R_Camera.R_GetCameraState();
+            pso.isPointLight = pso.mode & R_ShaderMode_PointLight;
+            if (pso.isPointLight)
+            {
+                pso.lightX = cam.x;
+                pso.lightY = cam.y;
+                pso.lightZ = cam.z;
+            }
+            else
+            {
+                pso.lightX = -cam.fwdX;
+                pso.lightY = -cam.fwdY;
+                pso.lightZ = -cam.fwdZ;
+            }
         }
         else
         {
@@ -482,20 +512,36 @@
             const triView = R_TriToViewSpace(triWorld);
             // the original triangle after having clipped against the near-plane
             const clippedTriQueue = Array(2) as [tri3_t, tri3_t];
-            const nClipResult = R_ClipGeometryAgainstNearPlane(triView,
-                                                               clippedTriQueue);
+            // the vertex normals after having clipped against the near-plane
+            const clippedTriVertexNormalQueue = Array(2) as [tri3_t, tri3_t];
+            const nClipResult = R_ClipGeometryAgainstNearPlane(
+                triView,
+                clippedTriQueue,
+                transformedTriVertexNormals3[triIndex],
+                clippedTriVertexNormalQueue
+            );
             // TODO: clip against far-plane
-            /* calculate the surface normal */
-            if (nClipResult) // TODO: add flat/smooth differentiation here
+            /* calculate the surface normal if the shader mode is set to
+             * flat-shading
+             */
+            if (nClipResult && !(pso.mode & R_ShaderMode_Smooth))
             {
                 const triNormal = M_TriNormal3(triWorld);
                 pso.normalX = triNormal[0];
                 pso.normalY = triNormal[1];
                 pso.normalZ = triNormal[2];
             }
+            else
+            {
+                pso.normalX = undefined;
+                pso.normalY = undefined;
+                pso.normalZ = undefined;
+            }
             for (let j = 0; j < nClipResult; ++j)
             {
                 const triFrustum = clippedTriQueue[j];
+                const triFrustumWorld = R_TriToWorldSpace(triFrustum);
+                const triVertexNormals = clippedTriVertexNormalQueue[j];
                 const triClip = R_TriToClipSpace(triFrustum);
                 const aClip3 = triClip[0];
                 const bClip3 = triClip[1];
@@ -517,15 +563,35 @@
                 vso.ax = ax; vso.ay = ay; vso.aw = aw;
                 vso.bx = bx; vso.by = by; vso.bw = bw;
                 vso.cx = cx; vso.cy = cy; vso.cw = cw;
+                /* vertex normals used in smooth shading */
+                const aNormal3 = triVertexNormals[0];
+                const bNormal3 = triVertexNormals[1];
+                const cNormal3 = triVertexNormals[2];
+                const nAX = aNormal3[0], nAY = aNormal3[1], nAZ = aNormal3[2];
+                const nBX = bNormal3[0], nBY = bNormal3[1], nBZ = bNormal3[2];
+                const nCX = cNormal3[0], nCY = cNormal3[1], nCZ = cNormal3[2];
+                vso.nax = nAX; vso.nay = nAY; vso.naz = nAZ;
+                vso.nbx = nBX; vso.nby = nBY; vso.nbz = nBZ;
+                vso.ncx = nCX; vso.ncy = nCY; vso.ncz = nCZ;
+                /* world space vertex coordinates used in point lighting */
+                const a3 = triFrustumWorld[0];
+                const b3 = triFrustumWorld[1];
+                const c3 = triFrustumWorld[2];
+                const wAX = a3[0], wAY = a3[1], wAZ = a3[2];
+                const wBX = b3[0], wBY = b3[1], wBZ = b3[2];
+                const wCX = c3[0], wCY = c3[1], wCZ = c3[2];
+                vso.wax = wAX; vso.way = wAY; vso.waz = wAZ;
+                vso.wbx = wBX; vso.wby = wBY; vso.wbz = wBZ;
+                vso.wcx = wCX; vso.wcy = wCY; vso.wcz = wCZ;
                 /* FIXME: clip these color coordinates as well, along with the
                  * vertices of the triangle, maybe??
                  */
                 // assign each vertex a specific color to be interpolated across
                 // the entire triangle
-                vso.ar = 255; vso.ag = 0; vso.ab = 0;
-                vso.br = 0; vso.bg = 255; vso.bb = 0;
-                vso.cr = 0; vso.cg = 0; vso.cb = 255;
-                R_FillTriangle_Flat(vso, pso);
+                vso.ar = 255; vso.ag = 255; vso.ab = 255;
+                vso.br = 255; vso.bg = 255; vso.bb = 255;
+                vso.cr = 255; vso.cg = 255; vso.cb = 255;
+                R_FillTriangle_Colored(vso, pso);
                 if (pso.mode & R_ShaderMode_Wireframe)
                     R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
                                              0, 0, 0, 255, 2);
@@ -536,7 +602,7 @@
         nTrisOnScreen[1] = nCulledBuffer;
     }
 
-    function R_RenderGeometries_Textured (nTrisOnScreen: Uint32Array): void
+    function R_RenderGeometries_TextureFill (nTrisOnScreen: Uint32Array): void
     {
         let trisRendered = 0;
         // early return if the mesh does not have texture-mapping
@@ -665,7 +731,7 @@
                 vso.wax = wAX; vso.way = wAY; vso.waz = wAZ;
                 vso.wbx = wBX; vso.wby = wBY; vso.wbz = wBZ;
                 vso.wcx = wCX; vso.wcy = wCY; vso.wcz = wCZ;
-                R_DrawTriangle_Textured_Perspective(vso, pso);
+                R_FillTriangle_Textured_Perspective(vso, pso);
                 if (pso.mode & R_ShaderMode_Wireframe)
                     R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
                                              255, 255, 255, 255, 2);
@@ -748,11 +814,11 @@
         if (pso.mode & R_ShaderMode_Fill)
         {
             if (pso.mode & R_ShaderMode_Texture)
-                R_RenderGeometries_Textured(nTrisOnScreen);
+                R_RenderGeometries_TextureFill(nTrisOnScreen);
             else
-                R_RenderGeomeries_Flat(nTrisOnScreen);
+                R_RenderGeomeries_ColorFill(nTrisOnScreen);
         }
-        else if (pso.mode & R_ShaderMode_Wireframe)
+        else
             R_RenderGeomeries_Wireframe(nTrisOnScreen);
         if (DEBUG_MODE) R_RenderDebugAxes(1000);
     }

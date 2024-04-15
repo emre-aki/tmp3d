@@ -409,27 +409,25 @@
     }
 
     //
-    // R_LerpScanline_Flat
-    // Lerp a single flat-shaded scanline
+    // R_LerpScanline_Colored
+    // Lerp a single color-filled scanline
     //
     function
-    R_LerpScanline_Flat
+    R_LerpScanline_Colored
     ({ dy,
        dx0, dx1,
        w0, w1,
        r0, g0, b0, r1, g1, b1,
+       nx0, ny0, nz0, nx1, ny1, nz1,
+       wx0, wy0, wz0, wx1, wy1, wz1,
        normalX, normalY, normalZ,
        lightX, lightY, lightZ,
+       isPointLight,
        alpha }: pso_t): void
     {
-        let lightLevel = 1;
-        if (lightX !== undefined &&
-            lightY !== undefined &&
-            lightZ !== undefined &&
-            normalX !== undefined &&
-            normalY !== undefined &&
-            normalZ !== undefined)
-            lightLevel = lightX * normalX + lightY * normalY + lightZ * normalZ;
+        const shouldShade = lightX !== undefined &&
+                            lightY !== undefined &&
+                            lightZ !== undefined;
         // raster clipping: clip the scanline if it goes out-of-bounds of screen
         // coordinates
         const clipLeft = Math.max(-dx0, 0);
@@ -448,6 +446,14 @@
         const gradG = (g1 - g0) * deltaX_;
         // 1 step in `+x` equals how many steps in `b`
         const gradB = (b1 - b0) * deltaX_;
+        /* 1 step in `+x` equals how many steps along the vertex normal */
+        const gradNX = (nx1 - nx0) * deltaX_;
+        const gradNY = (ny1 - ny0) * deltaX_;
+        const gradNZ = (nz1 - nz0) * deltaX_;
+        /* 1 step in `+x` equals how many in the world space coordinates */
+        const gradWX = (wx1 - wx0) * deltaX_;
+        const gradWY = (wy1 - wy0) * deltaX_;
+        const gradWZ = (wz1 - wz0) * deltaX_;
         // current z-coordinate in the perspective-correct space
         let w = preStepX * gradW + w0;
         /* the coordinates in the perspective-correct RGB space of the color to
@@ -456,6 +462,14 @@
         let r = preStepX * gradR + r0;
         let g = preStepX * gradG + g0;
         let b = preStepX * gradB + b0;
+        /* current vertex normal in the perspective-correct space */
+        let nx = preStepX * gradNX + nx0;
+        let ny = preStepX * gradNY + ny0;
+        let nz = preStepX * gradNZ + nz0;
+        /* current world space coordinates in the perspective-correct space */
+        let wx = preStepX * gradWX + wx0;
+        let wy = preStepX * gradWY + wy0;
+        let wz = preStepX * gradWZ + wz0;
         // alpha blending — how much we should sample from the new color
         const sampleAlpha = 255 * alpha;
         /* rasterize current scanline */
@@ -470,11 +484,56 @@
             {
                 w += gradW;
                 r += gradR; g += gradG; b += gradB;
+                nx += gradNX; ny += gradNY; nz += gradNZ;
+                wx += gradWX; wy += gradWY; wz += gradWZ;
 
                 continue;
             }
             zBuffer[bufferIndex] = w; // update the z-buffer
+            /* get the original coordinates back from the perspective-corrected
+             * space by dehomogenizing
+             */
             const w_ = 1 / w;
+            /* calculate light intensity on the current pixel */
+            let lightLevel = 1;
+            if (shouldShade)
+            {
+                // start with the assumption that the given light is a
+                // directional light...
+                let lX = lightX, lY = lightY, lZ = lightZ;
+                /* ...and adjust accordingly if it turns out to be a point light
+                 * instead
+                 */
+                if (isPointLight)
+                {
+                    lX -= wx * w_;
+                    lY -= wy * w_;
+                    lZ -= wz * w_;
+                }
+                const magL_ = 1 / Math.sqrt(lX * lX + lY * lY + lZ * lZ);
+                const lXUnit = lX * magL_;
+                const lYUnit = lY * magL_;
+                const lZUnit = lZ * magL_;
+                /* flat shading */
+                if (normalX !== undefined &&
+                    normalY !== undefined &&
+                    normalZ !== undefined)
+                {
+                    lightLevel =
+                        lXUnit * normalX + lYUnit * normalY + lZUnit * normalZ;
+                }
+                /* smooth shading */
+                else
+                {
+                    const NX = nx * w_, NY = ny * w_, NZ = nz * w_;
+                    const magN_ = 1 / Math.sqrt(NX * NX + NY * NY + NZ * NZ);
+                    const nXUnit = NX * magN_;
+                    const nYUnit = NY * magN_;
+                    const nZUnit = NZ * magN_;
+                    lightLevel =
+                        lXUnit * nXUnit + lYUnit * nYUnit + lZUnit * nZUnit;
+                }
+            }
             /* fill a single pixel in screen space with the color defined by
              * parameters `r`, `g`, `b`, and `alpha`.
              */
@@ -495,21 +554,29 @@
             frameBuffer.data[paintIndex + 3] = 255;
             w += gradW;
             r += gradR; g += gradG; b += gradB;
+            nx += gradNX; ny += gradNY; nz += gradNZ;
+            wx += gradWX; wy += gradWY; wz += gradWZ;
         }
     }
 
     //
-    // R_FillTriangle_Flat
-    // Draw flat-shaded triangle
+    // R_FillTriangle_Colored
+    // Fill the triangle with color
     //
     function
-    R_FillTriangle_Flat
+    R_FillTriangle_Colored
     ({ ax, ay, aw,
        bx, by, bw,
        cx, cy, cw,
        ar, ag, ab,
        br, bg, bb,
-       cr, cg, cb }: vso_t,
+       cr, cg, cb,
+       nax, nay, naz,
+       nbx, nby, nbz,
+       ncx, ncy, ncz,
+       wax, way, waz,
+       wbx, wby, wbz,
+       wcx, wcy, wcz }: vso_t,
      pso: pso_t ): void
     {
         /* coordinates of the triangle in screen space */
@@ -523,6 +590,16 @@
         let topR = ar * topW, midR = br * midW, bottomR = cr * bottomW;
         let topG = ag * topW, midG = bg * midW, bottomG = cg * bottomW;
         let topB = ab * topW, midB = bb * midW, bottomB = cb * bottomW;
+        /* vertex normals in perspective-corrected (1/z) world space */
+        let topNX = nax * topW, midNX = nbx * midW, bottomNX = ncx * bottomW;
+        let topNY = nay * topW, midNY = nby * midW, bottomNY = ncy * bottomW;
+        let topNZ = naz * topW, midNZ = nbz * midW, bottomNZ = ncz * bottomW;
+        /* world space coordinates of the triangle vertices in
+         * perspective-corrected (1/z) space
+         */
+        let topWX = wax * topW, midWX = wbx * midW, bottomWX = wcx * bottomW;
+        let topWY = way * topW, midWY = wby * midW, bottomWY = wcy * bottomW;
+        let topWZ = waz * topW, midWZ = wbz * midW, bottomWZ = wcz * bottomW;
         /* sort vertices of the triangle so that their y-coordinates are in
          * ascending order
          */
@@ -537,6 +614,14 @@
             const auxR = topR; topR = midR; midR = auxR;
             const auxG = topG; topG = midG; midG = auxG;
             const auxB = topB; topB = midB; midB = auxB;
+            /* swap vertex normals */
+            const auxNX = topNX; topNX = midNX; midNX = auxNX;
+            const auxNY = topNY; topNY = midNY; midNY = auxNY;
+            const auxNZ = topNZ; topNZ = midNZ; midNZ = auxNZ;
+            /* swap world space coordinates */
+            const auxWX = topWX; topWX = midWX; midWX = auxWX;
+            const auxWY = topWY; topWY = midWY; midWY = auxWY;
+            const auxWZ = topWZ; topWZ = midWZ; midWZ = auxWZ;
         }
         if (midY > bottomY)
         {
@@ -549,6 +634,14 @@
             const auxR = midR; midR = bottomR; bottomR = auxR;
             const auxG = midG; midG = bottomG; bottomG = auxG;
             const auxB = midB; midB = bottomB; bottomB = auxB;
+            /* swap vertex normals */
+            const auxNX = midNX; midNX = bottomNX; bottomNX = auxNX;
+            const auxNY = midNY; midNY = bottomNY; bottomNY = auxNY;
+            const auxNZ = midNZ; midNZ = bottomNZ; bottomNZ = auxNZ;
+            /* swap world space coordinates */
+            const auxWX = midWX; midWX = bottomWX; bottomWX = auxWX;
+            const auxWY = midWY; midWY = bottomWY; bottomWY = auxWY;
+            const auxWZ = midWZ; midWZ = bottomWZ; bottomWZ = auxWZ;
         }
         if (topY > midY)
         {
@@ -561,6 +654,14 @@
             const auxR = topR; topR = midR; midR = auxR;
             const auxG = topG; topG = midG; midG = auxG;
             const auxB = topB; topB = midB; midB = auxB;
+            /* swap vertex normals */
+            const auxNX = topNX; topNX = midNX; midNX = auxNX;
+            const auxNY = topNY; topNY = midNY; midNY = auxNY;
+            const auxNZ = topNZ; topNZ = midNZ; midNZ = auxNZ;
+            /* swap world space coordinates */
+            const auxWX = topWX; topWX = midWX; midWX = auxWX;
+            const auxWY = topWY; topWY = midWY; midWY = auxWY;
+            const auxWZ = topWZ; topWZ = midWZ; midWZ = auxWZ;
         }
         const deltaUpper = midY - topY, deltaUpper_ = 1 / deltaUpper;
         const deltaLower = bottomY - midY, deltaLower_ = 1 / deltaLower;
@@ -585,6 +686,30 @@
         const stepBAlongUpper = (midB - topB) * deltaUpper_;
         const stepBAlongLower = (bottomB - midB) * deltaLower_;
         const stepBAlongMajor = (bottomB - topB) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `nx` */
+        const stepNXAlongUpper = (midNX - topNX) * deltaUpper_;
+        const stepNXAlongLower = (bottomNX - midNX) * deltaLower_;
+        const stepNXAlongMajor = (bottomNX - topNX) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `ny` */
+        const stepNYAlongUpper = (midNY - topNY) * deltaUpper_;
+        const stepNYAlongLower = (bottomNY - midNY) * deltaLower_;
+        const stepNYAlongMajor = (bottomNY - topNY) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `nz` */
+        const stepNZAlongUpper = (midNZ - topNZ) * deltaUpper_;
+        const stepNZAlongLower = (bottomNZ - midNZ) * deltaLower_;
+        const stepNZAlongMajor = (bottomNZ - topNZ) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `wx` */
+        const stepWXAlongUpper = (midWX - topWX) * deltaUpper_;
+        const stepWXAlongLower = (bottomWX - midWX) * deltaLower_;
+        const stepWXAlongMajor = (bottomWX - topWX) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `wy` */
+        const stepWYAlongUpper = (midWY - topWY) * deltaUpper_;
+        const stepWYAlongLower = (bottomWY - midWY) * deltaLower_;
+        const stepWYAlongMajor = (bottomWY - topWY) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `wz` */
+        const stepWZAlongUpper = (midWZ - topWZ) * deltaUpper_;
+        const stepWZAlongLower = (bottomWZ - midWZ) * deltaLower_;
+        const stepWZAlongMajor = (bottomWZ - topWZ) * deltaMajor_;
         // raster clipping: clip the triangle if it goes out-of-bounds of screen
         // coordinates
         const clipTop = Math.max(-topY, 0), clipMid = Math.max(-midY, 0);
@@ -622,6 +747,30 @@
         let bUpper = preStepFromTop * stepBAlongUpper + topB;
         let bLower = preStepFromMid * stepBAlongLower + midB;
         let bMajor = preStepFromTop * stepBAlongMajor + topB;
+        /* current `nx` coordinates in perspective-correct (1/z) world space */
+        let nXUpper = preStepFromTop * stepNXAlongUpper + topNX;
+        let nXLower = preStepFromMid * stepNXAlongLower + midNX;
+        let nXMajor = preStepFromTop * stepNXAlongMajor + topNX;
+        /* current `ny` coordinates in perspective-correct (1/z) world space */
+        let nYUpper = preStepFromTop * stepNYAlongUpper + topNY;
+        let nYLower = preStepFromMid * stepNYAlongLower + midNY;
+        let nYMajor = preStepFromTop * stepNYAlongMajor + topNY;
+        /* current `nz` coordinates in perspective-correct (1/z) world space */
+        let nZUpper = preStepFromTop * stepNZAlongUpper + topNZ;
+        let nZLower = preStepFromMid * stepNZAlongLower + midNZ;
+        let nZMajor = preStepFromTop * stepNZAlongMajor + topNZ;
+        /* current `wx` coordinates in perspective-correct (1/z) world space */
+        let wXUpper = preStepFromTop * stepWXAlongUpper + topWX;
+        let wXLower = preStepFromMid * stepWXAlongLower + midWX;
+        let wXMajor = preStepFromTop * stepWXAlongMajor + topWX;
+        /* current `wy` coordinates in perspective-correct (1/z) world space */
+        let wYUpper = preStepFromTop * stepWYAlongUpper + topWY;
+        let wYLower = preStepFromMid * stepWYAlongLower + midWY;
+        let wYMajor = preStepFromTop * stepWYAlongMajor + topWY;
+        /* current `wz` coordinates in perspective-correct (1/z) world space */
+        let wZUpper = preStepFromTop * stepWZAlongUpper + topWZ;
+        let wZLower = preStepFromMid * stepWZAlongLower + midWZ;
+        let wZMajor = preStepFromTop * stepWZAlongMajor + topWZ;
         // whether the lefmost edge of the triangle is the longest
         const isLeftMajor = stepXAlongMajor < stepXAlongUpper;
         if (isLeftMajor)
@@ -638,13 +787,25 @@
                 pso.r0 = rMajor; pso.r1 = rUpper;
                 pso.g0 = gMajor; pso.g1 = gUpper;
                 pso.b0 = bMajor; pso.b1 = bUpper;
-                R_LerpScanline_Flat(pso);
+                pso.nx0 = nXMajor; pso.nx1 = nXUpper;
+                pso.ny0 = nYMajor; pso.ny1 = nYUpper;
+                pso.nz0 = nZMajor; pso.nz1 = nZUpper;
+                pso.wx0 = wXMajor; pso.wx1 = wXUpper;
+                pso.wy0 = wYMajor; pso.wy1 = wYUpper;
+                pso.wz0 = wZMajor; pso.wz1 = wZUpper;
+                R_LerpScanline_Colored(pso);
                 /* step forward along all vectors */
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
                 wUpper += stepWAlongUpper; wMajor += stepWAlongMajor;
                 rUpper += stepRAlongUpper; rMajor += stepRAlongMajor;
                 gUpper += stepGAlongUpper; gMajor += stepGAlongMajor;
                 bUpper += stepBAlongUpper; bMajor += stepBAlongMajor;
+                nXUpper += stepNXAlongUpper; nXMajor += stepNXAlongMajor;
+                nYUpper += stepNYAlongUpper; nYMajor += stepNYAlongMajor;
+                nZUpper += stepNZAlongUpper; nZMajor += stepNZAlongMajor;
+                wXUpper += stepWXAlongUpper; wXMajor += stepWXAlongMajor;
+                wYUpper += stepWYAlongUpper; wYMajor += stepWYAlongMajor;
+                wZUpper += stepWZAlongUpper; wZMajor += stepWZAlongMajor;
             }
             /* lerp based on `y` in screen space for the lower half of the
              * triangle
@@ -658,13 +819,25 @@
                 pso.r0 = rMajor; pso.r1 = rLower;
                 pso.g0 = gMajor; pso.g1 = gLower;
                 pso.b0 = bMajor; pso.b1 = bLower;
-                R_LerpScanline_Flat(pso);
+                pso.nx0 = nXMajor; pso.nx1 = nXLower;
+                pso.ny0 = nYMajor; pso.ny1 = nYLower;
+                pso.nz0 = nZMajor; pso.nz1 = nZLower;
+                pso.wx0 = wXMajor; pso.wx1 = wXLower;
+                pso.wy0 = wYMajor; pso.wy1 = wYLower;
+                pso.wz0 = wZMajor; pso.wz1 = wZLower;
+                R_LerpScanline_Colored(pso);
                 /* step forward along all vectors */
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
                 wLower += stepWAlongLower; wMajor += stepWAlongMajor;
                 rLower += stepRAlongLower; rMajor += stepRAlongMajor;
                 gLower += stepGAlongLower; gMajor += stepGAlongMajor;
                 bLower += stepBAlongLower; bMajor += stepBAlongMajor;
+                nXLower += stepNXAlongLower; nXMajor += stepNXAlongMajor;
+                nYLower += stepNYAlongLower; nYMajor += stepNYAlongMajor;
+                nZLower += stepNZAlongLower; nZMajor += stepNZAlongMajor;
+                wXLower += stepWXAlongLower; wXMajor += stepWXAlongMajor;
+                wYLower += stepWYAlongLower; wYMajor += stepWYAlongMajor;
+                wZLower += stepWZAlongLower; wZMajor += stepWZAlongMajor;
             }
         }
         else
@@ -681,13 +854,25 @@
                 pso.r0 = rUpper; pso.r1 = rMajor;
                 pso.g0 = gUpper; pso.g1 = gMajor;
                 pso.b0 = bUpper; pso.b1 = bMajor;
-                R_LerpScanline_Flat(pso);
+                pso.nx0 = nXUpper; pso.nx1 = nXMajor;
+                pso.ny0 = nYUpper; pso.ny1 = nYMajor;
+                pso.nz0 = nZUpper; pso.nz1 = nZMajor;
+                pso.wx0 = wXUpper; pso.wx1 = wXMajor;
+                pso.wy0 = wYUpper; pso.wy1 = wYMajor;
+                pso.wz0 = wZUpper; pso.wz1 = wZMajor;
+                R_LerpScanline_Colored(pso);
                 /* step forward along all vectors */
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
                 wUpper += stepWAlongUpper; wMajor += stepWAlongMajor;
                 rUpper += stepRAlongUpper; rMajor += stepRAlongMajor;
                 gUpper += stepGAlongUpper; gMajor += stepGAlongMajor;
                 bUpper += stepBAlongUpper; bMajor += stepBAlongMajor;
+                nXUpper += stepNXAlongUpper; nXMajor += stepNXAlongMajor;
+                nYUpper += stepNYAlongUpper; nYMajor += stepNYAlongMajor;
+                nZUpper += stepNZAlongUpper; nZMajor += stepNZAlongMajor;
+                wXUpper += stepWXAlongUpper; wXMajor += stepWXAlongMajor;
+                wYUpper += stepWYAlongUpper; wYMajor += stepWYAlongMajor;
+                wZUpper += stepWZAlongUpper; wZMajor += stepWZAlongMajor;
             }
             /* lerp based on `y` in screen space for the lower half of the
              * triangle
@@ -701,20 +886,32 @@
                 pso.r0 = rLower; pso.r1 = rMajor;
                 pso.g0 = gLower; pso.g1 = gMajor;
                 pso.b0 = bLower; pso.b1 = bMajor;
-                R_LerpScanline_Flat(pso);
+                pso.nx0 = nXLower; pso.nx1 = nXMajor;
+                pso.ny0 = nYLower; pso.ny1 = nYMajor;
+                pso.nz0 = nZLower; pso.nz1 = nZMajor;
+                pso.wx0 = wXLower; pso.wx1 = wXMajor;
+                pso.wy0 = wYLower; pso.wy1 = wYMajor;
+                pso.wz0 = wZLower; pso.wz1 = wZMajor;
+                R_LerpScanline_Colored(pso);
                 /* step forward along all vectors */
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
                 wLower += stepWAlongLower; wMajor += stepWAlongMajor;
                 rLower += stepRAlongLower; rMajor += stepRAlongMajor;
                 gLower += stepGAlongLower; gMajor += stepGAlongMajor;
                 bLower += stepBAlongLower; bMajor += stepBAlongMajor;
+                nXLower += stepNXAlongLower; nXMajor += stepNXAlongMajor;
+                nYLower += stepNYAlongLower; nYMajor += stepNYAlongMajor;
+                nZLower += stepNZAlongLower; nZMajor += stepNZAlongMajor;
+                wXLower += stepWXAlongLower; wXMajor += stepWXAlongMajor;
+                wYLower += stepWYAlongLower; wYMajor += stepWYAlongMajor;
+                wZLower += stepWZAlongLower; wZMajor += stepWZAlongMajor;
             }
         }
     }
 
     /*
     function
-    R_FillTriangle_Flat_Bresenham
+    R_FillTriangle_Colored_Bresenham
     ( ax: number, ay: number,
       bx: number, by: number,
       cx: number, cy: number,
@@ -725,7 +922,7 @@
     }
 
     function
-    R_LerpTexturedScanline_Affine
+    R_LerpScanline_Textured_Affine
     ( tex: texture_t,
       dx0: number, dx1: number, dy: number,
       u0: number, v0: number,
@@ -753,12 +950,12 @@
     */
 
     //
-    // R_LerpTexturedScanline_Perspective
-    // Lerp a single texture-mapped scanline with smooth shading
+    // R_LerpScanline_Textured_Perspective
+    // Lerp a single texture-mapped scanline
     //
     /* FIXME: remove redundant lighting associated branches in this function */
     function
-    R_LerpTexturedScanline_Perspective
+    R_LerpScanline_Textured_Perspective
     ({ tex,
        dy,
        dx0, dx1,
@@ -850,8 +1047,9 @@
                  */
                 if (isPointLight)
                 {
-                    const WX = wx * w_, WY = wy * w_, WZ = wz * w_;
-                    lX = lightX - WX; lY = lightY - WY; lZ = lightZ - WZ;
+                    lX -= wx * w_;
+                    lY -= wy * w_;
+                    lZ -= wz * w_;
                 }
                 /* TODO: maybe use `Q_rsqrt` here??? */
                 const magL_ = 1 / Math.sqrt(lX * lX + lY * lY + lZ * lZ);
@@ -910,11 +1108,11 @@
     }
 
     //
-    // R_DrawTriangle_Textured_Perspective
-    // Draw texture-mapped triangle with smooth shading
+    // R_FillTriangle_Textured_Perspective
+    // Fill the triangle with a texture
     //
     function
-    R_DrawTriangle_Textured_Perspective
+    R_FillTriangle_Textured_Perspective
     ({ ax, ay, aw,
        bx, by, bw,
        cx, cy, cw,
@@ -1125,7 +1323,7 @@
                 pso.wx0 = wXMajor; pso.wx1 = wXUpper;
                 pso.wy0 = wYMajor; pso.wy1 = wYUpper;
                 pso.wz0 = wZMajor; pso.wz1 = wZUpper;
-                R_LerpTexturedScanline_Perspective(pso);
+                R_LerpScanline_Textured_Perspective(pso);
                 /* step forward along all vectors */
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
                 wUpper += stepWAlongUpper; wMajor += stepWAlongMajor;
@@ -1155,7 +1353,7 @@
                 pso.wx0 = wXMajor; pso.wx1 = wXLower;
                 pso.wy0 = wYMajor; pso.wy1 = wYLower;
                 pso.wz0 = wZMajor; pso.wz1 = wZLower;
-                R_LerpTexturedScanline_Perspective(pso);
+                R_LerpScanline_Textured_Perspective(pso);
                 /* step forward along all vectors */
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
                 wLower += stepWAlongLower; wMajor += stepWAlongMajor;
@@ -1188,7 +1386,7 @@
                 pso.wx0 = wXUpper; pso.wx1 = wXMajor;
                 pso.wy0 = wYUpper; pso.wy1 = wYMajor;
                 pso.wz0 = wZUpper; pso.wz1 = wZMajor;
-                R_LerpTexturedScanline_Perspective(pso);
+                R_LerpScanline_Textured_Perspective(pso);
                 /* step forward along all vectors */
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
                 wUpper += stepWAlongUpper; wMajor += stepWAlongMajor;
@@ -1218,7 +1416,7 @@
                 pso.wx0 = wXLower; pso.wx1 = wXMajor;
                 pso.wy0 = wYLower; pso.wy1 = wYMajor;
                 pso.wz0 = wZLower; pso.wz1 = wZMajor;
-                R_LerpTexturedScanline_Perspective(pso);
+                R_LerpScanline_Textured_Perspective(pso);
                 /* step forward along all vectors */
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
                 wLower += stepWAlongLower; wMajor += stepWAlongMajor;
@@ -1351,11 +1549,11 @@
             R_DrawLine_RayCast,
             R_DrawCircle,
             R_DrawTriangle_Wireframe,
-            R_FillTriangle_Flat,
+            R_FillTriangle_Colored,
             /* TODO: uncomment these once implemented */
-            // R_FillTriangle_Flat_Bresenham,
+            // R_FillTriangle_Colored_Bresenham,
             // R_FillTriangle_Textured_Affine,
-            R_DrawTriangle_Textured_Perspective,
+            R_FillTriangle_Textured_Perspective,
             R_DrawImage,
             R_Print,
         };
