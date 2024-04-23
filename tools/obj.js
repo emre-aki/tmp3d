@@ -13,7 +13,7 @@ const path = require("path");
 
 const { ReadFile, WriteFile } = require("./file");
 const { LogInfo } = require("./log");
-const { ArrayToStr, DateToStr } = require("./misc");
+const { ArrayToStr, DateToStr, ObjectToStr } = require("./misc");
 
 const ROOT = path.join(__dirname, "..");
 const ASSETS_PATH = path.join(ROOT, "assets");
@@ -71,13 +71,7 @@ const tmp3DMeshTemplate = `/*
 
     window.__import__D_Mesh = function ()
     {
-        return {
-            D_Vertices: D_Vertices,
-            D_UV: D_UV,
-            D_Triangles: D_Triangles,
-            D_UVMap: D_UVMap,
-            D_TextureAtlas: D_TextureAtlas,
-        };
+        return { D_Vertices, D_UV, D_Triangles, D_UVMap, D_TextureAtlas };
     };
 })();
 `;
@@ -171,12 +165,13 @@ function ObjToTmp3D (pathToObj, pathToMtl, outputFilename, zOffset)
                                       parseInt(texturedMatchB[0]) - 1,
                                       parseInt(texturedMatchC[0]) - 1];
                     triangles.push(triangle);
-                    const texture = [parseInt(texturedMatchA[1]) - 1,
-                                     parseInt(texturedMatchB[1]) - 1,
-                                     parseInt(texturedMatchC[1]) - 1];
+                    const texture = { a: parseInt(texturedMatchA[1]) - 1,
+                                      b: parseInt(texturedMatchB[1]) - 1,
+                                      c: parseInt(texturedMatchC[1]) - 1,
+                                      textureId: "" };
                     // if there's a material defined for the face, write it in
                     // the uv-map
-                    if (mtlId) texture.push(`"${mtlId}"`);
+                    if (mtlId) texture.textureId = `"${mtlId}"`;
                     uvMap.push(texture);
                 }
                 /* encountered a textureless face data */
@@ -209,7 +204,7 @@ function ObjToTmp3D (pathToObj, pathToMtl, outputFilename, zOffset)
     const verticesSerialized = vertices.map(vertex => ArrayToStr(vertex));
     const trianglesSerialized = triangles.map(triangle => ArrayToStr(triangle));
     const uvVerticesSerialized = uvVertices.map(vertex => ArrayToStr(vertex));
-    const uvMapSerialized = uvMap.map(uvIndices => ArrayToStr(uvIndices));
+    const uvMapSerialized = uvMap.map(uvIndices => ObjectToStr(uvIndices));
     const textureAtlasSerialized = Object
         .entries(textureAtlas)
         .map(([textureId, texturePath]) => `"${textureId}": "${texturePath}"`);

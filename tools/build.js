@@ -23,7 +23,7 @@ const {
     Mkdir,
     ReadDir,
     RemovePath
-} = require("../tools/file");
+} = require("./file");
 const { LogInfo } = require("./log");
 
 const ROOT = path.dirname(__dirname); // the project root
@@ -97,6 +97,7 @@ function CopyStatic (sourceDir, outputDir, onFile)
         if (!IsDir(copySrc))
         {
             CopyFile(copySrc, copyDest);
+
             continue;
         }
         Mkdir(copyDest); // create the sub-directory in the `outputDir`

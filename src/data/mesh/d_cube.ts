@@ -55,18 +55,18 @@
     function D_UVMap (): uvface_t[]
     {
         return [
-            [0, 1, 2, "wood"],
-            [2, 1, 3, "wood"],
-            [0, 1, 2, "wood"],
-            [2, 1, 3, "wood"],
-            [0, 1, 2, "wood"],
-            [2, 1, 3, "wood"],
-            [0, 1, 2, "wood"],
-            [2, 1, 3, "wood"],
-            [0, 1, 2, "wood"],
-            [2, 1, 3, "wood"],
-            [0, 1, 2, "wood"],
-            [2, 1, 3, "wood"]
+            { a: 0, b: 1, c: 2, textureId: "wood" },
+            { a: 2, b: 1, c: 3, textureId: "wood" },
+            { a: 0, b: 1, c: 2, textureId: "wood" },
+            { a: 2, b: 1, c: 3, textureId: "wood" },
+            { a: 0, b: 1, c: 2, textureId: "wood" },
+            { a: 2, b: 1, c: 3, textureId: "wood" },
+            { a: 0, b: 1, c: 2, textureId: "wood" },
+            { a: 2, b: 1, c: 3, textureId: "wood" },
+            { a: 0, b: 1, c: 2, textureId: "wood" },
+            { a: 2, b: 1, c: 3, textureId: "wood" },
+            { a: 0, b: 1, c: 2, textureId: "wood" },
+            { a: 2, b: 1, c: 3, textureId: "wood" }
         ];
     }
 

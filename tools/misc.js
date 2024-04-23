@@ -21,5 +21,13 @@ function DateToStr (date)
     return `${year}-${month}-${day}`;
 }
 
+function ObjectToStr (object)
+{
+    return `{ ${Object.entries(object)
+                      .map(([key, value]) => `${key}: ${value}`)
+                      .join(", ")} }`;
+}
+
 exports.ArrayToStr = ArrayToStr;
 exports.DateToStr = DateToStr;
+exports.ObjectToStr = ObjectToStr;

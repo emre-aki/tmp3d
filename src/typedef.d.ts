@@ -565,7 +565,7 @@ declare function __import__R_Drawers (): __Mod__R_Drawers;
 // -----------------------------------------------------------------------------
 // engine/r_geometry.ts
 // -----------------------------------------------------------------------------
-type uvface_t = [number, number, number, string];
+type uvface_t = { a: number, b: number, c: number, textureId: string };
 type R_ToggleGlobalRotation = () => void;
 type R_ChangeRenderMode = () => void;
 

@@ -181,15 +181,15 @@
         textureTable = Array(nTriangles);
         for (let i = 0; i < nTriangles; ++i)
         {
-            const uvFaceData = triangles[i];
-            const texUVA2 = vertices[uvFaceData[0]];
-            const texUVB2 = vertices[uvFaceData[1]];
-            const texUVC2 = vertices[uvFaceData[2]];
+            const uvFace = triangles[i];
+            const texUVA2 = vertices[uvFace.a];
+            const texUVB2 = vertices[uvFace.b];
+            const texUVC2 = vertices[uvFace.c];
             /* FIXME: add `Tri2` & `Vec2` */
             uvTable3[i] = Tri3(Vec3(texUVA2[0], texUVA2[1], 1),
                                Vec3(texUVB2[0], texUVB2[1], 1),
                                Vec3(texUVC2[0], texUVC2[1], 1));
-            textureTable[i] = uvFaceData[3];
+            textureTable[i] = uvFace.textureId;
         }
     }
 
