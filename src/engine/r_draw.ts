@@ -866,7 +866,7 @@
                     lightLevel =
                         lXUnit * normalX + lYUnit * normalY + lZUnit * normalZ;
                 }
-                /* diffuse shading */
+                /* smooth shading */
                 else
                 {
                     const NX = nx * w_, NY = ny * w_, NZ = nz * w_;

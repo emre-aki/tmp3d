@@ -60,7 +60,7 @@ Tmp3D currently supports
   - AABB-based, crude frustum-culling
   - raster-clipping, i.e., 2-D clipping in the raster space
   - clipping geometry against the near-clipping plane
-  - flat and diffuse lighting w/ directional lights
+  - flat and smooth shading w/ directional and point lights
   - perspective-correct texture-mapping
   - loading & rendering 3-D models in the [Wavefront `.obj` format](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
   - depth-buffering & depth-sorting
@@ -68,7 +68,7 @@ Tmp3D currently supports
 
 and plans to support
 
-  - Phong reflection model
+  - [Phong Reflection Model](https://en.wikipedia.org/wiki/Phong_reflection_model)
   - affine texture-mapping
   - occlusion culling (😩)
   - a more de-coupled & user-friendly shader pipeline

@@ -21,9 +21,9 @@
         - [ ] Clipping against other planes? (Or would raster-clipping be
               enough?)
 - [x] Flat-shading
-- [ ] Phong reflection model
+- [ ] Phong Reflection Model
     - [x] Ambient lighting
-    - [x] Diffuse lighting
+    - [x] Diffuse lighting _(w/ flat and smooth shading)_
     - [ ] Specular reflections
 
 - [ ] Texture-mapping
@@ -64,7 +64,7 @@
 
 ### release: 0.0.7
 - [x] Crude frustum-culling
-- [x] Diffuse lighting
+- [x] Diffuse lighting _(w/ flat and smooth shading)_
 
 ### release: 0.0.8
 - [ ] Point light(s)

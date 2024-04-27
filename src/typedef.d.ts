@@ -673,7 +673,7 @@ type __Mod__R_Shader = {
     R_ShaderMode_Fill: number,
     R_ShaderMode_Texture: number,
     R_ShaderMode_Lights: number,
-    R_ShaderMode_Diffuse: number,
+    R_ShaderMode_Smooth: number,
     R_ShaderMode_PointLight: number,
     R_ToggleWireframe: R_ToggleWireframe,
     R_ChangeFillMode: R_ChangeFillMode,

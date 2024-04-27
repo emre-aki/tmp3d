@@ -29,11 +29,11 @@
     const SHADER_MODE_MASK_TEXTURE_FILL = 0x4;
     // bit flag to set light calculations on/off — off means ambient (base)
     // light only, in which case overrides whatever is set to
-    // `SHADER_MODE_MASK_DIFFUSE` or `SHADER_MODE_MASK_POINT_LIGHT`
+    // `SHADER_MODE_MASK_SMOOTH` or `SHADER_MODE_MASK_POINT_LIGHT`
     const SHADER_MODE_MASK_LIGHTS = 0x8;
-    // bit flag to set per-pixel diffuse light calculations on/off — off means
+    // bit flag to set per-pixel smooth shading calculations on/off — off means
     // flat shading, a constant light intensity over the entire triangle
-    const SHADER_MODE_MASK_DIFFUSE = 0x10;
+    const SHADER_MODE_MASK_SMOOTH = 0x10;
     // bit flag to be used to switch between directional and point lights —
     // requires `SHADER_MODE_MASK_LIGHTS` to be set
     const SHADER_MODE_MASK_POINT_LIGHT = 0x20;
@@ -41,7 +41,7 @@
     let mode = SHADER_MODE_MASK_FILL |
                SHADER_MODE_MASK_TEXTURE_FILL |
                SHADER_MODE_MASK_LIGHTS |
-               SHADER_MODE_MASK_DIFFUSE |
+               SHADER_MODE_MASK_SMOOTH |
                SHADER_MODE_MASK_POINT_LIGHT;
 
     const shaderChangeDebounce = 250;
@@ -167,7 +167,8 @@
 
     //
     // R_ChangeLightingMode
-    // Cycle between diffuse, flat and ambient (base) lighting modes
+    // Cycle between smooth, flat, and no shading, i.e., ambient (base) light
+    // modes
     //
     function R_ChangeLightingMode (): void
     {
@@ -176,18 +177,18 @@
             now - lastShaderChange > shaderChangeDebounce)
         {
             const lightsOnMask = mode & SHADER_MODE_MASK_LIGHTS;
-            const diffuseModeMask = mode & SHADER_MODE_MASK_DIFFUSE;
+            const smoothModeMask = mode & SHADER_MODE_MASK_SMOOTH;
             // @ts-ignore
             const lightsOff = !!lightsOnMask - 1, lightsOn = !lightsOnMask - 1;
             // @ts-ignore
-            const isDiffuseMode = !diffuseModeMask - 1;
+            const isSmooth = !smoothModeMask - 1;
             /* branchless programming 102!? 🤷‍♀️ */
-            mode ^= ((lightsOff | isDiffuseMode) & SHADER_MODE_MASK_LIGHTS) |
-                    (lightsOn & SHADER_MODE_MASK_DIFFUSE);
+            mode ^= ((lightsOff | isSmooth) & SHADER_MODE_MASK_LIGHTS) |
+                    (lightsOn & SHADER_MODE_MASK_SMOOTH);
             pso.mode = mode;
             lastShaderChange = now;
-            if (mode & SHADER_MODE_MASK_DIFFUSE)
-                R_SetOnScreenMessage("Diffuse shading", 50);
+            if (mode & SHADER_MODE_MASK_SMOOTH)
+                R_SetOnScreenMessage("Smooth shading", 50);
             else if (mode & SHADER_MODE_MASK_LIGHTS)
                 R_SetOnScreenMessage("Flat shading", 50);
             else
@@ -224,7 +225,7 @@
             R_ShaderMode_Fill: SHADER_MODE_MASK_FILL,
             R_ShaderMode_Texture: SHADER_MODE_MASK_TEXTURE_FILL,
             R_ShaderMode_Lights: SHADER_MODE_MASK_LIGHTS,
-            R_ShaderMode_Diffuse: SHADER_MODE_MASK_DIFFUSE,
+            R_ShaderMode_Smooth: SHADER_MODE_MASK_SMOOTH,
             R_ShaderMode_PointLight: SHADER_MODE_MASK_POINT_LIGHT,
             R_ToggleWireframe,
             R_ChangeFillMode,

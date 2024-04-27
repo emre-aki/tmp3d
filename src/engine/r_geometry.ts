@@ -66,7 +66,7 @@
     const R_ShaderMode_Fill = R_Shader.R_ShaderMode_Fill;
     const R_ShaderMode_Texture = R_Shader.R_ShaderMode_Texture;
     const R_ShaderMode_Lights = R_Shader.R_ShaderMode_Lights;
-    const R_ShaderMode_Diffuse = R_Shader.R_ShaderMode_Diffuse;
+    const R_ShaderMode_Smooth = R_Shader.R_ShaderMode_Smooth;
     const R_ShaderMode_PointLight = R_Shader.R_ShaderMode_PointLight;
     const vso = R_Shader.R_VertexShaderObj;
     const pso = R_Shader.R_PixelShaderObj;
@@ -86,7 +86,7 @@
     let tris3: tri3_t[]; // a pool of raw triangle data
     let transformedTris3: tri3_t[]; // triangles after transformation
     // normal vectors associated with vertices of each triangle in the pool,
-    // used in smooth/diffuse shading
+    // used in smooth shading
     let triVertexNormals3: tri3_t[];
     // vertex normals after transformation
     let transformedTriVertexNormals3: tri3_t[];
@@ -456,7 +456,7 @@
     }
 
     /* TODO: add vertex normals and world-coordinates, and directional/point
-     * and flat/diffuse differentiation
+     * and flat/smooth differentiation
      */
     function R_RenderGeomeries_Flat (nTrisOnScreen: Uint32Array): void
     {
@@ -486,7 +486,7 @@
                                                                clippedTriQueue);
             // TODO: clip against far-plane
             /* calculate the surface normal */
-            if (nClipResult) // TODO: add flat/diffuse differentiation here
+            if (nClipResult) // TODO: add flat/smooth differentiation here
             {
                 const triNormal = M_TriNormal3(triWorld);
                 pso.normalX = triNormal[0];
@@ -591,7 +591,7 @@
             /* calculate the surface normal if the shader mode is set to
              * flat-shading
              */
-            if (nClipResult && !(pso.mode & R_ShaderMode_Diffuse))
+            if (nClipResult && !(pso.mode & R_ShaderMode_Smooth))
             {
                 const triNormal = M_TriNormal3(triWorld);
                 pso.normalX = triNormal[0];
