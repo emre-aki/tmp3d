@@ -365,19 +365,19 @@
         while (cx >= cy)
         {
             let rx0, rx1, ry; // endpoints of the current scanline
-            /* fill in a scanline that scretches over the 1st and 4th octants */
+            /* fill in a scanline that stretches over the 1st and 4th octants */
             rx0 = ox - cx; rx1 = ox + cx; ry = oy + cy;
             for (let rxi = rx0; rxi <= rx1; ++rxi)
                 R_FillRect(rxi, ry, 1, 1, r, g, b, a);
-            /* fill in a scanline that scretches over the 2nd and 3rd octants */
+            /* fill in a scanline that stretches over the 2nd and 3rd octants */
             rx0 = ox - cy; rx1 = ox + cy; ry = oy + cx;
             for (let rxi = rx0; rxi <= rx1; ++rxi)
                 R_FillRect(rxi, ry, 1, 1, r, g, b, a);
-            /* fill in a scanline that scretches over the 5th and 8th octants */
+            /* fill in a scanline that stretches over the 5th and 8th octants */
             rx0 = ox - cx; rx1 = ox + cx; ry = oy - cy;
             for (let rxi = rx0; rxi <= rx1; ++rxi)
                 R_FillRect(rxi, ry, 1, 1, r, g, b, a);
-            /* fill in a scanline that scretches over the 6th and 7th octants */
+            /* fill in a scanline that stretches over the 6th and 7th octants */
             rx0 = ox - cy; rx1 = ox + cy; ry = oy - cx;
             for (let rxi = rx0; rxi <= rx1; ++rxi)
                 R_FillRect(rxi, ry, 1, 1, r, g, b, a);
