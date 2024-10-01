@@ -18,45 +18,48 @@
 
 (function (): void
 {
-    const I_Input = __import__I_Input();
-    const I_GetKeyState = I_Input.I_GetKeyState;
-    const I_GetMouseState = I_Input.I_GetMouseState;
-    const I_Keys = I_Input.I_Keys;
-    const I_Mouse = I_Input.I_Mouse;
+    const {
+        I_GetKeyState,
+        I_GetMouseState,
+        I_Keys,
+        I_Mouse,
+    } = __import__I_Input();
 
-    const G_Const = __import__G_Const();
-    const FOV_X = G_Const.FOV_X, FOV_Y = G_Const.FOV_Y;
-    const MAX_MOV_TILT = G_Const.MAX_MOV_TILT;
-    const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
+    const {
+        FOV_X, FOV_Y,
+        MAX_MOV_TILT,
+        SCREEN_W, SCREEN_H,
+    } = __import__G_Const();
 
-    const M_Mat4 = __import__M_Mat4();
-    const M_QuickInv4 = M_Mat4.M_QuickInv4;
-    const M_Vec4FromVec3 = M_Mat4.M_Vec4FromVec3;
-    const M_Transform4 = M_Mat4.M_Transform4;
-    const Mat4 = M_Mat4.M_Mat4;
+    const {
+        M_Mat4: Mat4,
+        M_QuickInv4,
+        M_Transform4,
+        M_Vec4FromVec3,
+     } = __import__M_Mat4();
 
-    const M_Math = __import__M_Math();
-    const M_RadToDeg = M_Math.M_RadToDeg;
-    const M_Clamp = M_Math.M_Clamp;
-    const M_ToFixedDigits = M_Math.M_ToFixedDigits;
-    const PI_2 = M_Math.PI_2;
+    const {
+        M_Clamp,
+        M_RadToDeg,
+        M_ToFixedDigits,
+        PI_2,
+    } = __import__M_Math();
 
-    const M_Tri3 = __import__M_Tri3();
-    const M_TransformTri3 = M_Tri3.M_TransformTri3;
+    const { M_TransformTri3 } = __import__M_Tri3();
 
-    const M_Vec3 = __import__M_Vec3();
-    const M_Add3 = M_Vec3.M_Add3;
-    const M_Sub3 = M_Vec3.M_Sub3;
-    const M_Scale3 = M_Vec3.M_Scale3;
-    const M_Cross3 = M_Vec3.M_Cross3;
-    const M_Norm3 = M_Vec3.M_Norm3;
-    const M_Perp3 = M_Vec3.M_Perp3;
-    const M_RotateAroundAxis3 = M_Vec3.M_RotateAroundAxis3;
-    const M_Vec3FromVec4 = M_Vec3.M_Vec3FromVec4;
-    const Vec3 = M_Vec3.M_Vec3;
+    const {
+        M_Add3,
+        M_Cross3,
+        M_Norm3,
+        M_Perp3,
+        M_RotateAroundAxis3,
+        M_Scale3,
+        M_Sub3,
+        M_Vec3: Vec3,
+        M_Vec3FromVec4,
+    } = __import__M_Vec3();
 
-    const R_Draw = __import__R_Draw();
-    const R_Print = R_Draw.R_Print;
+    const { R_Print } = __import__R_Draw();
 
     const ORIGIN = Vec3(0, 0, 0);
     // the axes

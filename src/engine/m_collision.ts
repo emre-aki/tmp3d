@@ -10,18 +10,21 @@
 
 (function (): void
 {
-    const M_Vec2 = __import__M_Vec2();
-    const M_Add2 = M_Vec2.M_Add2;
-    const M_Cross2 = M_Vec2.M_Cross2;
-    const M_Scale2 = M_Vec2.M_Scale2;
-    const M_Sub2 = M_Vec2.M_Sub2;
-    const Vec2 = M_Vec2.M_Vec2;
 
-    const M_Vec3 = __import__M_Vec3();
-    const M_Add3 = M_Vec3.M_Add3;
-    const M_DistToPlane3 = M_Vec3.M_DistToPlane3;
-    const M_Scale3 = M_Vec3.M_Scale3;
-    const M_Sub3 = M_Vec3.M_Sub3;
+    const {
+        M_Add2,
+        M_Cross2,
+        M_Scale2,
+        M_Sub2,
+        M_Vec2: Vec2,
+    } = __import__M_Vec2();
+
+    const {
+        M_Add3,
+        M_DistToPlane3,
+        M_Scale3,
+        M_Sub3,
+    } = __import__M_Vec3();
 
     function
     M_LineVsLine2

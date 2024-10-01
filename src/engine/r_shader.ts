@@ -13,12 +13,12 @@
 
 (function (): void
 {
-    const I_Input = __import__I_Input();
-    const I_GetKeyState = I_Input.I_GetKeyState;
-    const I_Keys = I_Input.I_Keys;
+    const {
+        I_GetKeyState,
+        I_Keys,
+    } = __import__I_Input();
 
-    const R_Drawers = __import__R_Drawers();
-    const R_SetOnScreenMessage = R_Drawers.R_SetOnScreenMessage;
+    const { R_SetOnScreenMessage } = __import__R_Drawers();
 
     // bit flag to set wireframe mode on/off
     const SHADER_MODE_MASK_WIREFRAME = 0x1;

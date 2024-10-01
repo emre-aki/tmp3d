@@ -13,24 +13,27 @@
 
 (function (): void
 {
-    const G_Const = __import__G_Const();
-    const SCREEN_W = G_Const.SCREEN_W, SCREEN_H = G_Const.SCREEN_H;
+    const {
+        SCREEN_W,
+        SCREEN_H,
+     } = __import__G_Const();
+
+    const { M_LineVsLine2 } = __import__M_Collision();
+
+    const {
+        M_Clamp,
+        M_FastSign,
+    } = __import__M_Math();
+
+    const { M_Vec2: Vec2 } = __import__M_Vec2();
+
+    const {
+        R_Ctx,
+        R_FlushBuffer,
+        R_InitBuffer,
+    } = __import__R_Screen();
+
     const N_PIXELS = SCREEN_W * SCREEN_H;
-
-    const M_Collision = __import__M_Collision();
-    const M_LineVsLine2 = M_Collision.M_LineVsLine2;
-
-    const M_Math = __import__M_Math();
-    const M_Clamp = M_Math.M_Clamp;
-    const M_FastSign = M_Math.M_FastSign;
-
-    const M_Vec2 = __import__M_Vec2();
-    const Vec2 = M_Vec2.M_Vec2;
-
-    const R_Screen = __import__R_Screen();
-    const R_Ctx = R_Screen.R_Ctx;
-    const R_FlushBuffer = R_Screen.R_FlushBuffer;
-    const R_InitBuffer = R_Screen.R_InitBuffer;
 
     /* double-buffering */
     let frameBuffer: ImageData, cleanFrameBuffer: Uint8ClampedArray;

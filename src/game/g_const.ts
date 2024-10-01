@@ -11,11 +11,9 @@
 
 (function ()
 {
-    const M_Vec3 = __import__M_Vec3();
-    const Vec3 = M_Vec3.M_Vec3;
+    const { M_Vec3: Vec3 } = __import__M_Vec3();
 
-    const M_AABB3 = __import__M_AABB3();
-    const AABB3 = M_AABB3.M_AABB3;
+    const { M_AABB3: AABB3 } = __import__M_AABB3();
 
     const SCREEN_W = 640, SCREEN_H = 480;
     const SCREEN_W_2 = SCREEN_W * 0.5, SCREEN_H_2 = SCREEN_H * 0.5;

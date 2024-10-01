@@ -12,41 +12,40 @@
 
 (function (): void
 {
-    const DEBUG_MODE = window.__DEBUG_MODE__;
+    const { __DEBUG_MODE__: DEBUG_MODE } = window;
 
-    const A_Assets = __import__A_Assets();
-    const A_Texture = A_Assets.A_Texture;
+    const { A_Texture } = __import__A_Assets();
 
-    const AN_Animation = __import__AN_Animation();
-    const AN_CancelAnimation = AN_Animation.AN_CancelAnimation;
+    const { AN_CancelAnimation } = __import__AN_Animation();
 
-    const D_GlobTextures = __import__D_GlobTextures();
-    const D_GlobTextureIdTable = D_GlobTextures.D_GlobTextureIdTable;
+    const { D_GlobTextureIdTable } = __import__D_GlobTextures();
 
-    const G_Const = __import__G_Const();
-    const FPS = G_Const.FPS;
+    const { FPS } = __import__G_Const();
 
-    const R_Camera = __import__R_Camera();
-    const R_UpdateCamera = R_Camera.R_UpdateCamera;
-    const R_DebugStats = R_Camera.R_DebugStats;
+    const {
+        R_DebugStats,
+        R_UpdateCamera,
+    } = __import__R_Camera();
 
-    const R_Draw = __import__R_Draw();
-    const R_FlushFrame = R_Draw.R_FlushFrame;
+    const { R_FlushFrame } = __import__R_Draw();
 
-    const R_Drawers = __import__R_Drawers();
-    const R_TitleDrawer = R_Drawers.R_TitleDrawer;
-    const R_PrintOnScreenMessage = R_Drawers.R_PrintOnScreenMessage;
+    const {
+        R_PrintOnScreenMessage,
+        R_TitleDrawer,
+    } = __import__R_Drawers();
 
-    const R_Geometry = __import__R_Geometry();
-    const R_RenderGeometries = R_Geometry.R_RenderGeometries;
-    const R_ToggleGlobalRotation = R_Geometry.R_ToggleGlobalRotation;
-    const R_UpdateGeometry = R_Geometry.R_UpdateGeometry;
+    const {
+        R_RenderGeometries,
+        R_ToggleGlobalRotation,
+        R_UpdateWorld,
+    } = __import__R_Geometry();
 
-    const R_Shader = __import__R_Shader();
-    const R_ToggleWireframe = R_Shader.R_ToggleWireframe;
-    const R_ChangeFillMode = R_Shader.R_ChangeFillMode;
-    const R_ChangeLightingMode = R_Shader.R_ChangeLightingMode;
-    const R_TogglePointLight = R_Shader.R_TogglePointLight;
+    const {
+        R_ChangeFillMode,
+        R_ChangeLightingMode,
+        R_TogglePointLight,
+        R_ToggleWireframe,
+    } = __import__R_Shader();
 
     const TICK_DELAY = 1000 / FPS;
 
@@ -70,7 +69,7 @@
         R_ChangeFillMode();     // separate listeners so the key strokes
         R_ChangeLightingMode(); // associated with each event can be captured
         R_TogglePointLight();   // individually
-        R_UpdateGeometry();
+        R_UpdateWorld();
     }
 
     function G_Tick (deltaT: number): void

@@ -47,18 +47,12 @@ interface Window {
 // -----------------------------------------------------------------------------
 // d_mesh.ts
 // -----------------------------------------------------------------------------
-type D_Vertices = () => pvec3_t[];
-type D_UV = () => pvec2_t[];
-type D_Triangles = () => pvec3_t[];
-type D_UVMap = () => uvface_t[];
-type D_TextureAtlas = () => { [textureId: string]: string };
-
 type __Mod__D_Mesh = {
-    D_Vertices: D_Vertices,
-    D_UV: D_UV,
-    D_Triangles: D_Triangles,
-    D_UVMap: D_UVMap,
-    D_TextureAtlas: D_TextureAtlas,
+    D_Vertices (): pvec3_t[],
+    D_UV (): pvec2_t[],
+    D_Triangles (): pvec3_t[],
+    D_UVMap (): uvface_t[],
+    D_TextureAtlas (): { [textureId: string]: string },
 };
 
 declare function __import__D_Mesh (): __Mod__D_Mesh;
@@ -66,8 +60,7 @@ declare function __import__D_Mesh (): __Mod__D_Mesh;
 // -----------------------------------------------------------------------------
 // data/d_player.ts
 // -----------------------------------------------------------------------------
-type D_Eye = () => pvec3_t;
-type __Mod__D_Player = { D_Velocity: number, D_Eye: D_Eye };
+type __Mod__D_Player = { D_Velocity: number, D_Eye (): pvec3_t };
 declare function __import__D_Player (): __Mod__D_Player;
 
 // -----------------------------------------------------------------------------
@@ -93,17 +86,12 @@ type texture_t = {
     height: number,
 };
 
-type A_LoadTextures = (
-    ids: string[],
-    filenames: string[],
-    numTextures: number
-) => Promise<void[]>;
-
-type A_Texture = (id: string) => texture_t;
-
 type __Mod__A_Assets = {
-    A_LoadTextures: A_LoadTextures,
-    A_Texture: A_Texture,
+    A_LoadTextures
+    ( ids: string[],
+      filenames: string[],
+      numTextures: number ): Promise<void[]>,
+    A_Texture (id: string): texture_t,
 };
 
 declare function __import__A_Assets (): __Mod__A_Assets;
@@ -126,29 +114,19 @@ type animation_t = { onFrame: OnFrame, interval: number };
 type QueuedAnimationTable = { [id: string]: animation_t };
 type RunningAnimationTable = { [id: string]: number };
 
-type AN_StartAnimation = (
-    onFrame: (animationIndex: number) => void,
-    interval: number,
-    shouldEnd?: (animationIndex: number) => boolean,
-    cleanUp?: () => void
-) => string;
-
-type AN_CancelAnimation = (id: string, cleanUp?: () => void) => void;
-
-type AN_QueueAnimation = (
-    onFrame: (animationIndex: number) => void,
-    interval: number,
-    shouldEnd?: (animationIndex: number) => boolean,
-    cleanUp?: () => void
-) => string;
-
-type AN_RunQueuedAnimation = (id: string) => void;
-
 type __Mod__AN_Animation = {
-    AN_StartAnimation: AN_StartAnimation,
-    AN_CancelAnimation: AN_CancelAnimation,
-    AN_QueueAnimation: AN_QueueAnimation,
-    AN_RunQueuedAnimation: AN_RunQueuedAnimation,
+    AN_StartAnimation
+    ( onFrame: (animationIndex: number) => void,
+      interval: number,
+      shouldEnd?: (animationIndex: number) => boolean,
+      cleanUp?: () => void ): string,
+    AN_CancelAnimation (id: string, cleanUp?: () => void): void,
+    AN_QueueAnimation
+    ( onFrame: (animationIndex: number) => void,
+      interval: number,
+      shouldEnd?: (animationIndex: number) => boolean,
+      cleanUp?: () => void ): string,
+    AN_RunQueuedAnimation (id: string): void,
 };
 
 declare function __import__AN_Animation (): __Mod__AN_Animation;
@@ -189,18 +167,13 @@ type MOUSE = {
     DELTA_WHEEL: "DELTA_WHEEL",
 };
 
-type I_GetKeyState = (key: keyof KEY) => 0 | 1;
-type I_InitKeyboard = (onElement: Document | HTMLElement) => void;
-type I_GetMouseState = (key: keyof MOUSE) => number;
-type I_InitMouse = (onElement: HTMLElement) => void;
-
 type __Mod__I_Input = {
     I_Keys: { [key in (keyof KEY)]: key },
-    I_Mouse: { [key in (keyof MOUSE)]: key},
-    I_GetKeyState: I_GetKeyState,
-    I_InitKeyboard: I_InitKeyboard,
-    I_GetMouseState: I_GetMouseState,
-    I_InitMouse: I_InitMouse,
+    I_Mouse: { [key in (keyof MOUSE)]: key },
+    I_GetKeyState (key: keyof KEY): 0 | 1,
+    I_InitKeyboard (onElement: Document | HTMLElement): void,
+    I_GetMouseState (key: keyof MOUSE): number,
+    I_InitMouse (onElement: HTMLElement): void,
 };
 
 declare function __import__I_Input (): __Mod__I_Input;
@@ -209,41 +182,32 @@ declare function __import__I_Input (): __Mod__I_Input;
 // engine/m_aabb.ts
 // -----------------------------------------------------------------------------
 type aabb3_t = Float32Array;
-type M_AABB3 = (origin3: vec3_t, dimensions3: vec3_t) => aabb3_t;
-type __Mod__M_AABB3 = { M_AABB3: M_AABB3 };
+
+type __Mod__M_AABB3 = {
+    M_AABB3 (origin3: vec3_t, dimensions3: vec3_t): aabb3_t
+};
+
 declare function __import__M_AABB3 (): __Mod__M_AABB3;
 
 // -----------------------------------------------------------------------------
 // engine/m_collision.ts
 // -----------------------------------------------------------------------------
-type M_LineVsLine2 = (
-    ax: number, ay: number,
-    bx: number, by: number,
-    cx: number, cy: number,
-    dx: number, dy: number,
-    segment?: 1
-) => vec2_t | undefined;
-
-type M_TimeBeforePlaneCollision3 = (
-    lineSrc: vec3_t, lineDest: vec3_t,
-    planeRef: vec3_t, planeNormal: vec3_t
-) => number | undefined;
-
-type M_LineSegmentVsPlaneCollision3 = (
-    lineSrc: vec3_t, lineDest: vec3_t,
-    planeRef: vec3_t, planeNormal: vec3_t
-) => vec3_t | undefined;
-
-type M_BoundingBoxVsBoundingBoxCollision3 = (
-    aabb0: aabb3_t,
-    aabb1: aabb3_t
-) => boolean;
-
 type __Mod__M_Collision = {
-    M_LineVsLine2: M_LineVsLine2,
-    M_TimeBeforePlaneCollision3: M_TimeBeforePlaneCollision3,
-    M_LineSegmentVsPlaneCollision3: M_LineSegmentVsPlaneCollision3,
-    M_BoundingBoxVsBoundingBoxCollision3: M_BoundingBoxVsBoundingBoxCollision3,
+    M_LineVsLine2
+    ( ax: number, ay: number,
+      bx: number, by: number,
+      cx: number, cy: number,
+      dx: number, dy: number,
+      segment?: 1 ): vec2_t | undefined,
+    M_TimeBeforePlaneCollision3
+    ( lineSrc: vec3_t, lineDest: vec3_t,
+      planeRef: vec3_t, planeNormal: vec3_t ): number | undefined,
+    M_LineSegmentVsPlaneCollision3
+    ( lineSrc: vec3_t, lineDest: vec3_t,
+      planeRef: vec3_t, planeNormal: vec3_t ): vec3_t | undefined,
+    M_BoundingBoxVsBoundingBoxCollision3
+    ( aabb0: aabb3_t,
+      aabb1: aabb3_t ): boolean,
  };
 
  declare function __import__M_Collision (): __Mod__M_Collision;
@@ -252,18 +216,13 @@ type __Mod__M_Collision = {
 // engine/m_vec2.ts
 // -----------------------------------------------------------------------------
 type vec2_t = Float32Array;
-type M_Vec2 = (x: number, y: number) => vec2_t;
-type M_Cross2 = (u: vec2_t, v: vec2_t) => number;
-type M_Add2 = (u: vec2_t, v: vec2_t) => vec2_t;
-type M_Sub2 = (u: vec2_t, v: vec2_t) => vec2_t;
-type M_Scale2 = (u: vec2_t, s: number) => vec2_t;
 
 type __Mod__M_Vec2 = {
-    M_Vec2: M_Vec2,
-    M_Cross2: M_Cross2,
-    M_Add2: M_Add2,
-    M_Sub2: M_Sub2,
-    M_Scale2: M_Scale2,
+    M_Vec2 (x: number, y: number): vec2_t,
+    M_Cross2 (u: vec2_t, v: vec2_t): number,
+    M_Add2 (u: vec2_t, v: vec2_t): vec2_t,
+    M_Sub2 (u: vec2_t, v: vec2_t): vec2_t,
+    M_Scale2 (u: vec2_t, s: number): vec2_t,
 };
 
 declare function __import__M_Vec2 (): __Mod__M_Vec2;
@@ -273,50 +232,25 @@ declare function __import__M_Vec2 (): __Mod__M_Vec2;
 // -----------------------------------------------------------------------------
 type vec3_t = Float32Array;
 type vec4_t = Float32Array;
-type M_Vec3 = (x: number, y: number, z: number) => vec3_t;
-type M_Vec3FromVec4 = (u: vec4_t) => vec3_t;
-type M_Dot3 = (u: vec3_t, v: vec3_t) => number;
-type M_Cross3 = (u: vec3_t, v: vec3_t) => vec3_t;
-type M_Add3 = (u: vec3_t, v: vec3_t) => vec3_t;
-type M_Sub3 = (u: vec3_t, v: vec3_t) => vec3_t;
-type M_Scale3 = (u: vec3_t, s: number) => vec3_t;
-type M_Mag3 = (u: vec3_t) => number;
-type M_Norm3 = (u: vec3_t) => vec3_t;
-type M_Perp3 = (vec: vec3_t, base: vec3_t) => vec3_t;
-
-type M_RotateAroundAxis3 = (
-    point: vec3_t,
-    axis: vec3_t,
-    angle: number
-) => vec3_t;
-
-type M_DistToPlane3 = (
-    vec: vec3_t,
-    ref: vec3_t,
-    normal: vec3_t,
-    isAbs?: 1
-) => number;
-
-type M_IsInFrontOfPlane3 = (
-    vec: vec3_t,
-    ref: vec3_t,
-    normal: vec3_t
-) => boolean;
 
 type __Mod__M_Vec3 = {
-    M_Vec3: M_Vec3,
-    M_Vec3FromVec4: M_Vec3FromVec4,
-    M_Dot3: M_Dot3,
-    M_Cross3: M_Cross3,
-    M_Add3: M_Add3,
-    M_Sub3: M_Sub3,
-    M_Scale3: M_Scale3,
-    M_Mag3: M_Mag3,
-    M_Norm3: M_Norm3,
-    M_Perp3: M_Perp3,
-    M_RotateAroundAxis3: M_RotateAroundAxis3,
-    M_DistToPlane3: M_DistToPlane3,
-    M_IsInFrontOfPlane3: M_IsInFrontOfPlane3,
+    M_Vec3 (x: number, y: number, z: number): vec3_t,
+    M_Vec3FromVec4 (u: vec4_t): vec3_t,
+    M_Dot3 (u: vec3_t, v: vec3_t): number,
+    M_Cross3 (u: vec3_t, v: vec3_t): vec3_t,
+    M_Add3 (u: vec3_t, v: vec3_t): vec3_t,
+    M_Sub3 (u: vec3_t, v: vec3_t): vec3_t,
+    M_Scale3 (u: vec3_t, s: number): vec3_t,
+    M_Mag3 (u: vec3_t): number,
+    M_Norm3 (u: vec3_t): vec3_t,
+    M_Perp3 (vec: vec3_t, base: vec3_t): vec3_t,
+    M_RotateAroundAxis3 (point: vec3_t, axis: vec3_t, angle: number): vec3_t,
+    M_DistToPlane3
+    ( vec: vec3_t,
+      ref: vec3_t,
+      normal: vec3_t,
+      isAbs?: 1 ): number,
+    M_IsInFrontOfPlane3 (vec: vec3_t, ref: vec3_t, normal: vec3_t): boolean,
 };
 
 declare function __import__M_Vec3 (): __Mod__M_Vec3;
@@ -325,16 +259,12 @@ declare function __import__M_Vec3 (): __Mod__M_Vec3;
 // engine/m_mat4.ts
 // -----------------------------------------------------------------------------
 type mat4_t = Float32Array;
-type M_Vec4FromVec3 = (u: pvec3_t | vec3_t, w: number) => vec4_t;
-type M_Mat4 = (x: vec4_t, y: vec4_t, z: vec4_t, w: vec4_t) => mat4_t;
-type M_QuickInv4 = (mat: mat4_t) => mat4_t;
-type M_Transform4 = (mat: mat4_t, vec: vec4_t) => vec4_t;
 
 type __Mod__M_Mat4 = {
-    M_Vec4FromVec3: M_Vec4FromVec3,
-    M_Mat4: M_Mat4,
-    M_QuickInv4: M_QuickInv4,
-    M_Transform4: M_Transform4,
+    M_Vec4FromVec3 (u: pvec3_t | vec3_t, w: number): vec4_t,
+    M_Mat4 (x: vec4_t, y: vec4_t, z: vec4_t, w: vec4_t): mat4_t,
+    M_QuickInv4 (mat: mat4_t): mat4_t,
+    M_Transform4 (mat: mat4_t, vec: vec4_t): vec4_t,
 };
 
 declare function __import__M_Mat4 (): __Mod__M_Mat4;
@@ -342,17 +272,12 @@ declare function __import__M_Mat4 (): __Mod__M_Mat4;
 // -----------------------------------------------------------------------------
 // engine/m_math.ts
 // -----------------------------------------------------------------------------
-type M_RadToDeg = (radian: number) => number;
-type M_Clamp = (number: number, lower: number, upper: number) => number;
-type M_ToFixedDigits = (number: number, nDigits: number) => number;
-type M_FastSign = (number: number) => number;
-
 type __Mod__M_Math = {
     PI_2: number,
-    M_RadToDeg: M_RadToDeg,
-    M_Clamp: M_Clamp,
-    M_ToFixedDigits: M_ToFixedDigits,
-    M_FastSign: M_FastSign,
+    M_RadToDeg (radian: number): number,
+    M_Clamp (number: number, lower: number, upper: number): number,
+    M_ToFixedDigits (number: number, nDigits: number): number,
+    M_FastSign (number: number): number,
 };
 
 declare function __import__M_Math (): __Mod__M_Math;
@@ -361,23 +286,13 @@ declare function __import__M_Math (): __Mod__M_Math;
 // engine/m_tri3.ts
 // -----------------------------------------------------------------------------
 type tri3_t = [vec3_t, vec3_t, vec3_t];
-type M_Tri3 = (a3: vec3_t, b3: vec3_t, c3: vec3_t) => tri3_t;
-type M_TriNormal3 = (tri3: tri3_t) => vec3_t;
-type M_TransformTri3 = (transform4: mat4_t, tri3: tri3_t) => tri3_t;
-type M_AABB3FromTri3 = (tri3: tri3_t) => aabb3_t;
-
-type M_RotateTriAroundAxis3 = (
-    tri3: tri3_t,
-    axis3: vec3_t,
-    angle: number
-) => tri3_t;
 
 type __Mod__M_Tri3 = {
-    M_Tri3: M_Tri3,
-    M_TriNormal3: M_TriNormal3,
-    M_TransformTri3: M_TransformTri3,
-    M_AABB3FromTri3: M_AABB3FromTri3,
-    M_RotateTriAroundAxis3: M_RotateTriAroundAxis3,
+    M_Tri3 (a3: vec3_t, b3: vec3_t, c3: vec3_t): tri3_t,
+    M_TriNormal3 (tri3: tri3_t): vec3_t,
+    M_TransformTri3 (transform4: mat4_t, tri3: tri3_t): tri3_t,
+    M_AABB3FromTri3 (tri3: tri3_t): aabb3_t,
+    M_RotateTriAroundAxis3 (tri3: tri3_t, axis3: vec3_t, angle: number): tri3_t,
 };
 
 declare function __import__M_Tri3 (): __Mod__M_Tri3;
@@ -394,44 +309,27 @@ type cam3_t = {
     fwdZ: number,
 };
 
-type R_InitCamera = (
-    fovy: number,
-    aspect: number,
-    zNear: number,
-    zFar: number,
-    eye: pvec3_t,
-    velocity: number
-) => void;
-
-type R_UpdateCamera = (mult: number) => void;
-type R_GetCameraState = () => cam3_t;
-type R_GetProjectionOrigin = () => vec3_t;
-type R_TriToWorldSpace = (triangle: tri3_t) => tri3_t;
-type R_TriToViewSpace = (triangle: tri3_t) => tri3_t;
-type R_TriToClipSpace = (triangle: tri3_t) => tri3_t;
-type R_VecToViewSpace = (vec: vec3_t) => vec3_t;
-type R_VecToClipSpace = (vec: vec3_t) => vec3_t;
-
-type R_DebugStats = (
-    deltaT: number,
-    nTrisOnScreen: Uint32Array
-) => void;
-
 type __Mod__R_Camera = {
     R_Origin: vec3_t,
     R_Right: vec3_t,
     R_Down: vec3_t,
     R_Fwd: vec3_t,
-    R_InitCamera: R_InitCamera,
-    R_UpdateCamera: R_UpdateCamera,
-    R_GetCameraState: R_GetCameraState,
-    R_GetProjectionOrigin: R_GetProjectionOrigin,
-    R_TriToWorldSpace: R_TriToWorldSpace,
-    R_TriToViewSpace: R_TriToViewSpace,
-    R_TriToClipSpace: R_TriToClipSpace,
-    R_VecToViewSpace: R_VecToViewSpace,
-    R_VecToClipSpace: R_VecToClipSpace,
-    R_DebugStats: R_DebugStats,
+    R_InitCamera
+    ( fovy: number,
+      aspect: number,
+      zNear: number,
+      zFar: number,
+      eye: pvec3_t,
+      velocity: number ): void,
+    R_UpdateCamera (mult: number): void,
+    R_GetCameraState (): cam3_t,
+    R_GetProjectionOrigin (): vec3_t,
+    R_TriToWorldSpace (triangle: tri3_t): tri3_t,
+    R_TriToViewSpace (triangle: tri3_t): tri3_t,
+    R_TriToClipSpace (triangle: tri3_t): tri3_t,
+    R_VecToViewSpace (vec: vec3_t): vec3_t,
+    R_VecToClipSpace (vec: vec3_t): vec3_t,
+    R_DebugStats (deltaT: number, nTrisOnScreen: Uint32Array): void,
 };
 
 declare function __import__R_Camera (): __Mod__R_Camera;
@@ -439,110 +337,72 @@ declare function __import__R_Camera (): __Mod__R_Camera;
 // -----------------------------------------------------------------------------
 // engine/r_draw.ts
 // -----------------------------------------------------------------------------
-type R_InitFrameBuffer = () => void;
-type R_InitZBuffer = () => void;
-type R_FlushFrame = () => void;
-
-type R_FillRect = (
-    x: number, y: number,
-    w: number, h: number,
-    r: number, g: number, b: number, a: number
-) => void;
-
-type R_DrawLine = (
-    sx: number, sy: number,
-    dx: number, dy: number,
-    r: number, g: number, b: number, a: number,
-    stroke: number
-) => void;
-
-type R_DrawLine_DDA = (
-    sx: number, sy: number,
-    dx: number, dy: number,
-    r: number, g: number, b: number, a: number,
-    stroke: number
-) => void;
-
-type R_DrawLine_RayCast = (
-    sx: number, sy: number,
-    dx: number, dy: number,
-    r: number, g: number, b: number, a: number,
-    stroke: number
-) => void;
-
-type R_DrawCircle = (
-    x: number, y: number,
-    rad: number,
-    r: number, g: number, b: number, a: number
-) => void;
-
-type R_DrawTriangle_Wireframe = (
-    ax: number, ay: number,
-    bx: number, by: number,
-    cx: number, cy: number,
-    r: number, g: number, b: number, a: number,
-    stroke: number
-) => void;
-
-type R_FillTriangle_Colored = (vso: vso_t, pso: pso_t) => void;
-
-type R_FillTriangle_Colored_Bresenham = (
-    ax: number, ay: number,
-    bx: number, by: number,
-    cx: number, cy: number,
-    r: number, g: number, b: number, a: number
-) => void;
-
-type R_FillTriangle_Textured_Affine = (
-    tex: texture_t,
-    ax: number, ay: number,
-    bx: number, by: number,
-    cx: number, cy: number,
-    au: number, av: number,
-    bu: number, bv: number,
-    cu: number, cv: number,
-    alpha: number,
-    lightLevel: number
-) => void;
-
-type R_FillTriangle_Textured_Perspective = (vso: vso_t, pso: pso_t) => void;
-
-type R_DrawImage = (
-    img: texture_t,
-    sx: number, sy: number,
-    sw: number, sh: number,
-    dx: number, dy: number,
-    dw: number, dh: number,
-    alpha?: number,
-    lightLevel?: number
-) => void;
-
-type R_Print = (
-    chars: string,
-    x: number, y: number,
-    color?: string,
-    size?: number,
-    fontFamily?: string,
-    style?: string
-) => void;
-
 type __Mod__R_Draw = {
-    R_InitFrameBuffer: R_InitFrameBuffer,
-    R_InitZBuffer: R_InitZBuffer,
-    R_FlushFrame: R_FlushFrame,
-    R_FillRect: R_FillRect,
-    R_DrawLine: R_DrawLine,
-    R_DrawLine_DDA: R_DrawLine_DDA,
-    R_DrawLine_RayCast: R_DrawLine_RayCast,
-    R_DrawCircle: R_DrawCircle,
-    R_DrawTriangle_Wireframe: R_DrawTriangle_Wireframe,
-    R_FillTriangle_Colored: R_FillTriangle_Colored,
+    R_InitFrameBuffer (): void,
+    R_InitZBuffer (): void,
+    R_FlushFrame (): void,
+    R_FillRect
+    ( x: number, y: number,
+      w: number, h: number,
+      r: number, g: number, b: number, a: number ): void,
+    R_DrawLine
+    ( sx: number, sy: number,
+      dx: number, dy: number,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void,
+    R_DrawLine_DDA
+    ( sx: number, sy: number,
+      dx: number, dy: number,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void,
+    R_DrawLine_RayCast
+    ( sx: number, sy: number,
+      dx: number, dy: number,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void,
+    R_DrawCircle
+    ( x: number, y: number,
+      rad: number,
+      r: number, g: number, b: number, a: number ): void,
+    R_DrawTriangle_Wireframe
+    ( ax: number, ay: number,
+      bx: number, by: number,
+      cx: number, cy: number,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void,
+    R_FillTriangle_Colored (vso: vso_t, pso: pso_t): void,
     /* TODO: uncomment these once they are implemented */
-    // R_FillTriangle_Colored_Bresenham: R_FillTriangle_Colored_Bresenham,
-    // R_FillTriangle_Textured_Affine: R_FillTriangle_Textured_Affine,
-    R_FillTriangle_Textured_Perspective: R_FillTriangle_Textured_Perspective,
-    R_DrawImage: R_DrawImage,
-    R_Print: R_Print,
+    // R_FillTriangle_Colored_Bresenham
+    // ( ax: number, ay: number,
+    //   bx: number, by: number,
+    //   cx: number, cy: number,
+    //   r: number, g: number, b: number, a: number ): void,
+    // R_FillTriangle_Textured_Affine
+    // ( tex: texture_t,
+    //   ax: number, ay: number,
+    //   bx: number, by: number,
+    //   cx: number, cy: number,
+    //   au: number, av: number,
+    //   bu: number, bv: number,
+    //   cu: number, cv: number,
+    //   alpha: number,
+    //   lightLevel: number ): void,
+    R_FillTriangle_Textured_Perspective (vso: vso_t, pso: pso_t): void,
+    R_DrawImage
+    ( img: texture_t,
+      sx: number, sy: number,
+      sw: number, sh: number,
+      dx: number, dy: number,
+      dw: number, dh: number,
+      alpha?: number,
+      lightLevel?: number ): void,
+    R_Print
+    ( chars: string,
+      x: number, y: number,
+      color?: string,
+      size?: number,
+      fontFamily?: string,
+      style?: string ): void,
 };
 
 declare function __import__R_Draw (): __Mod__R_Draw;
@@ -550,18 +410,12 @@ declare function __import__R_Draw (): __Mod__R_Draw;
 // -----------------------------------------------------------------------------
 // engine/r_drawers.ts
 // -----------------------------------------------------------------------------
-type R_LoadingDrawer = (onEnd?: () => void) => string;
-type R_TitleDrawer = (decor: texture_t, onEnd?: () => void) => string;
-type R_ErrorDrawer = (reason: string) => void;
-type R_PrintOnScreenMessage = () => void;
-type R_SetOnScreenMessage = (msg: string, ticks: number) => void;
-
 type __Mod__R_Drawers = {
-    R_LoadingDrawer: R_LoadingDrawer,
-    R_TitleDrawer: R_TitleDrawer,
-    R_ErrorDrawer: R_ErrorDrawer,
-    R_PrintOnScreenMessage: R_PrintOnScreenMessage,
-    R_SetOnScreenMessage: R_SetOnScreenMessage,
+    R_LoadingDrawer (onEnd?: () => void): string,
+    R_TitleDrawer (decor: texture_t, onEnd?: () => void): string,
+    R_ErrorDrawer (reason: string): void,
+    R_PrintOnScreenMessage (): void,
+    R_SetOnScreenMessage (msg: string, ticks: number): void,
 };
 
 declare function __import__R_Drawers (): __Mod__R_Drawers;
@@ -570,39 +424,23 @@ declare function __import__R_Drawers (): __Mod__R_Drawers;
 // engine/r_geometry.ts
 // -----------------------------------------------------------------------------
 type uvface_t = { a: number, b: number, c: number, textureId: string };
-type R_ToggleGlobalRotation = () => void;
-type R_ChangeRenderMode = () => void;
-
-type R_LoadGeometry = (
-    vertices: pvec3_t[], nVertices: number,
-    triangles: pvec3_t[], nTriangles: number
-) => void;
-
-type R_InitUVTable = (
-    vertices: pvec2_t[],
-    triangles: uvface_t[],
-    nTriangles: number
-) => void;
-
-type R_UpdateGeometry = () => void;
-type R_RenderGeometries = (nTrisOnScreen: Uint32Array) => void;
-
-type R_RenderLine = (
-    src: vec3_t, dest: vec3_t,
-    r: number, g: number, b: number, a: number,
-    stroke: number
-) => void;
-
-type R_Tris = () => tri3_t[];
 
 type __Mod__R_Geometry = {
-    R_ToggleGlobalRotation: R_ToggleGlobalRotation,
-    R_LoadGeometry: R_LoadGeometry,
-    R_InitUVTable: R_InitUVTable,
-    R_UpdateGeometry: R_UpdateGeometry,
-    R_RenderLine: R_RenderLine,
-    R_RenderGeometries: R_RenderGeometries,
-    R_Tris: R_Tris,
+    R_ToggleGlobalRotation (): void,
+    R_LoadGeometry
+    ( vertices: pvec3_t[], nVertices: number,
+      triangles: pvec3_t[], nTriangles: number ): void,
+    R_InitUVTable
+    ( vertices: pvec2_t[],
+      triangles: uvface_t[],
+      nTriangles: number ): void,
+    R_UpdateWorld (): void,
+    R_RenderGeometries (nTrisOnScreen: Uint32Array): void,
+    R_RenderLine
+    ( src: vec3_t, dest: vec3_t,
+      r: number, g: number, b: number, a: number,
+      stroke: number ): void,
+    R_Tris (): tri3_t[],
 };
 
 declare function __import__R_Geometry (): __Mod__R_Geometry;
@@ -610,14 +448,12 @@ declare function __import__R_Geometry (): __Mod__R_Geometry;
 // -----------------------------------------------------------------------------
 // engine/r_screen.ts
 // -----------------------------------------------------------------------------
-type R_FlushBuffer = (buffer: ImageData) => void;
-type R_InitBuffer = (w: number, h: number) => ImageData;
 
 type __Mod__R_Screen = {
     R_ScreenElement: HTMLCanvasElement,
     R_Ctx: CanvasRenderingContext2D,
-    R_FlushBuffer: R_FlushBuffer,
-    R_InitBuffer: R_InitBuffer,
+    R_FlushBuffer (buffer: ImageData): void,
+    R_InitBuffer (w: number, h: number): ImageData,
 };
 
 declare function __import__R_Screen (): __Mod__R_Screen;
@@ -661,11 +497,6 @@ type pso_t = {
     alpha: number,
 };
 
-type R_ToggleWireframe = () => void;
-type R_ChangeFillMode = () => void;
-type R_ChangeLightingMode = () => void;
-type R_TogglePointLight = () => void;
-
 type __Mod__R_Shader = {
     R_VertexShaderObj: vso_t,
     R_PixelShaderObj: pso_t,
@@ -675,10 +506,10 @@ type __Mod__R_Shader = {
     R_ShaderMode_Lights: number,
     R_ShaderMode_Smooth: number,
     R_ShaderMode_PointLight: number,
-    R_ToggleWireframe: R_ToggleWireframe,
-    R_ChangeFillMode: R_ChangeFillMode,
-    R_ChangeLightingMode: R_ChangeLightingMode,
-    R_TogglePointLight: R_TogglePointLight,
+    R_ToggleWireframe (): void,
+    R_ChangeFillMode (): void,
+    R_ChangeLightingMode (): void,
+    R_TogglePointLight (): void,
 };
 
 declare function __import__R_Shader (): __Mod__R_Shader;
@@ -706,14 +537,12 @@ declare function __import__G_Const (): __Mod__G_Const;
 // -----------------------------------------------------------------------------
 // game/g_run.ts
 // -----------------------------------------------------------------------------
-type G_Run = (setupResolution?: setup_resolution_t) => void;
-type __Mod__G_Run = { G_Run: G_Run };
+type __Mod__G_Run = { G_Run (setupResolution?: setup_resolution_t): void };
 declare function __import__G_Run (): __Mod__G_Run;
 
 // -----------------------------------------------------------------------------
 // game/g_setup.ts
 // -----------------------------------------------------------------------------
 type setup_resolution_t = { loadingId: string };
-type G_Setup = () => Promise<setup_resolution_t | undefined>;
-type __Mod__G_Setup = { G_Setup: G_Setup };
+type __Mod__G_Setup = { G_Setup (): Promise<setup_resolution_t | undefined> };
 declare function __import__G_Setup (): __Mod__G_Setup;

@@ -11,73 +11,77 @@
 
 (function (): void
 {
-    const DEBUG_MODE = window.__DEBUG_MODE__;
+    const { __DEBUG_MODE__: DEBUG_MODE } = window;
 
-    const A_Assets = __import__A_Assets();
-    const A_Texture = A_Assets.A_Texture;
+    const { A_Texture } = __import__A_Assets();
 
-    const G_Const = __import__G_Const();
-    const SCREEN_W_2 = G_Const.SCREEN_W_2, SCREEN_H_2 = G_Const.SCREEN_H_2;
-    const Z_NEAR = G_Const.Z_NEAR;
-    const FRUSTUM_AABB3 = G_Const.FRUSTUM_AABB3;
+    const {
+        FRUSTUM_AABB3,
+        SCREEN_W_2, SCREEN_H_2,
+        Z_NEAR,
+    } = __import__G_Const();
 
-    const I_Input = __import__I_Input();
-    const I_GetKeyState = I_Input.I_GetKeyState;
-    const I_Keys = I_Input.I_Keys;
+    const {
+        I_GetKeyState,
+        I_Keys,
+    } = __import__I_Input();
 
-    const M_Collision = __import__M_Collision();
-    const M_TimeBeforePlaneCollision3 = M_Collision.M_TimeBeforePlaneCollision3;
-    const M_LineSegmentVsPlaneCollision3 =
-        M_Collision.M_LineSegmentVsPlaneCollision3;
-    const M_BoundingBoxVsBoundingBoxCollision3 =
-        M_Collision.M_BoundingBoxVsBoundingBoxCollision3;
+    const {
+        M_BoundingBoxVsBoundingBoxCollision3,
+        M_LineSegmentVsPlaneCollision3,
+        M_TimeBeforePlaneCollision3,
+     } = __import__M_Collision();
 
-    const M_Tri3 = __import__M_Tri3();
-    const M_TriNormal3 = M_Tri3.M_TriNormal3;
-    const M_AABB3FromTri3 = M_Tri3.M_AABB3FromTri3;
-    const M_RotateTriAroundAxis3 = M_Tri3.M_RotateTriAroundAxis3;
-    const Tri3 = M_Tri3.M_Tri3;
+    const {
+        M_AABB3FromTri3,
+        M_RotateTriAroundAxis3,
+        M_Tri3: Tri3,
+        M_TriNormal3,
+    } = __import__M_Tri3();
 
-    const M_Vec3 = __import__M_Vec3();
-    const M_IsInFrontOfPlane3 = M_Vec3.M_IsInFrontOfPlane3;
-    const M_Add3 = M_Vec3.M_Add3;
-    const M_Sub3 = M_Vec3.M_Sub3;
-    const M_Scale3 = M_Vec3.M_Scale3;
-    const Vec3 = M_Vec3.M_Vec3;
+    const {
+        M_Add3,
+        M_IsInFrontOfPlane3,
+        M_Scale3,
+        M_Sub3,
+        M_Vec3: Vec3,
+    } = __import__M_Vec3();
 
-    const R_Camera = __import__R_Camera();
-    const R_TriToWorldSpace = R_Camera.R_TriToWorldSpace;
-    const R_TriToViewSpace = R_Camera.R_TriToViewSpace;
-    const R_TriToClipSpace = R_Camera.R_TriToClipSpace;
-    const R_VecToViewSpace = R_Camera.R_VecToViewSpace;
-    const R_VecToClipSpace = R_Camera.R_VecToClipSpace;
-    const R_GetProjectionOrigin = R_Camera.R_GetProjectionOrigin;
+    const {
+        R_GetCameraState,
+        R_GetProjectionOrigin,
+        R_TriToClipSpace,
+        R_TriToViewSpace,
+        R_TriToWorldSpace,
+        R_VecToClipSpace,
+        R_VecToViewSpace,
+        /* base vectors in world space */
+        R_Origin: ORIGIN,
+        R_Right: RIGHT,
+        R_Down: DOWN,
+        R_Fwd: FWD,
+    } = __import__R_Camera();
 
-    const R_Draw = __import__R_Draw();
-    const R_DrawLine = R_Draw.R_DrawLine;
-    const R_DrawTriangle_Wireframe = R_Draw.R_DrawTriangle_Wireframe;
-    const R_FillTriangle_Colored = R_Draw.R_FillTriangle_Colored;
-    const R_FillTriangle_Textured_Perspective =
-        R_Draw.R_FillTriangle_Textured_Perspective;
+    const {
+        R_DrawLine,
+        R_DrawTriangle_Wireframe,
+        R_FillTriangle_Colored,
+        R_FillTriangle_Textured_Perspective,
+    } = __import__R_Draw();
 
-    const R_Shader = __import__R_Shader();
-    const R_ShaderMode_Wireframe = R_Shader.R_ShaderMode_Wireframe;
-    const R_ShaderMode_Fill = R_Shader.R_ShaderMode_Fill;
-    const R_ShaderMode_Texture = R_Shader.R_ShaderMode_Texture;
-    const R_ShaderMode_Lights = R_Shader.R_ShaderMode_Lights;
-    const R_ShaderMode_Smooth = R_Shader.R_ShaderMode_Smooth;
-    const R_ShaderMode_PointLight = R_Shader.R_ShaderMode_PointLight;
-    const vso = R_Shader.R_VertexShaderObj;
-    const pso = R_Shader.R_PixelShaderObj;
+    const {
+        R_ShaderMode_Fill,
+        R_ShaderMode_Lights,
+        R_ShaderMode_PointLight,
+        R_ShaderMode_Smooth,
+        R_ShaderMode_Texture,
+        R_ShaderMode_Wireframe,
+        R_PixelShaderObj: pso,
+        R_VertexShaderObj: vso,
+    } = __import__R_Shader();
 
     // the center of the projection (near-clipping) plane
     let projectionOrigin: vec3_t;
-    /* base vectors in world space */
-    const ORIGIN = R_Camera.R_Origin;
-    const RIGHT = R_Camera.R_Right;
-    const DOWN = R_Camera.R_Down;
-    const FWD = R_Camera.R_Fwd;
-
     let nTris: number; // total number of triangles in the model
     let tris3: tri3_t[]; // a pool of raw triangle data
     let transformedTris3: tri3_t[]; // triangles after transformation
@@ -192,7 +196,7 @@
     /* TODO: add functionality here to allow updating parts of the geometry as
      * opposed to the entire model
      */
-    function R_UpdateGeometry (): void
+    function R_UpdateWorld (): void
     {
         if (doGlobalRotation)
         {
@@ -437,6 +441,7 @@
     function R_RenderGeomeries_Wireframe (nTrisOnScreen: Uint32Array): void
     {
         let trisRendered = 0;
+        /* go over and render all of the triangles that survived culling */
         for (let i = 0; i < nCulledBuffer; ++i)
         {
             const triIndex = culledBuffer[i];
@@ -483,7 +488,7 @@
         {
             // currently the camera also acts as both a directional light, and a
             // point light
-            const cam = R_Camera.R_GetCameraState();
+            const cam = R_GetCameraState();
             pso.isPointLight = pso.mode & R_ShaderMode_PointLight;
             if (pso.isPointLight)
             {
@@ -505,6 +510,7 @@
             pso.lightZ = undefined;
         }
         let trisRendered = 0;
+        /* go over and render all of the triangles that survived culling */
         for (let i = 0; i < nCulledBuffer; ++i)
         {
             const triIndex = culledBuffer[i];
@@ -612,7 +618,7 @@
         {
             // currently the camera also acts as both a directional light, and a
             // point light
-            const cam = R_Camera.R_GetCameraState();
+            const cam = R_GetCameraState();
             pso.isPointLight = pso.mode & R_ShaderMode_PointLight;
             if (pso.isPointLight)
             {
@@ -638,8 +644,9 @@
         {
             const triIndex = culledBuffer[i];
             const triWorld = transformedTris3[triIndex];
-            const uvMap = uvTable3[triIndex];
             const triView = R_TriToViewSpace(triWorld);
+            const triNormalsWorld = transformedTriVertexNormals3[triIndex];
+            const uvMap = uvTable3[triIndex];
             // the original triangle after having clipped against the near-plane
             const clippedTriQueue = Array(2) as [tri3_t, tri3_t];
             // the vertex normals after having clipped against the near-plane
@@ -649,7 +656,7 @@
             const nClipResult = R_ClipGeometryAgainstNearPlane_Textured(
                 triView,
                 clippedTriQueue,
-                transformedTriVertexNormals3[triIndex],
+                triNormalsWorld,
                 clippedTriVertexNormalQueue,
                 uvMap,
                 clippedUvMapQueue
@@ -834,7 +841,7 @@
             R_ToggleGlobalRotation,
             R_LoadGeometry,
             R_InitUVTable,
-            R_UpdateGeometry,
+            R_UpdateWorld,
             R_RenderLine,
             R_RenderGeometries,
             R_Tris,

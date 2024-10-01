@@ -13,20 +13,21 @@
     /* NOTE: Triangles employ counter-clockwise order */
     // TODO: maybe, no need for a Tri3 object at all??
 
-    const M_Vec3 = __import__M_Vec3();
-    const M_Sub3 = M_Vec3.M_Sub3;
-    const M_Cross3 = M_Vec3.M_Cross3;
-    const M_Norm3 = M_Vec3.M_Norm3;
-    const M_RotateAroundAxis3 = M_Vec3.M_RotateAroundAxis3;
-    const M_Vec3FromVec4 = M_Vec3.M_Vec3FromVec4;
-    const Vec3 = M_Vec3.M_Vec3;
+    const {
+        M_Cross3,
+        M_Norm3,
+        M_RotateAroundAxis3,
+        M_Sub3,
+        M_Vec3: Vec3,
+        M_Vec3FromVec4,
+    } = __import__M_Vec3();
 
-    const M_AABB3 = __import__M_AABB3();
-    const AABB3 = M_AABB3.M_AABB3;
+    const { M_AABB3: AABB3 } = __import__M_AABB3();
 
-    const M_Mat4 = __import__M_Mat4();
-    const M_Transform4 = M_Mat4.M_Transform4;
-    const M_Vec4FromVec3 = M_Mat4.M_Vec4FromVec3;
+    const {
+        M_Transform4,
+        M_Vec4FromVec3,
+    } = __import__M_Mat4();
 
     function M_Tri3 (a3: vec3_t, b3: vec3_t, c3: vec3_t): tri3_t
     {
