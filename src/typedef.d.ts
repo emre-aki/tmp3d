@@ -447,9 +447,14 @@ type __Mod__R_Geometry = {
 declare function __import__R_Geometry (): __Mod__R_Geometry;
 
 // -----------------------------------------------------------------------------
+// engine/r_light.ts
+// -----------------------------------------------------------------------------
+type __Mod__R_Light = { R_UpdateLight (pso: pso_t): void };
+declare function __import__R_Light (): __Mod__R_Light;
+
+// -----------------------------------------------------------------------------
 // engine/r_screen.ts
 // -----------------------------------------------------------------------------
-
 type __Mod__R_Screen = {
     R_ScreenElement: HTMLCanvasElement,
     R_Ctx: CanvasRenderingContext2D,

@@ -48,7 +48,6 @@
     } = __import__M_Vec3();
 
     const {
-        R_GetCameraState,
         R_GetProjectionOrigin,
         R_TriToClipSpace,
         R_TriToViewSpace,
@@ -69,10 +68,10 @@
         R_FillTriangle_Textured_Perspective,
     } = __import__R_Draw();
 
+    const { R_UpdateLight } = __import__R_Light();
+
     const {
         R_ShaderMode_Fill,
-        R_ShaderMode_Lights,
-        R_ShaderMode_PointLight,
         R_ShaderMode_Smooth,
         R_ShaderMode_Texture,
         R_ShaderMode_Wireframe,
@@ -198,6 +197,7 @@
      */
     function R_UpdateWorld (): void
     {
+        R_UpdateLight(pso);
         if (doGlobalRotation)
         {
             globalRotation += 0.1;
@@ -483,32 +483,6 @@
 
     function R_RenderGeomeries_ColorFill (nTrisOnScreen: Uint32Array): void
     {
-        /* set the light */
-        if (pso.mode & R_ShaderMode_Lights)
-        {
-            // currently the camera also acts as both a directional light, and a
-            // point light
-            const cam = R_GetCameraState();
-            pso.isPointLight = pso.mode & R_ShaderMode_PointLight;
-            if (pso.isPointLight)
-            {
-                pso.lightX = cam.x;
-                pso.lightY = cam.y;
-                pso.lightZ = cam.z;
-            }
-            else
-            {
-                pso.lightX = -cam.fwdX;
-                pso.lightY = -cam.fwdY;
-                pso.lightZ = -cam.fwdZ;
-            }
-        }
-        else
-        {
-            pso.lightX = undefined;
-            pso.lightY = undefined;
-            pso.lightZ = undefined;
-        }
         let trisRendered = 0;
         /* go over and render all of the triangles that survived culling */
         for (let i = 0; i < nCulledBuffer; ++i)
@@ -613,32 +587,6 @@
         let trisRendered = 0;
         // early return if the mesh does not have texture-mapping
         if (!uvTable3) return;
-        /* set the light */
-        if (pso.mode & R_ShaderMode_Lights)
-        {
-            // currently the camera also acts as both a directional light, and a
-            // point light
-            const cam = R_GetCameraState();
-            pso.isPointLight = pso.mode & R_ShaderMode_PointLight;
-            if (pso.isPointLight)
-            {
-                pso.lightX = cam.x;
-                pso.lightY = cam.y;
-                pso.lightZ = cam.z;
-            }
-            else
-            {
-                pso.lightX = -cam.fwdX;
-                pso.lightY = -cam.fwdY;
-                pso.lightZ = -cam.fwdZ;
-            }
-        }
-        else
-        {
-            pso.lightX = undefined;
-            pso.lightY = undefined;
-            pso.lightZ = undefined;
-        }
         /* go over and render all of the triangles that survived culling */
         for (let i = 0; i < nCulledBuffer; ++i)
         {
