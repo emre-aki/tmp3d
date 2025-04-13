@@ -112,10 +112,10 @@
         // "light objects buffer" to support multiple point/directional lights
         // in a scene?
         // surface normal of the triangle used in flat-shading
-        normalX: undefined, normalY: undefined, normalZ: undefined,
+        normalX: undefined, normalY: undefined, normalZ: undefined, // FIXME: maybe this should be in `vso`??
         // the position of the point light in world space, or the direction of
         // the directional light, both of which affect the entire scene
-        lightX: undefined, lightY: undefined, lightZ: undefined,
+        lightX: undefined, lightY: undefined, lightZ: undefined, // FIXME: maybe this should be in `vso`??
         // whether to interpret the light defined by the vector
         // <`lightX`, `lightY`, `lightZ`> as a directional light or as a point
         // light

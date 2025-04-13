@@ -13,6 +13,8 @@
 // -----------------------------------------------------------------------------
 type pvec2_t = [number, number];
 type pvec3_t = [number, number, number];
+type pvec4_t = [number, number, number, number];
+type pmat4_t = [pvec4_t, pvec4_t, pvec4_t, pvec4_t];
 type bitmap_t = Uint8ClampedArray;
 declare var __VERSION__: string;
 declare var __DEBUG_MODE__: 1 | undefined;

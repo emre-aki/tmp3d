@@ -536,6 +536,7 @@
                     lightLevel =
                         lXUnit * nXUnit + lYUnit * nYUnit + lZUnit * nZUnit;
                 }
+                lightLevel = (lightLevel + 1) * 0.5;
             }
             /* fill a single pixel in screen space with the color defined by
              * parameters `r`, `g`, `b`, and `alpha`.
@@ -1079,6 +1080,7 @@
                     lightLevel =
                         lXUnit * nXUnit + lYUnit * nYUnit + lZUnit * nZUnit;
                 }
+                lightLevel = (lightLevel + 1) * 0.5;
             }
             /* draw a single pixel in screen space sampled from the
              * perspective-corrected texture space
@@ -1535,7 +1537,8 @@
     {
         R_Ctx.font = (style ? style + " " : "") +
                      (size ? size : 10).toString() + "px " +
-                     (fontFamily ? fontFamily : "Courier, monospace");
+                    //  (fontFamily ? fontFamily : "Courier, monospace");
+                    (fontFamily ? fontFamily : "Menlo");
         R_Ctx.fillStyle = color || "#000000";
         R_Ctx.fillText(chars, x, y);
     }

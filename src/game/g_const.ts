@@ -24,7 +24,7 @@
 
     const MAX_MOV_TILT = Math.PI / 90;
 
-    const NEAR_H = 2, NEAR_W = ASPECT * NEAR_H;
+    const NEAR_H = 0.5, NEAR_W = ASPECT * NEAR_H;
     const Z_NEAR = NEAR_H / (2 * TAN_FOV_Y_2), Z_FAR = 500 * Z_NEAR;
     const FAR_W = Z_FAR / Z_NEAR * NEAR_W, FAR_W_2 = FAR_W * 0.5;
     const FAR_H = FAR_W / ASPECT, FAR_H_2 = FAR_H * 0.5;

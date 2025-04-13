@@ -42,6 +42,7 @@
     const {
         M_Add3,
         M_IsInFrontOfPlane3,
+        M_Norm3,
         M_Scale3,
         M_Sub3,
         M_Vec3: Vec3,
@@ -690,6 +691,26 @@
                 if (pso.mode & R_ShaderMode_Wireframe)
                     R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
                                              255, 255, 255, 255, 2);
+                // draw vertex normals
+                // R_RenderLine(triFrustumWorld[0],
+                //              M_Add3(triFrustumWorld[0],
+                //                     M_Norm3(triVertexNormals[0])),
+                //              255, 255, 255, 255, 2);
+                // R_RenderLine(triFrustumWorld[1],
+                //              M_Add3(triFrustumWorld[1],
+                //                     M_Norm3(triVertexNormals[1])),
+                //              255, 255, 255, 255, 2);
+                // R_RenderLine(triFrustumWorld[2],
+                //              M_Add3(triFrustumWorld[2],
+                //                     M_Norm3(triVertexNormals[2])),
+                //              255, 255, 255, 255, 2);
+                // //
+                // // draw surface normals
+                // const triNormal = M_TriNormal3(triWorld);
+                // let m = M_Add3(triFrustumWorld[0], triFrustumWorld[1]);
+                // m = M_Scale3(M_Add3(m, triFrustumWorld[2]), 1 / 3);
+                // R_RenderLine(m, M_Add3(m, triNormal), 255, 0, 255, 255, 2);
+                //
                 ++trisRendered;
             }
         }
