@@ -641,13 +641,10 @@
             }
             zBuffer[bufferIndex] = c; // don't forget to update the z-buffer!
             const c_ = 1 / c;
-            let sX = Math.floor(u * c_ * texWidth);
-            let sY = Math.floor(v * c_ * texHeight);
+            let sX = u * c_, sY = v * c_;
             /* wrap-around the texture if the sampling point is out-of-bounds */
-            if (sX < 0) sX = ((sX % texWidth) + texWidth) % texWidth;
-            else if (sX >= texWidth) sX %= texWidth;
-            if (sY < 0) sY = ((sY % texHeight) + texHeight) % texHeight;
-            else if (sY >= texHeight) sY %= texHeight;
+            sX = Math.floor((((sX % 1) + 1) % 1) * texWidth);
+            sY = Math.floor((((sY % 1) + 1) % 1) * texHeight);
             /* get the original vertex normal back from the perspective-correct
              * space by dehomogenizing
              */
