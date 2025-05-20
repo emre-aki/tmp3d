@@ -160,13 +160,15 @@ function main ()
         .description("Build a static site to serve the Tmp3D Engine")
         .version("0.0.1");
     cli
-        .option("-o, --output-path", "The path in which the built site will be saved", "./dist")
+        .option("-o, --output-path",
+                "The path in which the built site will be saved",
+                "./dist")
         .option("-d, --debug", "Build in debug mode")
         .option("-v, --verbose", "Verbose mode")
         .action(HandleCommand);
     cli.parse(process.argv);
 }
 
-main();
+if (require.main === module) main();
 
 exports.Build = Build;
