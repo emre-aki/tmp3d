@@ -16,10 +16,10 @@ jobs:
                 node-version: [16.x]
         steps:
             # checkout the repository over at GitHub
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             # setup a Node.js environment with the given configuration
             - name: 'Use Node.js ${{ matrix.node-version }}'
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: '${{ matrix.node-version }}'
                   cache: npm
@@ -29,11 +29,11 @@ jobs:
             - run: npm run build
             # setup and configure GitHub Pages
             - name: Setup Pages
-              uses: actions/configure-pages@v2
+              uses: actions/configure-pages@v5
             # a composite action for packaging and uploading an artifact that
             # can be deployed at GitHub Pages
             - name: Upload artifact
-              uses: actions/upload-pages-artifact@v1
+              uses: actions/upload-pages-artifact@v3
               with:
                   path: dist/ # path to serve/deploy at GitHub Pages
     deploy:
@@ -53,4 +53,4 @@ jobs:
         steps:
             - name: Deploy to GitHub Pages
               id: deployment
-              uses: actions/deploy-pages@v1
+              uses: actions/deploy-pages@v4
