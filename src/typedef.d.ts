@@ -8,18 +8,18 @@
  *      Type definitions for Tmp3D.
  */
 
-// -----------------------------------------------------------------------------
+//
 // globals
-// -----------------------------------------------------------------------------
+//
 type pvec2_t = [number, number];
 type pvec3_t = [number, number, number];
 type bitmap_t = Uint8ClampedArray;
 declare var __VERSION__: string;
 declare var __DEBUG_MODE__: 1 | undefined;
 
-// -----------------------------------------------------------------------------
+//
 // window
-// -----------------------------------------------------------------------------
+//
 interface Window {
     __import__D_Mesh: typeof __import__D_Mesh;
     __import__D_Player: typeof __import__D_Player;
@@ -44,9 +44,9 @@ interface Window {
     __import__G_Setup: typeof __import__G_Setup;
 }
 
-// -----------------------------------------------------------------------------
+//
 // d_mesh.ts
-// -----------------------------------------------------------------------------
+//
 type __Mod__D_Mesh = {
     D_Vertices (): pvec3_t[],
     D_UV (): pvec2_t[],
@@ -57,15 +57,15 @@ type __Mod__D_Mesh = {
 
 declare function __import__D_Mesh (): __Mod__D_Mesh;
 
-// -----------------------------------------------------------------------------
+//
 // data/d_player.ts
-// -----------------------------------------------------------------------------
+//
 type __Mod__D_Player = { D_Velocity: number, D_Eye (): pvec3_t };
 declare function __import__D_Player (): __Mod__D_Player;
 
-// -----------------------------------------------------------------------------
+//
 // data/d_textures.ts
-// -----------------------------------------------------------------------------
+//
 type D_GlobTextureIdTable = { [id: string]: string };
 type D_GlobTextureFilenameTable = { [id: string]: string };
 
@@ -76,9 +76,9 @@ type __Mod__D_GlobTextures = {
 
 declare function __import__D_GlobTextures (): __Mod__D_GlobTextures;
 
-// -----------------------------------------------------------------------------
+//
 // engine/a_assets.ts
-// -----------------------------------------------------------------------------
+//
 type texture_t = {
     id: string,
     bitmap: bitmap_t,
@@ -96,9 +96,9 @@ type __Mod__A_Assets = {
 
 declare function __import__A_Assets (): __Mod__A_Assets;
 
-// -----------------------------------------------------------------------------
+//
 // engine/an_animation.ts
-// -----------------------------------------------------------------------------
+//
 type OnFrame = (
     animationIndex: Uint32Array,
     id: string,
@@ -131,9 +131,9 @@ type __Mod__AN_Animation = {
 
 declare function __import__AN_Animation (): __Mod__AN_Animation;
 
-// -----------------------------------------------------------------------------
+//
 // engine/i_input.ts
-// -----------------------------------------------------------------------------
+//
 type KEY = {
     RTN: "RTN",
     SPC: "SPC",
@@ -178,9 +178,9 @@ type __Mod__I_Input = {
 
 declare function __import__I_Input (): __Mod__I_Input;
 
-// -----------------------------------------------------------------------------
+//
 // engine/m_aabb.ts
-// -----------------------------------------------------------------------------
+//
 type aabb3_t = Float32Array;
 
 type __Mod__M_AABB3 = {
@@ -189,9 +189,9 @@ type __Mod__M_AABB3 = {
 
 declare function __import__M_AABB3 (): __Mod__M_AABB3;
 
-// -----------------------------------------------------------------------------
+//
 // engine/m_collision.ts
-// -----------------------------------------------------------------------------
+//
 type __Mod__M_Collision = {
     M_LineVsLine2
     ( ax: number, ay: number,
@@ -212,9 +212,9 @@ type __Mod__M_Collision = {
 
  declare function __import__M_Collision (): __Mod__M_Collision;
 
-// -----------------------------------------------------------------------------
+//
 // engine/m_vec2.ts
-// -----------------------------------------------------------------------------
+//
 type vec2_t = Float32Array;
 
 type __Mod__M_Vec2 = {
@@ -227,9 +227,9 @@ type __Mod__M_Vec2 = {
 
 declare function __import__M_Vec2 (): __Mod__M_Vec2;
 
-// -----------------------------------------------------------------------------
+//
 // engine/m_vec3.ts
-// -----------------------------------------------------------------------------
+//
 type vec3_t = Float32Array;
 type vec4_t = Float32Array;
 
@@ -255,9 +255,9 @@ type __Mod__M_Vec3 = {
 
 declare function __import__M_Vec3 (): __Mod__M_Vec3;
 
-// -----------------------------------------------------------------------------
+//
 // engine/m_mat4.ts
-// -----------------------------------------------------------------------------
+//
 type mat4_t = Float32Array;
 
 type __Mod__M_Mat4 = {
@@ -269,9 +269,9 @@ type __Mod__M_Mat4 = {
 
 declare function __import__M_Mat4 (): __Mod__M_Mat4;
 
-// -----------------------------------------------------------------------------
+//
 // engine/m_math.ts
-// -----------------------------------------------------------------------------
+//
 type __Mod__M_Math = {
     PI_2: number,
     M_RadToDeg (radian: number): number,
@@ -282,9 +282,9 @@ type __Mod__M_Math = {
 
 declare function __import__M_Math (): __Mod__M_Math;
 
-// -----------------------------------------------------------------------------
+//
 // engine/m_tri3.ts
-// -----------------------------------------------------------------------------
+//
 type tri3_t = [vec3_t, vec3_t, vec3_t];
 
 type __Mod__M_Tri3 = {
@@ -297,9 +297,9 @@ type __Mod__M_Tri3 = {
 
 declare function __import__M_Tri3 (): __Mod__M_Tri3;
 
-// -----------------------------------------------------------------------------
+//
 // engine/r_camera.ts
-// -----------------------------------------------------------------------------
+//
 type cam3_t = {
     x: number,
     y: number,
@@ -334,9 +334,9 @@ type __Mod__R_Camera = {
 
 declare function __import__R_Camera (): __Mod__R_Camera;
 
-// -----------------------------------------------------------------------------
+//
 // engine/r_draw.ts
-// -----------------------------------------------------------------------------
+//
 type __Mod__R_Draw = {
     R_InitFrameBuffer (): void,
     R_InitZBuffer (): void,
@@ -407,9 +407,9 @@ type __Mod__R_Draw = {
 
 declare function __import__R_Draw (): __Mod__R_Draw;
 
-// -----------------------------------------------------------------------------
+//
 // engine/r_drawers.ts
-// -----------------------------------------------------------------------------
+//
 type __Mod__R_Drawers = {
     R_LoadingDrawer (onEnd?: () => void): string,
     R_TitleDrawer (decor: texture_t, onEnd?: () => void): string,
@@ -420,9 +420,9 @@ type __Mod__R_Drawers = {
 
 declare function __import__R_Drawers (): __Mod__R_Drawers;
 
-// -----------------------------------------------------------------------------
+//
 // engine/r_geometry.ts
-// -----------------------------------------------------------------------------
+//
 type uvface_t = { a: number, b: number, c: number, textureId: string };
 
 type __Mod__R_Geometry = {
@@ -445,10 +445,15 @@ type __Mod__R_Geometry = {
 
 declare function __import__R_Geometry (): __Mod__R_Geometry;
 
-// -----------------------------------------------------------------------------
-// engine/r_screen.ts
-// -----------------------------------------------------------------------------
+//
+// engine/r_light.ts
+//
+type __Mod__R_Light = { R_UpdateLight (pso: pso_t): void };
+declare function __import__R_Light (): __Mod__R_Light;
 
+//
+// engine/r_screen.ts
+//
 type __Mod__R_Screen = {
     R_ScreenElement: HTMLCanvasElement,
     R_Ctx: CanvasRenderingContext2D,
@@ -458,9 +463,9 @@ type __Mod__R_Screen = {
 
 declare function __import__R_Screen (): __Mod__R_Screen;
 
-// -----------------------------------------------------------------------------
+//
 // engine/r_shader.ts
-// -----------------------------------------------------------------------------
+//
 type vso_t = {
     ax: number, ay: number, aw: number,
     bx: number, by: number, bw: number,
@@ -514,9 +519,9 @@ type __Mod__R_Shader = {
 
 declare function __import__R_Shader (): __Mod__R_Shader;
 
-// -----------------------------------------------------------------------------
+//
 // game/g_const.ts
-// -----------------------------------------------------------------------------
+//
 type __Mod__G_Const = {
     FPS: number,
     FOV_X: number,
@@ -534,15 +539,15 @@ type __Mod__G_Const = {
 
 declare function __import__G_Const (): __Mod__G_Const;
 
-// -----------------------------------------------------------------------------
+//
 // game/g_run.ts
-// -----------------------------------------------------------------------------
+//
 type __Mod__G_Run = { G_Run (setupResolution?: setup_resolution_t): void };
 declare function __import__G_Run (): __Mod__G_Run;
 
-// -----------------------------------------------------------------------------
+//
 // game/g_setup.ts
-// -----------------------------------------------------------------------------
+//
 type setup_resolution_t = { loadingId: string };
 type __Mod__G_Setup = { G_Setup (): Promise<setup_resolution_t | undefined> };
 declare function __import__G_Setup (): __Mod__G_Setup;

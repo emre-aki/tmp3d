@@ -524,6 +524,7 @@
                 {
                     lightLevel =
                         lXUnit * normalX + lYUnit * normalY + lZUnit * normalZ;
+                    lightLevel = (lightLevel + 1) * 0.5;
                 }
                 /* smooth shading */
                 else
@@ -964,8 +965,10 @@
        dx0, dx1,
        w0, w1,
        u0, v0, u1, v1,
-       nx0, ny0, nz0, nx1, ny1, nz1,
-       wx0, wy0, wz0, wx1, wy1, wz1,
+       nx0, ny0, nz0,
+       nx1, ny1, nz1,
+       wx0, wy0, wz0,
+       wx1, wy1, wz1,
        normalX, normalY, normalZ,
        lightX, lightY, lightZ,
        isPointLight,
@@ -1066,6 +1069,7 @@
                 {
                     lightLevel =
                         lXUnit * normalX + lYUnit * normalY + lZUnit * normalZ;
+                    lightLevel = (lightLevel + 1) * 0.5;
                 }
                 /* smooth shading */
                 else
