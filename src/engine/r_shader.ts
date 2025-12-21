@@ -37,6 +37,8 @@
     // bit flag to be used to switch between directional and point lights —
     // requires `SHADER_MODE_MASK_LIGHTS` to be set
     const SHADER_MODE_MASK_POINT_LIGHT = 0x20;
+    // bit flag to toggle drawing of vertex and surface normals on/off
+    const SHADER_MODE_MASK_NORMALS = 0x40;
 
     let mode = SHADER_MODE_MASK_FILL |
                SHADER_MODE_MASK_TEXTURE_FILL |
@@ -126,12 +128,18 @@
     function R_ToggleWireframe (): void
     {
         const now = Date.now();
+
         if (I_GetKeyState(I_Keys.F) &&
             now - lastShaderChange > shaderChangeDebounce)
         {
             mode ^= SHADER_MODE_MASK_WIREFRAME;
             pso.mode = mode;
             lastShaderChange = now;
+
+            if (mode & SHADER_MODE_MASK_WIREFRAME)
+                R_SetOnScreenMessage("Wireframes: ON", 50);
+            else
+                R_SetOnScreenMessage("Wireframes: OFF", 50);
         }
     }
 
@@ -142,6 +150,7 @@
     function R_ChangeFillMode (): void
     {
         const now = Date.now();
+
         if (I_GetKeyState(I_Keys.R) &&
             now - lastShaderChange > shaderChangeDebounce)
         {
@@ -156,6 +165,7 @@
                     (fill & SHADER_MODE_MASK_TEXTURE_FILL);
             pso.mode = mode;
             lastShaderChange = now;
+
             if (mode & SHADER_MODE_MASK_TEXTURE_FILL)
                 R_SetOnScreenMessage("Texture fill", 50);
             else if (mode & SHADER_MODE_MASK_FILL)
@@ -173,6 +183,7 @@
     function R_ChangeLightingMode (): void
     {
         const now = Date.now();
+
         if (I_GetKeyState(I_Keys.L) &&
             now - lastShaderChange > shaderChangeDebounce)
         {
@@ -187,6 +198,7 @@
                     (lightsOn & SHADER_MODE_MASK_SMOOTH);
             pso.mode = mode;
             lastShaderChange = now;
+
             if (mode & SHADER_MODE_MASK_SMOOTH)
                 R_SetOnScreenMessage("Smooth shading", 50);
             else if (mode & SHADER_MODE_MASK_LIGHTS)
@@ -203,16 +215,40 @@
     function R_TogglePointLight (): void
     {
         const now = Date.now();
+
         if (I_GetKeyState(I_Keys.P) &&
             now - lastShaderChange > shaderChangeDebounce)
         {
             mode ^= SHADER_MODE_MASK_POINT_LIGHT;
             pso.mode = mode;
             lastShaderChange = now;
+
             if (mode & SHADER_MODE_MASK_POINT_LIGHT)
                 R_SetOnScreenMessage("Point light", 50);
             else
                 R_SetOnScreenMessage("Directional light", 50);
+        }
+    }
+
+    //
+    // R_ToggleNormals
+    // Toggles drawing of vertex and surface normals
+    //
+    function R_ToggleNormals (): void
+    {
+        const now = Date.now();
+
+        if (I_GetKeyState(I_Keys.N) &&
+            now - lastShaderChange > shaderChangeDebounce)
+        {
+            mode ^= SHADER_MODE_MASK_NORMALS;
+            pso.mode = mode;
+            lastShaderChange = now;
+
+            if (mode & SHADER_MODE_MASK_NORMALS)
+                R_SetOnScreenMessage("Normals: ON", 50);
+            else
+                R_SetOnScreenMessage("Normals: OFF", 50);
         }
     }
 
@@ -227,10 +263,12 @@
             R_ShaderMode_Lights: SHADER_MODE_MASK_LIGHTS,
             R_ShaderMode_Smooth: SHADER_MODE_MASK_SMOOTH,
             R_ShaderMode_PointLight: SHADER_MODE_MASK_POINT_LIGHT,
+            R_ShaderMode_Normals: SHADER_MODE_MASK_NORMALS,
             R_ToggleWireframe,
             R_ChangeFillMode,
             R_ChangeLightingMode,
             R_TogglePointLight,
+            R_ToggleNormals,
         };
     };
 })();

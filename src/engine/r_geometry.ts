@@ -42,6 +42,7 @@
     const {
         M_Add3,
         M_IsInFrontOfPlane3,
+        M_Norm3,
         M_Scale3,
         M_Sub3,
         M_Vec3: Vec3,
@@ -75,6 +76,7 @@
         R_ShaderMode_Smooth,
         R_ShaderMode_Texture,
         R_ShaderMode_Wireframe,
+        R_ShaderMode_Normals,
         R_PixelShaderObj: pso,
         R_VertexShaderObj: vso,
     } = __import__R_Shader();
@@ -451,8 +453,6 @@
             const triView = R_TriToViewSpace(triWorld);
             // keep a buffer of clipped triangles for drawing
             const clippedTriQueue = Array(2) as [tri3_t, tri3_t];
-            // UNUSED: the vertex normals after having clipped against the
-            // near-plane
             const clippedTriVertexNormalQueue = Array(2) as [tri3_t, tri3_t];
 
             const nClipResult = R_ClipGeometryAgainstNearPlane(
@@ -478,6 +478,11 @@
 
                 R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
                                          255, 255, 255, 255, 2);
+
+                if (pso.mode & R_ShaderMode_Normals)
+                    R_RenderNormals(R_TriToWorldSpace(triViewClipped),
+                                    clippedTriVertexNormalQueue[j]);
+
                 ++trisRendered;
             }
         }
@@ -584,6 +589,10 @@
                 if (pso.mode & R_ShaderMode_Wireframe)
                     R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
                                              0, 0, 0, 255, 2);
+
+                if (pso.mode & R_ShaderMode_Normals)
+                    R_RenderNormals(triWorldClipped, triVertexNormals);
+
                 ++trisRendered;
             }
         }
@@ -704,6 +713,10 @@
                 if (pso.mode & R_ShaderMode_Wireframe)
                     R_DrawTriangle_Wireframe(ax, ay, bx, by, cx, cy,
                                              255, 255, 255, 255, 2);
+
+                if (pso.mode & R_ShaderMode_Normals)
+                    R_RenderNormals(triWorldClipped, triVertexNormals);
+
                 ++trisRendered;
             }
         }
@@ -775,6 +788,32 @@
         R_RenderLine(ORIGIN, M_Scale3(RIGHT, length), 255, 0, 0, 255, 2);
         R_RenderLine(ORIGIN, M_Scale3(DOWN, length), 0, 255, 0, 255, 2);
         R_RenderLine(ORIGIN, M_Scale3(FWD, length), 0, 0, 255, 255, 2);
+    }
+
+    function
+    R_RenderNormals
+    ( triWorldClipped: tri3_t,
+      vertexNormals: tri3_t): void
+    {
+        /* draw vertex normals */
+        R_RenderLine(triWorldClipped[0],
+                     M_Add3(triWorldClipped[0],
+                            M_Norm3(vertexNormals[0])),
+                     255, 255, 255, 255, 2);
+        R_RenderLine(triWorldClipped[1],
+                     M_Add3(triWorldClipped[1],
+                            M_Norm3(vertexNormals[1])),
+                     255, 255, 255, 255, 2);
+        R_RenderLine(triWorldClipped[2],
+                     M_Add3(triWorldClipped[2],
+                            M_Norm3(vertexNormals[2])),
+                     255, 255, 255, 255, 2);
+
+        /* draw surface normals */
+        const triNormal = M_TriNormal3(triWorldClipped);
+        let m = M_Add3(triWorldClipped[0], triWorldClipped[1]);
+        m = M_Scale3(M_Add3(m, triWorldClipped[2]), 1 / 3);
+        R_RenderLine(m, M_Add3(m, triNormal), 255, 0, 255, 255, 2);
     }
 
     function R_RenderGeometries (nTrisOnScreen: Uint32Array): void

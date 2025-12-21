@@ -45,6 +45,7 @@
         R_ChangeLightingMode,
         R_TogglePointLight,
         R_ToggleWireframe,
+        R_ToggleNormals,
     } = __import__R_Shader();
 
     const TICK_DELAY = 1000 / FPS;
@@ -69,6 +70,7 @@
         R_ChangeFillMode();     // separate listeners so the key strokes
         R_ChangeLightingMode(); // associated with each event can be captured
         R_TogglePointLight();   // individually
+        R_ToggleNormals();      //
         R_UpdateWorld();
     }
 
