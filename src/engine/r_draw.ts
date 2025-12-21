@@ -419,7 +419,7 @@
     R_LerpScanline_Colored
     ({ dy,
        dx0, dx1,
-       w0, w1,
+       z0, z1,
        r0, g0, b0, r1, g1, b1,
        nx0, ny0, nz0, nx1, ny1, nz1,
        wx0, wy0, wz0, wx1, wy1, wz1,
@@ -441,8 +441,8 @@
         // pre-step from start by 0.5 as pixel centers are the actual sampling
         // points
         const preStepX = dX0 + 0.5 - dx0;
-        // 1 step in `+x` equals how many steps in `w`
-        const gradW = (w1 - w0) * deltaX_;
+        // 1 step in `+x` equals how many steps in `z`
+        const gradZ = (z1 - z0) * deltaX_;
         // 1 step in `+x` equals how many steps in `r`
         const gradR = (r1 - r0) * deltaX_;
         // 1 step in `+x` equals how many steps in `g`
@@ -458,7 +458,7 @@
         const gradWY = (wy1 - wy0) * deltaX_;
         const gradWZ = (wz1 - wz0) * deltaX_;
         // current z-coordinate in the perspective-correct space
-        let w = preStepX * gradW + w0;
+        let z = preStepX * gradZ + z0;
         /* the coordinates in the perspective-correct RGB space of the color to
          * fill the current pixel with
          */
@@ -479,24 +479,26 @@
         for (let x = dX0; x < dX1 && x < SCREEN_W; ++x)
         {
             const bufferIndex = dy * SCREEN_W + x;
+
             /* skip filling in the pixel unless the current pixel in the raster
              * triangle is closer (1 / zRaster > 1 / zBuffer) than what's
              * already in the z-buffer at the position we want to draw
              */
-            if (w <= zBuffer[bufferIndex])
+            if (z <= zBuffer[bufferIndex])
             {
-                w += gradW;
+                z += gradZ;
                 r += gradR; g += gradG; b += gradB;
                 nx += gradNX; ny += gradNY; nz += gradNZ;
                 wx += gradWX; wy += gradWY; wz += gradWZ;
 
                 continue;
             }
-            zBuffer[bufferIndex] = w; // update the z-buffer
-            /* get the original coordinates back from the perspective-corrected
-             * space by dehomogenizing
-             */
-            const w_ = 1 / w;
+            zBuffer[bufferIndex] = z; // update the z-buffer
+
+            // get the original coordinates back from the perspective-corrected
+            // space by dehomogenizing
+            const z_ = 1 / z;
+
             /* calculate light intensity on the current pixel */
             let lightLevel = 1;
             if (shouldShade)
@@ -504,19 +506,22 @@
                 // start with the assumption that the given light is a
                 // directional light...
                 let lX = lightX, lY = lightY, lZ = lightZ;
+
                 /* ...and adjust accordingly if it turns out to be a point light
                  * instead
                  */
                 if (isPointLight)
                 {
-                    lX -= wx * w_;
-                    lY -= wy * w_;
-                    lZ -= wz * w_;
+                    lX -= wx * z_;
+                    lY -= wy * z_;
+                    lZ -= wz * z_;
                 }
+
                 const magL_ = 1 / Math.sqrt(lX * lX + lY * lY + lZ * lZ);
                 const lXUnit = lX * magL_;
                 const lYUnit = lY * magL_;
                 const lZUnit = lZ * magL_;
+
                 /* flat shading */
                 if (normalX !== undefined &&
                     normalY !== undefined &&
@@ -529,11 +534,12 @@
                 /* smooth shading */
                 else
                 {
-                    const NX = nx * w_, NY = ny * w_, NZ = nz * w_;
+                    const NX = nx * z_, NY = ny * z_, NZ = nz * z_;
                     const magN_ = 1 / Math.sqrt(NX * NX + NY * NY + NZ * NZ);
                     const nXUnit = NX * magN_;
                     const nYUnit = NY * magN_;
                     const nZUnit = NZ * magN_;
+
                     lightLevel =
                         lXUnit * nXUnit + lYUnit * nYUnit + lZUnit * nZUnit;
                 }
@@ -548,7 +554,7 @@
             const bufferAlpha = frameBuffer.data[paintIndex + 3] || 255;
             const blendRatio = sampleAlpha / bufferAlpha;
             const blendRatio_ = 1 - blendRatio;
-            const newBlend = lightLevel * blendRatio * w_;
+            const newBlend = lightLevel * blendRatio * z_;
             const newRed = newBlend * r + blendRatio_ * bufferRed;
             const newGreen = newBlend * g + blendRatio_ * bufferGreen;
             const newBlue = newBlend * b + blendRatio_ * bufferBlue;
@@ -556,7 +562,7 @@
             frameBuffer.data[paintIndex + 1] = newGreen;
             frameBuffer.data[paintIndex + 2] = newBlue;
             frameBuffer.data[paintIndex + 3] = 255;
-            w += gradW;
+            z += gradZ;
             r += gradR; g += gradG; b += gradB;
             nx += gradNX; ny += gradNY; nz += gradNZ;
             wx += gradWX; wy += gradWY; wz += gradWZ;
@@ -569,9 +575,9 @@
     //
     function
     R_FillTriangle_Colored
-    ({ ax, ay, aw,
-       bx, by, bw,
-       cx, cy, cw,
+    ({ ax, ay, az,
+       bx, by, bz,
+       cx, cy, cz,
        ar, ag, ab,
        br, bg, bb,
        cr, cg, cb,
@@ -587,23 +593,23 @@
         let topX = ax, midX = bx, bottomX = cx;
         let topY = ay, midY = by, bottomY = cy;
         // z-coordinates in the perspective-correct space
-        let topW = aw, midW = bw, bottomW = cw;
+        let topZ = az, midZ = bz, bottomZ = cz;
         /* the color coordinates at each triangle vertex in the
          * perspective-corrected RGB space to interpolate across the triangle
          */
-        let topR = ar * topW, midR = br * midW, bottomR = cr * bottomW;
-        let topG = ag * topW, midG = bg * midW, bottomG = cg * bottomW;
-        let topB = ab * topW, midB = bb * midW, bottomB = cb * bottomW;
+        let topR = ar * topZ, midR = br * midZ, bottomR = cr * bottomZ;
+        let topG = ag * topZ, midG = bg * midZ, bottomG = cg * bottomZ;
+        let topB = ab * topZ, midB = bb * midZ, bottomB = cb * bottomZ;
         /* vertex normals in perspective-corrected (1/z) world space */
-        let topNX = nax * topW, midNX = nbx * midW, bottomNX = ncx * bottomW;
-        let topNY = nay * topW, midNY = nby * midW, bottomNY = ncy * bottomW;
-        let topNZ = naz * topW, midNZ = nbz * midW, bottomNZ = ncz * bottomW;
+        let topNX = nax * topZ, midNX = nbx * midZ, bottomNX = ncx * bottomZ;
+        let topNY = nay * topZ, midNY = nby * midZ, bottomNY = ncy * bottomZ;
+        let topNZ = naz * topZ, midNZ = nbz * midZ, bottomNZ = ncz * bottomZ;
         /* world space coordinates of the triangle vertices in
          * perspective-corrected (1/z) space
          */
-        let topWX = wax * topW, midWX = wbx * midW, bottomWX = wcx * bottomW;
-        let topWY = way * topW, midWY = wby * midW, bottomWY = wcy * bottomW;
-        let topWZ = waz * topW, midWZ = wbz * midW, bottomWZ = wcz * bottomW;
+        let topWX = wax * topZ, midWX = wbx * midZ, bottomWX = wcx * bottomZ;
+        let topWY = way * topZ, midWY = wby * midZ, bottomWY = wcy * bottomZ;
+        let topWZ = waz * topZ, midWZ = wbz * midZ, bottomWZ = wcz * bottomZ;
         /* sort vertices of the triangle so that their y-coordinates are in
          * ascending order
          */
@@ -613,7 +619,7 @@
             const auxX = topX; topX = midX; midX = auxX;
             const auxY = topY; topY = midY; midY = auxY;
             // swap in perspective-correct (1/z) space
-            const auxW = topW; topW = midW; midW = auxW;
+            const auxZ = topZ; topZ = midZ; midZ = auxZ;
             /* swap in perspective-correct (1/z) RGB space */
             const auxR = topR; topR = midR; midR = auxR;
             const auxG = topG; topG = midG; midG = auxG;
@@ -633,7 +639,7 @@
             const auxX = midX; midX = bottomX; bottomX = auxX;
             const auxY = midY; midY = bottomY; bottomY = auxY;
             // swap in perspective-correct (1/z) space
-            const auxW = midW; midW = bottomW; bottomW = auxW;
+            const auxZ = midZ; midZ = bottomZ; bottomZ = auxZ;
             /* swap in perspective-correct (1/z) RGB space */
             const auxR = midR; midR = bottomR; bottomR = auxR;
             const auxG = midG; midG = bottomG; bottomG = auxG;
@@ -653,7 +659,7 @@
             const auxX = topX; topX = midX; midX = auxX;
             const auxY = topY; topY = midY; midY = auxY;
             // swap in perspective-correct (1/z) space
-            const auxW = topW; topW = midW; midW = auxW;
+            const auxZ = topZ; topZ = midZ; midZ = auxZ;
             /* swap in perspective-correct (1/z) RGB space */
             const auxR = topR; topR = midR; midR = auxR;
             const auxG = topG; topG = midG; midG = auxG;
@@ -674,10 +680,10 @@
         const stepXAlongUpper = (midX - topX) * deltaUpper_;
         const stepXAlongLower = (bottomX - midX) * deltaLower_;
         const stepXAlongMajor = (bottomX - topX) * deltaMajor_;
-        /* 1 step in `+y` equals how many steps in `w` */
-        const stepWAlongUpper = (midW - topW) * deltaUpper_;
-        const stepWAlongLower = (bottomW - midW) * deltaLower_;
-        const stepWAlongMajor = (bottomW - topW) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `z` */
+        const stepZAlongUpper = (midZ - topZ) * deltaUpper_;
+        const stepZAlongLower = (bottomZ - midZ) * deltaLower_;
+        const stepZAlongMajor = (bottomZ - topZ) * deltaMajor_;
         /* 1 step in `+y` equals how many steps in `r` */
         const stepRAlongUpper = (midR - topR) * deltaUpper_;
         const stepRAlongLower = (bottomR - midR) * deltaLower_;
@@ -732,10 +738,10 @@
         let xUpper = preStepFromTop * stepXAlongUpper + topX;
         let xLower = preStepFromMid * stepXAlongLower + midX;
         let xMajor = preStepFromTop * stepXAlongMajor + topX;
-        /* current `w` coordinates in perspective-correct (1/z) space */
-        let wUpper = preStepFromTop * stepWAlongUpper + topW;
-        let wLower = preStepFromMid * stepWAlongLower + midW;
-        let wMajor = preStepFromTop * stepWAlongMajor + topW;
+        /* current `z` coordinates in perspective-correct (1/z) space */
+        let zUpper = preStepFromTop * stepZAlongUpper + topZ;
+        let zLower = preStepFromMid * stepZAlongLower + midZ;
+        let zMajor = preStepFromTop * stepZAlongMajor + topZ;
         /* current `r` channels of the color in perspective-correct (1/z) space
          */
         let rUpper = preStepFromTop * stepRAlongUpper + topR;
@@ -787,7 +793,7 @@
                 /* configure the pixel shader object for the draw call */
                 pso.dy = y;
                 pso.dx0 = xMajor; pso.dx1 = xUpper;
-                pso.w0 = wMajor; pso.w1 = wUpper;
+                pso.z0 = zMajor; pso.z1 = zUpper;
                 pso.r0 = rMajor; pso.r1 = rUpper;
                 pso.g0 = gMajor; pso.g1 = gUpper;
                 pso.b0 = bMajor; pso.b1 = bUpper;
@@ -800,7 +806,7 @@
                 R_LerpScanline_Colored(pso);
                 /* step forward along all vectors */
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
-                wUpper += stepWAlongUpper; wMajor += stepWAlongMajor;
+                zUpper += stepZAlongUpper; zMajor += stepZAlongMajor;
                 rUpper += stepRAlongUpper; rMajor += stepRAlongMajor;
                 gUpper += stepGAlongUpper; gMajor += stepGAlongMajor;
                 bUpper += stepBAlongUpper; bMajor += stepBAlongMajor;
@@ -819,7 +825,7 @@
                 /* configure the pixel shader object for the draw call */
                 pso.dy = y;
                 pso.dx0 = xMajor; pso.dx1 = xLower;
-                pso.w0 = wMajor; pso.w1 = wLower;
+                pso.z0 = zMajor; pso.z1 = zLower;
                 pso.r0 = rMajor; pso.r1 = rLower;
                 pso.g0 = gMajor; pso.g1 = gLower;
                 pso.b0 = bMajor; pso.b1 = bLower;
@@ -832,7 +838,7 @@
                 R_LerpScanline_Colored(pso);
                 /* step forward along all vectors */
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
-                wLower += stepWAlongLower; wMajor += stepWAlongMajor;
+                zLower += stepZAlongLower; zMajor += stepZAlongMajor;
                 rLower += stepRAlongLower; rMajor += stepRAlongMajor;
                 gLower += stepGAlongLower; gMajor += stepGAlongMajor;
                 bLower += stepBAlongLower; bMajor += stepBAlongMajor;
@@ -854,7 +860,7 @@
                 /* configure the pixel shader object for the draw call */
                 pso.dy = y;
                 pso.dx0 = xUpper; pso.dx1 = xMajor;
-                pso.w0 = wUpper; pso.w1 = wMajor;
+                pso.z0 = zUpper; pso.z1 = zMajor;
                 pso.r0 = rUpper; pso.r1 = rMajor;
                 pso.g0 = gUpper; pso.g1 = gMajor;
                 pso.b0 = bUpper; pso.b1 = bMajor;
@@ -867,7 +873,7 @@
                 R_LerpScanline_Colored(pso);
                 /* step forward along all vectors */
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
-                wUpper += stepWAlongUpper; wMajor += stepWAlongMajor;
+                zUpper += stepZAlongUpper; zMajor += stepZAlongMajor;
                 rUpper += stepRAlongUpper; rMajor += stepRAlongMajor;
                 gUpper += stepGAlongUpper; gMajor += stepGAlongMajor;
                 bUpper += stepBAlongUpper; bMajor += stepBAlongMajor;
@@ -886,7 +892,7 @@
                 /* configure the pixel shader object for the draw call */
                 pso.dy = y;
                 pso.dx0 = xLower; pso.dx1 = xMajor;
-                pso.w0 = wLower; pso.w1 = wMajor;
+                pso.z0 = zLower; pso.z1 = zMajor;
                 pso.r0 = rLower; pso.r1 = rMajor;
                 pso.g0 = gLower; pso.g1 = gMajor;
                 pso.b0 = bLower; pso.b1 = bMajor;
@@ -899,7 +905,7 @@
                 R_LerpScanline_Colored(pso);
                 /* step forward along all vectors */
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
-                wLower += stepWAlongLower; wMajor += stepWAlongMajor;
+                zLower += stepZAlongLower; zMajor += stepZAlongMajor;
                 rLower += stepRAlongLower; rMajor += stepRAlongMajor;
                 gLower += stepGAlongLower; gMajor += stepGAlongMajor;
                 bLower += stepBAlongLower; bMajor += stepBAlongMajor;
@@ -963,7 +969,7 @@
     ({ tex,
        dy,
        dx0, dx1,
-       w0, w1,
+       z0, z1,
        u0, v0, u1, v1,
        nx0, ny0, nz0,
        nx1, ny1, nz1,
@@ -989,8 +995,8 @@
         // pre-step from start by 0.5 as pixel centers are the actual sampling
         // points
         const preStepX = dX0 + 0.5 - dx0;
-        // 1 step in `+x` equals how many steps in `w`
-        const gradW = (w1 - w0) * deltaX_;
+        // 1 step in `+x` equals how many steps in `z`
+        const gradZ = (z1 - z0) * deltaX_;
         /* 1 step in `+x` equals how many steps in `u` and `v` */
         const gradU = (u1 - u0) * deltaX_;
         const gradV = (v1 - v0) * deltaX_;
@@ -1003,7 +1009,7 @@
         const gradWY = (wy1 - wy0) * deltaX_;
         const gradWZ = (wz1 - wz0) * deltaX_;
         // current z-coordinate in the perspective-correct space
-        let w = preStepX * gradW + w0;
+        let z = preStepX * gradZ + z0;
         /* current uv coordinates in the perspective-correct space */
         let u = preStepX * gradU + u0;
         let v = preStepX * gradV + v0;
@@ -1023,24 +1029,26 @@
              * triangle is closer (1 / zRaster > 1 / zBuffer) than what's
              * already in the z-buffer at the position we want to draw
              */
-            if (w <= zBuffer[bufferIndex])
+            if (z <= zBuffer[bufferIndex])
             {
-                w += gradW;
+                z += gradZ;
                 u += gradU; v += gradV;
                 nx += gradNX; ny += gradNY; nz += gradNZ;
                 wx += gradWX; wy += gradWY; wz += gradWZ;
 
                 continue;
             }
-            zBuffer[bufferIndex] = w; // update the z-buffer
+            zBuffer[bufferIndex] = z; // update the z-buffer
+
             /* get the original coordinates back from the perspective-corrected
              * space by dehomogenizing
              */
-            const w_ = 1 / w;
-            let sX = u * w_, sY = v * w_;
+            const z_ = 1 / z;
+            let sX = u * z_, sY = v * z_;
             /* wrap-around the texture if the sampling point is out-of-bounds */
             sX = Math.floor((((sX % 1) + 1) % 1) * texWidth);
             sY = Math.floor((((sY % 1) + 1) % 1) * texHeight);
+
             /* calculate light intensity on the current pixel */
             let lightLevel = 1;
             if (shouldShade)
@@ -1048,20 +1056,23 @@
                 // start with the assumption that the given light is a
                 // directional light...
                 let lX = lightX, lY = lightY, lZ = lightZ;
+
                 /* ...and adjust accordingly if it turns out to be a point light
                  * instead
                  */
                 if (isPointLight)
                 {
-                    lX -= wx * w_;
-                    lY -= wy * w_;
-                    lZ -= wz * w_;
+                    lX -= wx * z_;
+                    lY -= wy * z_;
+                    lZ -= wz * z_;
                 }
+
                 /* TODO: maybe use `Q_rsqrt` here??? */
                 const magL_ = 1 / Math.sqrt(lX * lX + lY * lY + lZ * lZ);
                 const lXUnit = lX * magL_;
                 const lYUnit = lY * magL_;
                 const lZUnit = lZ * magL_;
+
                 /* flat shading */
                 if (normalX !== undefined &&
                     normalY !== undefined &&
@@ -1074,12 +1085,13 @@
                 /* smooth shading */
                 else
                 {
-                    const NX = nx * w_, NY = ny * w_, NZ = nz * w_;
+                    const NX = nx * z_, NY = ny * z_, NZ = nz * z_;
                     /* TODO: maybe use `Q_rsqrt` here??? */
                     const magN_ = 1 / Math.sqrt(NX * NX + NY * NY + NZ * NZ);
                     const nXUnit = NX * magN_;
                     const nYUnit = NY * magN_;
                     const nZUnit = NZ * magN_;
+
                     lightLevel =
                         lXUnit * nXUnit + lYUnit * nYUnit + lZUnit * nZUnit;
                 }
@@ -1107,7 +1119,7 @@
             frameBuffer.data[paintIndex + 1] = newGreen;
             frameBuffer.data[paintIndex + 2] = newBlue;
             frameBuffer.data[paintIndex + 3] = 255;
-            w += gradW;
+            z += gradZ;
             u += gradU; v += gradV;
             nx += gradNX; ny += gradNY; nz += gradNZ;
             wx += gradWX; wy += gradWY; wz += gradWZ;
@@ -1120,9 +1132,9 @@
     //
     function
     R_FillTriangle_Textured_Perspective
-    ({ ax, ay, aw,
-       bx, by, bw,
-       cx, cy, cw,
+    ({ ax, ay, az,
+       bx, by, bz,
+       cx, cy, cz,
        au, av,
        bu, bv,
        cu, cv,
@@ -1138,20 +1150,20 @@
         let topX = ax, midX = bx, bottomX = cx;
         let topY = ay, midY = by, bottomY = cy;
         // z-coordinates in the perspective-correct space
-        let topW = aw, midW = bw, bottomW = cw;
+        let topZ = az, midZ = bz, bottomZ = cz;
         /* UV coordinates in perspective-corrected (1/z) texture space */
-        let topU = au * topW, midU = bu * midW, bottomU = cu * bottomW;
-        let topV = av * topW, midV = bv * midW, bottomV = cv * bottomW;
+        let topU = au * topZ, midU = bu * midZ, bottomU = cu * bottomZ;
+        let topV = av * topZ, midV = bv * midZ, bottomV = cv * bottomZ;
         /* vertex normals in perspective-corrected (1/z) world space */
-        let topNX = nax * topW, midNX = nbx * midW, bottomNX = ncx * bottomW;
-        let topNY = nay * topW, midNY = nby * midW, bottomNY = ncy * bottomW;
-        let topNZ = naz * topW, midNZ = nbz * midW, bottomNZ = ncz * bottomW;
+        let topNX = nax * topZ, midNX = nbx * midZ, bottomNX = ncx * bottomZ;
+        let topNY = nay * topZ, midNY = nby * midZ, bottomNY = ncy * bottomZ;
+        let topNZ = naz * topZ, midNZ = nbz * midZ, bottomNZ = ncz * bottomZ;
         /* world space coordinates of the triangle vertices in
          * perspective-corrected (1/z) space
          */
-        let topWX = wax * topW, midWX = wbx * midW, bottomWX = wcx * bottomW;
-        let topWY = way * topW, midWY = wby * midW, bottomWY = wcy * bottomW;
-        let topWZ = waz * topW, midWZ = wbz * midW, bottomWZ = wcz * bottomW;
+        let topWX = wax * topZ, midWX = wbx * midZ, bottomWX = wcx * bottomZ;
+        let topWY = way * topZ, midWY = wby * midZ, bottomWY = wcy * bottomZ;
+        let topWZ = waz * topZ, midWZ = wbz * midZ, bottomWZ = wcz * bottomZ;
         /* sort vertices of the triangle so that their y-coordinates are in
          * ascending order
          */
@@ -1161,7 +1173,7 @@
             const auxX = topX; topX = midX; midX = auxX;
             const auxY = topY; topY = midY; midY = auxY;
             // swap in perspective-correct (1/z) space
-            const auxW = topW; topW = midW; midW = auxW;
+            const auxZ = topZ; topZ = midZ; midZ = auxZ;
             /* swap uv coordinates */
             const auxU = topU; topU = midU; midU = auxU;
             const auxV = topV; topV = midV; midV = auxV;
@@ -1180,7 +1192,7 @@
             const auxX = midX; midX = bottomX; bottomX = auxX;
             const auxY = midY; midY = bottomY; bottomY = auxY;
             // swap in perspective-correct (1/z) space
-            const auxW = midW; midW = bottomW; bottomW = auxW;
+            const auxZ = midZ; midZ = bottomZ; bottomZ = auxZ;
             /* swap uv coordinates */
             const auxU = midU; midU = bottomU; bottomU = auxU;
             const auxV = midV; midV = bottomV; bottomV = auxV;
@@ -1199,7 +1211,7 @@
             const auxX = topX; topX = midX; midX = auxX;
             const auxY = topY; topY = midY; midY = auxY;
             // swap in perspective-correct (1/z) space
-            const auxW = topW; topW = midW; midW = auxW;
+            const auxZ = topZ; topZ = midZ; midZ = auxZ;
             /* swap uv coordinates */
             const auxU = topU; topU = midU; midU = auxU;
             const auxV = topV; topV = midV; midV = auxV;
@@ -1219,10 +1231,10 @@
         const stepXAlongUpper = (midX - topX) * deltaUpper_;
         const stepXAlongLower = (bottomX - midX) * deltaLower_;
         const stepXAlongMajor = (bottomX - topX) * deltaMajor_;
-        /* 1 step in `+y` equals how many steps in `w` */
-        const stepWAlongUpper = (midW - topW) * deltaUpper_;
-        const stepWAlongLower = (bottomW - midW) * deltaLower_;
-        const stepWAlongMajor = (bottomW - topW) * deltaMajor_;
+        /* 1 step in `+y` equals how many steps in `z` */
+        const stepZAlongUpper = (midZ - topZ) * deltaUpper_;
+        const stepZAlongLower = (bottomZ - midZ) * deltaLower_;
+        const stepZAlongMajor = (bottomZ - topZ) * deltaMajor_;
         /* 1 step in `+y` equals how many steps in `u` */
         const stepUAlongUpper = (midU - topU) * deltaUpper_;
         const stepUAlongLower = (bottomU - midU) * deltaLower_;
@@ -1273,10 +1285,10 @@
         let xUpper = preStepFromTop * stepXAlongUpper + topX;
         let xLower = preStepFromMid * stepXAlongLower + midX;
         let xMajor = preStepFromTop * stepXAlongMajor + topX;
-        /* current `w` coordinates in perspective-correct (1/z) space */
-        let wUpper = preStepFromTop * stepWAlongUpper + topW;
-        let wLower = preStepFromMid * stepWAlongLower + midW;
-        let wMajor = preStepFromTop * stepWAlongMajor + topW;
+        /* current `z` coordinates in perspective-correct (1/z) space */
+        let zUpper = preStepFromTop * stepZAlongUpper + topZ;
+        let zLower = preStepFromMid * stepZAlongLower + midZ;
+        let zMajor = preStepFromTop * stepZAlongMajor + topZ;
         /* current `u` coordinates in perspective-correct (1/z) texture space */
         let uUpper = preStepFromTop * stepUAlongUpper + topU;
         let uLower = preStepFromMid * stepUAlongLower + midU;
@@ -1321,7 +1333,7 @@
                 /* configure the pixel shader object for the draw call */
                 pso.dy = y;
                 pso.dx0 = xMajor; pso.dx1 = xUpper;
-                pso.w0 = wMajor; pso.w1 = wUpper;
+                pso.z0 = zMajor; pso.z1 = zUpper;
                 pso.u0 = uMajor; pso.u1 = uUpper;
                 pso.v0 = vMajor; pso.v1 = vUpper;
                 pso.nx0 = nXMajor; pso.nx1 = nXUpper;
@@ -1333,7 +1345,7 @@
                 R_LerpScanline_Textured_Perspective(pso);
                 /* step forward along all vectors */
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
-                wUpper += stepWAlongUpper; wMajor += stepWAlongMajor;
+                zUpper += stepZAlongUpper; zMajor += stepZAlongMajor;
                 uUpper += stepUAlongUpper; uMajor += stepUAlongMajor;
                 vUpper += stepVAlongUpper; vMajor += stepVAlongMajor;
                 nXUpper += stepNXAlongUpper; nXMajor += stepNXAlongMajor;
@@ -1351,7 +1363,7 @@
                 /* configure the pixel shader object for the draw call */
                 pso.dy = y;
                 pso.dx0 = xMajor; pso.dx1 = xLower;
-                pso.w0 = wMajor; pso.w1 = wLower;
+                pso.z0 = zMajor; pso.z1 = zLower;
                 pso.u0 = uMajor; pso.u1 = uLower;
                 pso.v0 = vMajor; pso.v1 = vLower;
                 pso.nx0 = nXMajor; pso.nx1 = nXLower;
@@ -1363,7 +1375,7 @@
                 R_LerpScanline_Textured_Perspective(pso);
                 /* step forward along all vectors */
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
-                wLower += stepWAlongLower; wMajor += stepWAlongMajor;
+                zLower += stepZAlongLower; zMajor += stepZAlongMajor;
                 uLower += stepUAlongLower; uMajor += stepUAlongMajor;
                 vLower += stepVAlongLower; vMajor += stepVAlongMajor;
                 nXLower += stepNXAlongLower; nXMajor += stepNXAlongMajor;
@@ -1384,7 +1396,7 @@
                 /* configure the pixel shader object for the draw call */
                 pso.dy = y;
                 pso.dx0 = xUpper; pso.dx1 = xMajor;
-                pso.w0 = wUpper; pso.w1 = wMajor;
+                pso.z0 = zUpper; pso.z1 = zMajor;
                 pso.u0 = uUpper; pso.u1 = uMajor;
                 pso.v0 = vUpper; pso.v1 = vMajor;
                 pso.nx0 = nXUpper; pso.nx1 = nXMajor;
@@ -1396,7 +1408,7 @@
                 R_LerpScanline_Textured_Perspective(pso);
                 /* step forward along all vectors */
                 xUpper += stepXAlongUpper; xMajor += stepXAlongMajor;
-                wUpper += stepWAlongUpper; wMajor += stepWAlongMajor;
+                zUpper += stepZAlongUpper; zMajor += stepZAlongMajor;
                 uUpper += stepUAlongUpper; uMajor += stepUAlongMajor;
                 vUpper += stepVAlongUpper; vMajor += stepVAlongMajor;
                 nXUpper += stepNXAlongUpper; nXMajor += stepNXAlongMajor;
@@ -1414,7 +1426,7 @@
                 /* configure the pixel shader object for the draw call */
                 pso.dy = y;
                 pso.dx0 = xLower; pso.dx1 = xMajor;
-                pso.w0 = wLower; pso.w1 = wMajor;
+                pso.z0 = zLower; pso.z1 = zMajor;
                 pso.u0 = uLower; pso.u1 = uMajor;
                 pso.v0 = vLower; pso.v1 = vMajor;
                 pso.nx0 = nXLower; pso.nx1 = nXMajor;
@@ -1426,7 +1438,7 @@
                 R_LerpScanline_Textured_Perspective(pso);
                 /* step forward along all vectors */
                 xLower += stepXAlongLower; xMajor += stepXAlongMajor;
-                wLower += stepWAlongLower; wMajor += stepWAlongMajor;
+                zLower += stepZAlongLower; zMajor += stepZAlongMajor;
                 uLower += stepUAlongLower; uMajor += stepUAlongMajor;
                 vLower += stepVAlongLower; vMajor += stepVAlongMajor;
                 nXLower += stepNXAlongLower; nXMajor += stepNXAlongMajor;

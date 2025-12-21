@@ -467,9 +467,9 @@ declare function __import__R_Screen (): __Mod__R_Screen;
 // engine/r_shader.ts
 //
 type vso_t = {
-    ax: number, ay: number, aw: number,
-    bx: number, by: number, bw: number,
-    cx: number, cy: number, cw: number,
+    ax: number, ay: number, az: number,
+    bx: number, by: number, bz: number,
+    cx: number, cy: number, cz: number,
     ar: number, ag: number, ab: number,
     br: number, bg: number, bb: number,
     cr: number, cg: number, cb: number,
@@ -489,7 +489,7 @@ type pso_t = {
     tex?: texture_t,
     dy: number,
     dx0: number, dx1: number,
-    w0: number, w1: number,
+    z0: number, z1: number,
     r0: number, g0: number, b0: number, r1: number, g1: number, b1: number,
     u0: number, v0: number, u1: number, v1: number,
     nx0: number, ny0: number, nz0: number,

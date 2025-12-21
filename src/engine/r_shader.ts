@@ -53,9 +53,9 @@
          * dimension `w` that is the z-coordinate in the perspective-correct
          * space
          */
-        ax: 0, ay: 0, aw: 0,
-        bx: 0, by: 0, bw: 0,
-        cx: 0, cy: 0, cw: 0,
+        ax: 0, ay: 0, az: 0,
+        bx: 0, by: 0, bz: 0,
+        cx: 0, cy: 0, cz: 0,
         /* color coordinates at each vertex in the RGB space to be interpolated
          * across the entire triangle
          */
@@ -89,7 +89,7 @@
         dx0: 0, dx1: 0,
         // perspective-corrected z-coordinates to lerp across the current
         // scanline
-        w0: 0, w1: 0,
+        z0: 0, z1: 0,
         // perspective-corrected UV coordinates to lerp across the current
         // scanline
         u0: 0, v0: 0, u1: 0, v1: 0,
